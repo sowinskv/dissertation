@@ -1,6 +1,6 @@
 this repository contains (or WILL contain) the research and code for my thesis on using Quantum Neural Networks (QNNs) to model molecular systems.
 
--- the core idea is to explore whether QNNs can offer a new way to tackle molecular simulations, which are often incredibly difficult for classical computers. This project investigates the potential of QNNs to predict key properties of molecules, such as their energy states, and compares their performance against traditional simulation methods in terms of accuracy and computation time.
+-- the core idea is to explore whether QNNs can offer a new way to tackle molecular simulations, which are often incredibly difficult for classical computers. This project investigates **the potential of QNNs to predict key properties of molecules, such as their energy states**, and compares their performance against traditional simulation methods in terms of accuracy and computation time.
 
 a key part of this research is understanding the opportunities and challenges of using today's quantum hardware. The project involves:
 
