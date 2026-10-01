@@ -1,0 +1,10 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+# IBM Quantum credentials - never commit
+qiskit-ibm.json
+.env
+CLAUDE.local.md
