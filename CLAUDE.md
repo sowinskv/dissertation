@@ -41,7 +41,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Figures
 
-- All figures use `src/plotstyle.py` (`ps.use("paper")` for the thesis PDF, `"editorial"` for slides).
+- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
 - Experiments write CSV to `results/`; separate `experiments/plot_expNN.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
 - Title states the finding (a sentence, not a label), subtitle explains it, footer lists system, basis, simulator, seeds and caveats.
