@@ -6,12 +6,6 @@ Title (declared, Polish): _Zastosowanie kwantowych sieci neuronowych do symulacj
 
 The thesis text is written in Polish. Code comments, docstrings and console output: English, mostly lowercase (uppercase only where needed: H2, CSV, HF, FCI, VQE, class names). Plot labels stay in Polish (figures go into the thesis).
 
-## About the author
-
-- Experienced software / AI engineer, comfortable with Python and classical ML.
-- Self-taught in quantum physics and quantum computing, no formal background.
-- **Explain every new quantum or chemistry concept the first time it appears**, briefly, with an ML analogy where it helps.
-
 ## Research framing (decided)
 
 - Not "are QNNs better than classical methods" (at this scale they cannot be: exact FCI is cheap).
@@ -45,12 +39,22 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0 (see requirements.txt).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
 
+## Figures
+
+- All figures use `src/plotstyle.py` (`ps.use("paper")` for the thesis PDF, `"editorial"` for slides).
+- Experiments write CSV to `results/`; separate `experiments/plot_expNN.py` scripts read the CSV and draw. Never recompute physics in a plot script.
+- Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
+- Title states the finding (a sentence, not a label), subtitle explains it, footer lists system, basis, simulator, seeds and caveats.
+- Direct labels at line ends + key in the header; annotate the 1-3 things the reader must notice (callout, bracket, zone). No dual y-axes.
+- Polish number format (decimal comma) on all axes and labels; units in panel subtitles.
+- Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
+
 ## Repo layout
 
 - `experiments/` runnable experiment scripts (`expNN_<name>.py`), run from repo root
 - `src/` shared modules (hamiltonians, ansatze, energy, train, classical, metrics) - to be extracted from experiments as they repeat
 - `tests/` unit and control tests
-- `results/` CSV/JSON/PNG outputs
+- `results/` CSV/JSON outputs and figures (`fig_expNN_*.pdf/.png`)
 
 ## Status
 
