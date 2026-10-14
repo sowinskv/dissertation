@@ -121,6 +121,7 @@ def main():
                      "nfev_UCCSD": nfev_ucc, "nfev_HEA": nfev_hea})
         print(f"{R:6.2f} {e_hf:11.6f} {e_fci:11.6f} {e_ucc:11.6f} {e_hea:11.6f}"
               f" {1e3 * abs(e_ucc - e_fci):15.2e} {1e3 * abs(e_hea - e_fci):13.2e}")
+        print(qubit_op)
 
     # circuit resources (independent of R, so computed once)
     uccsd, hea = build_ansatze(*qubit_problem(R_VALUES[0])[:2])
