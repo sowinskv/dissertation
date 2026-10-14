@@ -38,6 +38,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 - Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0 (see requirements.txt).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
+- Experiments that use several worker processes must set OMP_NUM_THREADS=1 (done at the top of the script); multithreaded BLAS on tiny matrices otherwise makes training ~30x slower.
 
 ## Figures
 
@@ -66,5 +67,9 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 ## Status
 
 - exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models reach FCI to numerical precision (< 1e-9 mHa); UCCSD 3 params, 4 CNOT, ~45 circuit evaluations; HEA 12 params, 2 CNOT, ~1100 evaluations (evaluations counted as 2p+1 per gradient).
-- exp02: H4 chain, UCCSD vs HEA 1-6 layers x 5 seeds, CCSD reference (running).
+- exp02: H4 chain (d = 0.5-2.5 A, 9 points), UCCSD vs HEA 1-6 layers x 5 seeds, CCSD reference.
+  - HF weight in FCI state drops 99% -> 33%; HF error 25 -> 462 mHa; CCSD goes BELOW FCI from d = 1.25 (down to -31 mHa).
+  - UCCSD (26 params, 1072 CNOT, ~1.2k evals): within chemical accuracy up to d = 1.5, max error 5.3 mHa.
+  - HEA: error falls with layers but non-monotonically and seed-dependent; 6 layers (84 params, 30 CNOT) median worst 5.4 mHa, worst seed 57.7 mHa; ~800k evals (~690x UCCSD); 28 runs hit 10k iterations. <N> stays 4.
+  - Open: worst HEA runs (e.g. 57.70 mHa at d = 2.0) have fidelity ~0 with FCI and repeat across depths -> likely a fixed wrong-symmetry state; check its spin.
 - Next: LiH with an active space.

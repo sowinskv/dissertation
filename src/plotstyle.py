@@ -187,10 +187,11 @@ def header(fig, title, subtitle=None, key=None):
     x = fig.subplotpars.left
     y_in = 0.16
     if title:   # pass None when the title goes into the thesis caption instead
+        title = _wrap(fig, title, 13 * 1.1)   # bold glyphs are wider
         a = fig.text(x, 0, title, ha="left", va="top", fontsize=13, fontweight="bold",
-                     color=t["ink"])
+                     color=t["ink"], linespacing=1.15)
         L["top"].append((a, y_in))
-        y_in += 0.32
+        y_in += 0.32 + 0.24 * title.count("\n")
     if subtitle:
         sub = _wrap(fig, subtitle, 8.5)
         a = fig.text(x, 0, sub, ha="left", va="top", fontsize=8.5, color=t["ink_2"],
@@ -263,6 +264,35 @@ def end_label(ax, x, y, text, dy=0, dx_pt=6):
                 annotation_clip=False)
 
 
+def end_labels(ax, x, items, min_gap_pt=10, dx_pt=6):
+    """direct labels for several series ending at x. labels that would overlap are spread
+    apart vertically and tied to their line end with a thin leader (never stacked blindly).
+    items: list of (y, text)."""
+    t = theme()
+    to_px = ax.transData.transform
+    pts_per_px = 72 / ax.figure.dpi
+    ys = [(to_px((x, y))[1] * pts_per_px, y, text) for y, text in items]
+    ys.sort()
+    placed = []
+    for y_pt, y, text in ys:
+        target = y_pt if not placed else max(y_pt, placed[-1][0] + min_gap_pt)
+        placed.append([target, y_pt, y, text])
+    # re-center the block so labels stay as close to their lines as possible
+    shift = sum(p[1] - p[0] for p in placed) / len(placed)
+    if shift < 0:
+        for p in placed:
+            p[0] += shift
+        for i in range(1, len(placed)):
+            placed[i][0] = max(placed[i][0], placed[i - 1][0] + min_gap_pt)
+    for target, y_pt, y, text in placed:
+        moved = abs(target - y_pt) > 1
+        ax.annotate(text, (x, y), xytext=(dx_pt + (8 if moved else 0), target - y_pt),
+                    textcoords="offset points", ha="left", va="center", fontsize=7.5,
+                    color=t["ink_2"], annotation_clip=False,
+                    arrowprops=({"arrowstyle": "-", "color": t["muted"], "lw": 0.6,
+                                 "shrinkA": 0, "shrinkB": 2} if moved else None))
+
+
 def callout(ax, xy, text, xytext, ha="left", va="center"):
     """annotation with a thin leader line, editorial style."""
     t = theme()
@@ -283,12 +313,13 @@ def bracket(ax, x, y_low, y_high, text, side="right"):
                 va="center", fontsize=7, color=t["ink_2"], linespacing=1.2)
 
 
-def threshold(ax, y, text):
-    """horizontal threshold line (e.g. chemical accuracy) with a label just below it."""
+def threshold(ax, y, text, x=0.01, above=False):
+    """horizontal threshold line (e.g. chemical accuracy) with a label just below (or above) it.
+    x is the label position as a fraction of the axis width."""
     t = theme()
     ax.axhline(y, color=t["ink_2"], lw=0.9, ls=(0, (1, 1.8)), zorder=1)
-    ax.annotate(text, (0.01, y), xycoords=ax.get_yaxis_transform(), xytext=(0, -3),
-                textcoords="offset points", ha="left", va="top", fontsize=7,
+    ax.annotate(text, (x, y), xycoords=ax.get_yaxis_transform(), xytext=(0, 3 if above else -3),
+                textcoords="offset points", ha="left", va="bottom" if above else "top", fontsize=7,
                 color=t["ink_2"], zorder=5,
                 bbox={"facecolor": t["surface"], "edgecolor": "none", "pad": 1.2})
 
