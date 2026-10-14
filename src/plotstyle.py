@@ -45,7 +45,6 @@ THEME = {
     "muted": "#8a867d",     # axis text, notes, baseline series
     "grid": "#e6e3dc",      # hairline gridlines
     "baseline": "#b9b5ab",  # bottom axis line
-    "band": "#efece5",      # shaded zones (e.g. chemical accuracy)
 }
 
 # validated categorical slots, assigned in this fixed order, never cycled
@@ -284,15 +283,14 @@ def bracket(ax, x, y_low, y_high, text, side="right"):
                 va="center", fontsize=7, color=t["ink_2"], linespacing=1.2)
 
 
-def zone_below(ax, y, text, y_min=None):
-    """shade the region below y (e.g. the chemical-accuracy zone) and label it."""
+def threshold(ax, y, text):
+    """horizontal threshold line (e.g. chemical accuracy) with a label just below it."""
     t = theme()
-    lo = y_min if y_min is not None else ax.get_ylim()[0]
-    ax.axhspan(lo, y, color=t["band"], zorder=0, lw=0)
-    ax.axhline(y, color=t["muted"], lw=0.8, ls=(0, (1, 1.5)), zorder=1)
-    ax.text(0.01, y, text, transform=ax.get_yaxis_transform(), ha="left", va="top",
-            fontsize=7, color=t["ink_2"], zorder=5,
-            bbox={"facecolor": t["band"], "edgecolor": "none", "pad": 1.5})
+    ax.axhline(y, color=t["ink_2"], lw=0.9, ls=(0, (1, 1.8)), zorder=1)
+    ax.annotate(text, (0.01, y), xycoords=ax.get_yaxis_transform(), xytext=(0, -3),
+                textcoords="offset points", ha="left", va="top", fontsize=7,
+                color=t["ink_2"], zorder=5,
+                bbox={"facecolor": t["surface"], "edgecolor": "none", "pad": 1.2})
 
 
 # ---------------- number formatting ----------------
@@ -331,5 +329,7 @@ def save(fig, path_stem, formats=("pdf", "png")):
     stem = Path(path_stem)
     stem.parent.mkdir(parents=True, exist_ok=True)
     for f in formats:
-        fig.savefig(stem.with_suffix(f".{f}"))
+        # no creation timestamp in the PDF, so re-running a plot doesn't produce a git diff
+        meta = {"CreationDate": None} if f == "pdf" else None
+        fig.savefig(stem.with_suffix(f".{f}"), metadata=meta)
     print("saved:", ", ".join(str(stem.with_suffix(f".{f}")) for f in formats))

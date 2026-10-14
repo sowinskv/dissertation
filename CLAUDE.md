@@ -45,7 +45,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - Experiments write CSV to `results/`; separate `experiments/plot_expNN.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
 - Title states the finding (a sentence, not a label), subtitle explains it, footer lists system, basis, simulator, seeds and caveats.
-- Direct labels at line ends + key in the header; annotate the 1-3 things the reader must notice (callout, bracket, zone). No dual y-axes.
+- Direct labels at line ends + key in the header; annotate the 1-3 things the reader must notice (callout, bracket, threshold). No dual y-axes.
 - Polish number format (decimal comma) on all axes and labels; units in panel subtitles.
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
 

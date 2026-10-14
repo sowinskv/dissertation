@@ -67,7 +67,7 @@ def main():
     # ---- panel 2: error vs FCI, log scale ----
     ps.log_axis(ax2, "y", every=2)
     ax2.set_ylim(FLOOR_MHA * 0.4, 3e3)
-    ps.zone_below(ax2, ps.CHEM_ACC_MHA, "dokładność chemiczna  (błąd < 1,6 mHa)")
+    ps.threshold(ax2, ps.CHEM_ACC_MHA, "↓ dokładność chemiczna: błąd < 1,6 mHa")
     for m in ["HF", "HEA", "UCCSD"]:
         ps.plot(ax2, R, err[m], m)
     ps.panel_title(ax2, "Błąd względem FCI", "|E − E_FCI| [mHa], skala logarytmiczna")
@@ -77,7 +77,7 @@ def main():
     ps.end_label(ax2, R[-1], err["UCCSD"][-1], "VQE-UCCSD")
     ps.callout(ax2, (1.2, err["HEA"].max()),
                f"najgorszy punkt HEA: ok. {ps._num(round(hea_margin, -2))}×\nponiżej progu",
-               xytext=(1.5, 3e-2))
+               xytext=(1.6, 8e-3))
 
     ax2.set_xlabel("Długość wiązania R [Å]")
     ps.number_axis(ax2, "x", decimals=1)
