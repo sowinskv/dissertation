@@ -52,11 +52,19 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 ## Repo layout
 
 - `experiments/` runnable experiment scripts (`expNN_<name>.py`), run from repo root
-- `src/` shared modules (hamiltonians, ansatze, energy, train, classical, metrics) - to be extracted from experiments as they repeat
-- `tests/` unit and control tests
+- `src/` shared modules:
+  - `hamiltonians.py` geometries, qubit hamiltonian (ParityMapper), exact ground state in the right electron-number sector
+  - `classical.py` HF / CCSD / FCI from PySCF, HF weight in the FCI state
+  - `ansatze.py` UCCSD, HEA(layers), circuit resources (params, CNOT, depth)
+  - `fastsim.py` exact batched numpy statevector simulation of a qiskit circuit (used for training; tested against StatevectorEstimator to 1e-10)
+  - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
+  - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
+  - `plotstyle.py` figure style
+- `tests/` control tests, run with `uv run pytest -q`
 - `results/` CSV/JSON outputs and figures (`fig_expNN_*.pdf/.png`)
 
 ## Status
 
-- exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models within chemical accuracy everywhere; UCCSD 3 params, 4 CNOT, ~20 evaluations; HEA 12 params, 2 CNOT, ~250 evaluations.
-- Next: same experiment for H4 (and LiH with an active space).
+- exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models reach FCI to numerical precision (< 1e-9 mHa); UCCSD 3 params, 4 CNOT, ~45 circuit evaluations; HEA 12 params, 2 CNOT, ~1100 evaluations (evaluations counted as 2p+1 per gradient).
+- exp02: H4 chain, UCCSD vs HEA 1-6 layers x 5 seeds, CCSD reference (running).
+- Next: LiH with an active space.

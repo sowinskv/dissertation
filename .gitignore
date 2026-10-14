@@ -8,3 +8,5 @@ __pycache__/
 qiskit-ibm.json
 .env
 CLAUDE.local.md
+# in-progress experiment checkpoints
+results/*_partial.jsonl

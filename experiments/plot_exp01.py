@@ -4,7 +4,7 @@ figure for experiment 01 (H2 potential energy curve), drawn from the saved CSV.
 plots are separate from experiments: change the figure without re-running the physics.
 
 run (from repo root):  python experiments/plot_exp01.py
-input:   results/exp01_h2_results.csv  (energies in Ha)
+input:   results/exp01_h2_results.csv
 output:  results/fig_exp01_h2.pdf, results/fig_exp01_h2.png
 """
 
@@ -17,7 +17,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import plotstyle as ps  # noqa: E402
 
-FLOOR_MHA = 1e-10   # errors below this are at machine precision; drawn on the floor
+FLOOR_MHA = 1e-13   # errors below this are at machine precision; drawn on the floor
 
 
 def load(path):
@@ -28,18 +28,20 @@ def load(path):
 
 def main():
     ps.use()
-    d = load("results/exp01_h2_results.csv")
-    R = d["R"]
+    raw = load("results/exp01_h2_results.csv")
+    R = raw["R_A"]
+    d = {m: raw[f"E_{m}_Ha"] for m in ("HF", "FCI", "UCCSD", "HEA")}
 
-    # errors vs FCI in mHa (the CSV stores Ha)
+    # errors vs FCI in mHa
     err = {
         "HF": np.abs(d["HF"] - d["FCI"]) * 1e3,
-        "UCCSD": np.maximum(d["dE_UCCSD"] * 1e3, FLOOR_MHA),
-        "HEA": np.maximum(d["dE_HEA"] * 1e3, FLOOR_MHA),
+        "UCCSD": np.maximum(raw["dE_UCCSD_mHa"], FLOOR_MHA),
+        "HEA": np.maximum(raw["dE_HEA_mHa"], FLOOR_MHA),
     }
     i_eq = int(np.argmin(d["FCI"]))
     hf_gap = err["HF"][-1]
-    hea_margin = ps.CHEM_ACC_MHA / err["HEA"].max()
+    worst = max(("HEA", "UCCSD"), key=lambda m: err[m].max())
+    i_worst = int(np.argmax(err[worst]))
 
     fig, (ax1, ax2) = ps.figure(nrows=2, height_ratios=[1.25, 1], sharex=True,
                                 panel_height=2.4)
@@ -65,7 +67,7 @@ def main():
                xytext=(2.4, -1.09), ha="center")
 
     # ---- panel 2: error vs FCI, log scale ----
-    ps.log_axis(ax2, "y", every=2)
+    ps.log_axis(ax2, "y", every=3)
     ax2.set_ylim(FLOOR_MHA * 0.4, 3e3)
     ps.threshold(ax2, ps.CHEM_ACC_MHA, "↓ dokładność chemiczna: błąd < 1,6 mHa")
     for m in ["HF", "HEA", "UCCSD"]:
@@ -73,11 +75,15 @@ def main():
     ps.panel_title(ax2, "Błąd względem FCI", "|E − E_FCI| [mHa], skala logarytmiczna")
 
     ps.end_label(ax2, R[-1], err["HF"][-1], "Hartree–Fock")
-    ps.end_label(ax2, R[-1], err["HEA"][-1], "VQE-HEA")
-    ps.end_label(ax2, R[-1], err["UCCSD"][-1], "VQE-UCCSD")
-    ps.callout(ax2, (1.2, err["HEA"].max()),
-               f"najgorszy punkt HEA: ok. {ps._num(round(hea_margin, -2))}×\nponiżej progu",
-               xytext=(1.6, 8e-3))
+    e_h, e_u = err["HEA"][-1], err["UCCSD"][-1]
+    if abs(np.log10(e_h / e_u)) < 1.5:   # lines end together: one label, never stacked
+        ps.end_label(ax2, R[-1], np.sqrt(e_h * e_u), "oba VQE")
+    else:
+        ps.end_label(ax2, R[-1], e_h, "VQE-HEA")
+        ps.end_label(ax2, R[-1], e_u, "VQE-UCCSD")
+    ps.callout(ax2, (R[i_worst], err[worst][i_worst]),
+               f"największy błąd VQE: {ps.sci(err[worst][i_worst])} mHa\n(precyzja numeryczna)",
+               xytext=(1.6, 1e-4))
 
     ax2.set_xlabel("Długość wiązania R [Å]")
     ps.number_axis(ax2, "x", decimals=1)
@@ -85,10 +91,10 @@ def main():
 
     ps.header(fig, "Oba modele VQE odtwarzają dokładną krzywą energii H₂",
               "Hartree–Fock myli się coraz bardziej przy rozciąganiu wiązania; "
-              "błąd VQE pozostaje tysiące razy poniżej progu",
+              "oba modele VQE trafiają w FCI z dokładnością numeryczną",
               key=["FCI", "HF", "UCCSD", "HEA"])
     ps.footer(fig, "H₂, baza STO-3G, symulator wektora stanu (bez szumu), 19 geometrii, HEA: 2 warstwy, 1 ziarno. "
-                   "Błędy < 10⁻¹⁰ mHa (precyzja maszynowa) narysowano na dolnej krawędzi.")
+                   "Błędy < 10⁻¹³ mHa (precyzja maszynowa) narysowano na dolnej krawędzi.")
 
     ps.save(fig, "results/fig_exp01_h2")
 

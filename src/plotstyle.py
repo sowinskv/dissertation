@@ -303,6 +303,16 @@ def _num(v, decimals=None):
     return s.replace(".", ",") if _state["decimal_comma"] else s
 
 
+def sci(v, digits=1):
+    """compact scientific notation for labels: 5,2·10⁻¹⁰ (polish decimal comma)."""
+    if v == 0:
+        return "0"
+    e = int(math.floor(math.log10(abs(v))))
+    m = round(v / 10 ** e, digits)
+    mant = _num(m, digits) if digits else str(int(m))
+    return f"{mant}·10{str(e).translate(_SUP)}" if e != 0 else mant
+
+
 def number_axis(ax, axis="y", decimals=None):
     """plain ticks with polish decimal comma and a true minus sign."""
     target = ax.yaxis if axis == "y" else ax.xaxis

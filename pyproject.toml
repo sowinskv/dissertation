@@ -10,3 +10,12 @@ dependencies = [
     "qiskit-nature==0.8.0",
     "scipy>=1.18.1",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::scipy.sparse.SparseEfficiencyWarning"]
