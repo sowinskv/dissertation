@@ -138,7 +138,7 @@ def main():
               f"points within chemical accuracy: {100 * np.mean(d <= CHEM_ACC):.0f}%")
 
     # save results
-    with open("results/exp01_h2_wyniki.csv", "w", newline="") as f:
+    with open("results/exp01_h2_results.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)
@@ -169,7 +169,7 @@ def main():
     ax2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2)
     fig.tight_layout()
     fig.savefig("results/exp01_h2_krzywa.png", dpi=150)
-    print("saved: results/exp01_h2_wyniki.csv, results/exp01_h2_krzywa.png")
+    print("saved: resresults.csv, results/exp01_h2_krzywa.png")
 
 
 if __name__ == "__main__":

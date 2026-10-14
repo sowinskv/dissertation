@@ -4,7 +4,7 @@ figure for experiment 01 (H2 potential energy curve), drawn from the saved CSV.
 plots are separate from experiments: change the figure without re-running the physics.
 
 run (from repo root):  python experiments/plot_exp01.py
-input:   results/exp01_h2_wyniki.csv  (energies in Ha)
+input:   results/exp01_h2_results.csv  (energies in Ha)
 output:  results/fig_exp01_h2.pdf, results/fig_exp01_h2.png
 """
 
@@ -28,7 +28,7 @@ def load(path):
 
 def main():
     ps.use()
-    d = load("results/exp01_h2_wyniki.csv")
+    d = load("results/exp01_h2_results.csv")
     R = d["R"]
 
     # errors vs FCI in mHa (the CSV stores Ha)
