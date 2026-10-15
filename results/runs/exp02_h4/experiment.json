@@ -1,0 +1,47 @@
+{
+ "name": "exp02_h4",
+ "title": "UCCSD vs hardware-efficient ansatz on the H\u2084 chain",
+ "description": "VQE with UCCSD and HEA (1-6 layers, 5 random starts) on a linear H\u2084 chain, spacing 0.5-2.5 \u00c5, against HF, CCSD and FCI. Research question 1.",
+ "config": {
+  "molecule": "H4 linear chain",
+  "basis": "sto3g",
+  "spacings_A": [
+   0.5,
+   0.75,
+   1.0,
+   1.25,
+   1.5,
+   1.75,
+   2.0,
+   2.25,
+   2.5
+  ],
+  "hea_layers": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "hea_init": "uniform(-0.1, 0.1)",
+  "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
+  "maxiter": 10000,
+  "gtol": 1e-07
+ },
+ "figures": [
+  "fig_exp02_h4.png",
+  "fig_exp02_h4_cost.png"
+ ],
+ "status": "done",
+ "started_at": "2026-10-15T23:52:28",
+ "finished_at": "2026-10-16T00:27:38",
+ "n_runs": 306
+}

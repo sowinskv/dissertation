@@ -74,5 +74,6 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - HF weight in FCI state drops 99% -> 33%; HF error 25 -> 462 mHa; CCSD goes BELOW FCI from d = 1.25 (down to -31 mHa).
   - UCCSD (26 params, 1072 CNOT, ~1.2k evals): within chemical accuracy up to d = 1.5, max error 5.3 mHa.
   - HEA: error falls with layers but non-monotonically and seed-dependent; 6 layers (84 params, 30 CNOT) median worst 5.4 mHa, worst seed 57.7 mHa; ~800k evals (~690x UCCSD); 28 runs hit 10k iterations. <N> stays 4.
+  - Reproducibility: rerun with tracking (single-threaded BLAS throughout) changed 16 HEA runs with 1-2 layers (moved between near-degenerate local minima, e.g. 22.57 <-> 24.51 mHa); L >= 3 and UCCSD bit-identical, per-layer median/worst unchanged. Shallow HEA is sensitive to floating-point summation order.
   - Open: worst HEA runs (e.g. 57.70 mHa at d = 2.0) have fidelity ~0 with FCI and repeat across depths -> likely a fixed wrong-symmetry state; check its spin.
 - Next: LiH with an active space.

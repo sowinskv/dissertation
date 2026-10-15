@@ -1,0 +1,16 @@
+{"step": 0, "energy": -1.975700672778448, "grad_norm": 0.595196680891655, "evaluations": 0, "t": 0.079}
+{"step": 1, "energy": -2.0711404040847423, "grad_norm": 0.19937483180540036, "evaluations": 159, "t": 0.192}
+{"step": 2, "energy": -2.0808078768793203, "grad_norm": 0.09362422328930134, "evaluations": 212, "t": 0.232}
+{"step": 3, "energy": -2.0826715029611247, "grad_norm": 0.03572776219402543, "evaluations": 265, "t": 0.271}
+{"step": 4, "energy": -2.08313907289845, "grad_norm": 0.02488703747223359, "evaluations": 318, "t": 0.31}
+{"step": 5, "energy": -2.083494515921471, "grad_norm": 0.010017683638499017, "evaluations": 371, "t": 0.346}
+{"step": 6, "energy": -2.083512616721409, "grad_norm": 0.002798358060630316, "evaluations": 477, "t": 0.421}
+{"step": 7, "energy": -2.0835149041581094, "grad_norm": 0.0004334949692256103, "evaluations": 530, "t": 0.46}
+{"step": 8, "energy": -2.083514950503999, "grad_norm": 9.294803832762484e-05, "evaluations": 583, "t": 0.498}
+{"step": 9, "energy": -2.0835149527266097, "grad_norm": 2.4919911926172342e-05, "evaluations": 636, "t": 0.535}
+{"step": 10, "energy": -2.083514952915759, "grad_norm": 9.116263151992287e-06, "evaluations": 689, "t": 0.572}
+{"step": 11, "energy": -2.0835149529552766, "grad_norm": 2.581272168434277e-06, "evaluations": 742, "t": 0.612}
+{"step": 12, "energy": -2.083514952958766, "grad_norm": 9.567627331611875e-07, "evaluations": 795, "t": 0.649}
+{"step": 13, "energy": -2.083514952959443, "grad_norm": 3.9869910358550577e-07, "evaluations": 848, "t": 0.687}
+{"step": 14, "energy": -2.083514952959515, "grad_norm": 1.745531844817574e-07, "evaluations": 954, "t": 0.764}
+{"step": 15, "energy": -2.083514952959515, "grad_norm": 2.842673101125757e-08, "evaluations": 1007, "t": 0.802}

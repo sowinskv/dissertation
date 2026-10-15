@@ -1,0 +1,17 @@
+{
+ "run_id": "d2.25_CCSD",
+ "params": {
+  "d_A": 2.25,
+  "method": "CCSD"
+ },
+ "reference": -1.8801886640651668,
+ "status": "done",
+ "started_at": "2026-10-15T23:52:37",
+ "metrics": {
+  "E_Ha": -1.908045238604379,
+  "dE_mHa": -27.856574539212087,
+  "hf_weight": 0.3893224702819932
+ },
+ "finished_at": "2026-10-15T23:52:37",
+ "duration_s": 0.0
+}
