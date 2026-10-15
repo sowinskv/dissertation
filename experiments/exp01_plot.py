@@ -62,7 +62,7 @@ def main():
     ps.number_axis(ax2, "x", decimals=1)
     ax2.set_xlim(R[0] - 0.05, R[-1] + 0.05)
 
-    ps.header(fig, "VQE reproduces the exact H₂ curve", key=["FCI", "HF", "UCCSD", "HEA"])
+    ps.header(fig, "Potential energy curve of H₂: HF, FCI and VQE", key=["FCI", "HF", "UCCSD", "HEA"])
     ps.footer(fig, "H₂, STO-3G, noiseless statevector. HEA: 2 layers. "
                    "Errors below 10⁻¹³ mHa are drawn at the floor.")
 

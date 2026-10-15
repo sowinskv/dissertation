@@ -90,7 +90,7 @@ def fig_error_vs_spacing(rows, best_l):
     ps.number_axis(ax2, "x", decimals=1)
     ax2.set_xlim(d[0] - 0.08, d[-1] + 0.08)
 
-    ps.header(fig, "Stretching H₄ breaks every approximate method",
+    ps.header(fig, "Error of approximate methods for the linear H₄ chain vs atom spacing",
               key=["HF", "CCSD", "UCCSD", "HEA"])
     ps.footer(fig, f"{BASE_NOTE} HEA: {best_l} layers, median and range of 5 random starts. "
                    "Hollow diamonds: CCSD below the exact energy.")
@@ -132,7 +132,7 @@ def fig_cost(rows, layers):
         ps.panel_title(ax, title, "log scale")
     ax1.set_ylabel("Worst error on the curve (mHa)")
 
-    ps.header(fig, "UCCSD pays in gates, HEA pays in training", key=["UCCSD", "HEA"])
+    ps.header(fig, "VQE accuracy vs circuit size and training cost, H₄ chain", key=["UCCSD", "HEA"])
     ps.footer(fig, f"{BASE_NOTE} HEA: median of 5 random starts; numbers = layers.")
     ps.save(fig, "results/fig_exp02_h4_cost")
 

@@ -45,7 +45,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
 - Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
-- Minimal text, in English: a short title stating the finding (no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
+- Minimal text, in English: a short descriptive title in research style (what is plotted, for which system; no marketing phrasing, no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
 - Decimal point; units as the panel subtitle (e.g. "mHa, log scale").
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
 
