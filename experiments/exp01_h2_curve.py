@@ -9,7 +9,7 @@ compares four methods for H2 in the STO-3G basis:
 
 run (from repo root):  python experiments/exp01_h2_curve.py
 output: results/exp01_h2_results.csv, results/exp01_h2_meta.json
-figure: python experiments/plot_exp01.py
+figure: python experiments/exp01_plot.py
 """
 
 import sys

@@ -1,7 +1,7 @@
 """
 figures for experiment 02 (H4: UCCSD vs HEA), drawn from the saved CSV.
 
-run (from repo root):  python experiments/plot_exp02.py
+run (from repo root):  python experiments/exp02_plot.py
 input:   results/exp02_h4_results.csv
 output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation strength
          results/fig_exp02_h4_cost.pdf/.png   cost of accuracy: CNOT count and training cost
