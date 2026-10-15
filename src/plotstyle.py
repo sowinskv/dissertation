@@ -10,7 +10,7 @@ the rules this module encodes (so individual plot scripts don't have to):
   - identity never relies on color alone: distinct markers / line styles + direct labels
   - recessive chrome: horizontal hairline grid only, no box, muted axis text
   - a header (title, subtitle, key) and a footer (source / notes) outside the plot area
-  - polish number formatting (decimal comma) by default, because the thesis is in polish
+  - english labels, kept minimal; decimal point by default (decimal_comma=True switches to polish)
 
 the categorical colors are the first slots of a validated palette:
 all-pairs CVD separation >= 9 (deutan) and normal-vision separation >= 24 on white.
@@ -53,25 +53,25 @@ SLOTS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#625
 # ---------------- fixed identity of every method ----------------
 # color is a theme role ("ink", "muted") or a slot index; it never changes between figures
 METHODS = {
-    "FCI":      {"color": "ink",   "marker": None, "ls": "-",  "label": "FCI (dokładne)"},
+    "FCI":      {"color": "ink",   "marker": None, "ls": "-",  "label": "FCI (exact)"},
     "HF":       {"color": "muted", "marker": None, "ls": "--", "label": "Hartree–Fock"},
     "UCCSD":    {"color": 0,       "marker": "s",  "ls": "-",  "label": "VQE-UCCSD"},
     "HEA":      {"color": 1,       "marker": "^",  "ls": "-",  "label": "VQE-HEA"},
     "CCSD":     {"color": 2,       "marker": "D",  "ls": "-",  "label": "CCSD"},
-    "QNN-cond": {"color": 3,       "marker": "P",  "ls": "-",  "label": "warunkowa QNN"},
+    "QNN-cond": {"color": 3,       "marker": "P",  "ls": "-",  "label": "conditional QNN"},
     "MLP":      {"color": 4,       "marker": "v",  "ls": "-",  "label": "MLP"},
-    "GP":       {"color": 5,       "marker": "X",  "ls": "-",  "label": "proces gaussowski"},
+    "GP":       {"color": 5,       "marker": "X",  "ls": "-",  "label": "Gaussian process"},
 }
 
 FONT_STACK = ["Inter", "Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"]
 TEXT_WIDTH_IN = 6.3   # A4 text width with ~2.5 cm margins
 CHEM_ACC_MHA = 1.6    # chemical accuracy in mHa
 
-_state = {"decimal_comma": True}
+_state = {"decimal_comma": False}
 
 
 # ---------------- setup ----------------
-def use(decimal_comma=True):
+def use(decimal_comma=False):
     """apply the style globally. call once at the top of a plot script."""
     t = THEME
     _state.update(decimal_comma=decimal_comma)

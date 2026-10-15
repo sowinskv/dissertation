@@ -4,7 +4,7 @@ Engineering (BSc) thesis at PJATK Warsaw by Joanna
 
 Title (declared, Polish): _Zastosowanie kwantowych sieci neuronowych do symulacji i modelowania układów molekularnych_.
 
-The thesis text is written in Polish. Code comments, docstrings and console output: English, mostly lowercase (uppercase only where needed: H2, CSV, HF, FCI, VQE, class names). Plot labels stay in Polish (figures go into the thesis).
+The thesis text is written in Polish. Code comments, docstrings and console output: English, mostly lowercase (uppercase only where needed: H2, CSV, HF, FCI, VQE, class names). Plot labels in English, kept minimal.
 
 ## Research framing (decided)
 
@@ -45,9 +45,8 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
 - Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
-- Title states the finding (a sentence, not a label), subtitle explains it, footer lists system, basis, simulator, seeds and caveats.
-- Direct labels at line ends + key in the header; annotate the 1-3 things the reader must notice (callout, bracket, threshold). No dual y-axes.
-- Polish number format (decimal comma) on all axes and labels; units in panel subtitles.
+- Minimal text, in English: a short title stating the finding (no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
+- Decimal point; units as the panel subtitle (e.g. "mHa, log scale").
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
 
 ## Repo layout

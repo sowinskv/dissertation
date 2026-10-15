@@ -38,11 +38,6 @@ def main():
         "UCCSD": np.maximum(raw["dE_UCCSD_mHa"], FLOOR_MHA),
         "HEA": np.maximum(raw["dE_HEA_mHa"], FLOOR_MHA),
     }
-    i_eq = int(np.argmin(d["FCI"]))
-    hf_gap = err["HF"][-1]
-    worst = max(("HEA", "UCCSD"), key=lambda m: err[m].max())
-    i_worst = int(np.argmax(err[worst]))
-
     fig, (ax1, ax2) = ps.figure(nrows=2, height_ratios=[1.25, 1], sharex=True,
                                 panel_height=2.4)
 
@@ -51,50 +46,31 @@ def main():
     ps.plot(ax1, R, d["FCI"], "FCI", zorder=3)
     ps.plot(ax1, R, d["UCCSD"], "UCCSD", ls="none", markersize=5.5, zorder=4)
     ps.plot(ax1, R, d["HEA"], "HEA", ls="none", markersize=3.2, zorder=5)
-    ps.panel_title(ax1, "Energia całkowita", "energia stanu podstawowego [Ha] w funkcji długości wiązania")
+    ps.panel_title(ax1, "Energy", "Ha")
     ps.number_axis(ax1, "y", decimals=1)
-    ax1.set_ylim(-1.28, -0.55)
-
-    ps.end_label(ax1, R[-1], d["HF"][-1], "Hartree–Fock")
-    ps.end_label(ax1, R[-1], d["FCI"][-1], "FCI = VQE")
-    ps.bracket(ax1, R[-1] - 0.12, d["FCI"][-1], d["HF"][-1],
-               f"błąd HF\n{ps._num(round(hf_gap))} mHa", side="left")
-    ps.callout(ax1, (R[i_eq], d["FCI"][i_eq]),
-               f"minimum: długość wiązania\nR ≈ {ps._num(R[i_eq], 2)} Å",
-               xytext=(1.0, -1.225))
-    ps.callout(ax1, (2.4, d["FCI"][-6]),
-               "rozerwane wiązanie:\ndwa osobne atomy H",
-               xytext=(2.4, -1.09), ha="center")
+    ax1.set_ylim(-1.2, -0.55)
 
     # ---- panel 2: error vs FCI, log scale ----
     ps.log_axis(ax2, "y", every=3)
     ax2.set_ylim(FLOOR_MHA * 0.4, 3e3)
-    ps.threshold(ax2, ps.CHEM_ACC_MHA, "↓ dokładność chemiczna: błąd < 1,6 mHa")
+    ps.threshold(ax2, ps.CHEM_ACC_MHA, "chemical accuracy")
     for m in ["HF", "HEA", "UCCSD"]:
         ps.plot(ax2, R, err[m], m)
-    ps.panel_title(ax2, "Błąd względem FCI", "|E − E_FCI| [mHa], skala logarytmiczna")
+    ps.panel_title(ax2, "Error vs FCI", "mHa, log scale")
 
-    ps.end_label(ax2, R[-1], err["HF"][-1], "Hartree–Fock")
-    e_h, e_u = err["HEA"][-1], err["UCCSD"][-1]
-    if abs(np.log10(e_h / e_u)) < 1.5:   # lines end together: one label, never stacked
-        ps.end_label(ax2, R[-1], np.sqrt(e_h * e_u), "oba VQE")
-    else:
-        ps.end_label(ax2, R[-1], e_h, "VQE-HEA")
-        ps.end_label(ax2, R[-1], e_u, "VQE-UCCSD")
-    ps.callout(ax2, (R[i_worst], err[worst][i_worst]),
-               f"największy błąd VQE: {ps.sci(err[worst][i_worst])} mHa\n(precyzja numeryczna)",
-               xytext=(1.6, 1e-4))
-
-    ax2.set_xlabel("Długość wiązania R [Å]")
+    ax2.set_xlabel("Bond length R (Å)")
     ps.number_axis(ax2, "x", decimals=1)
     ax2.set_xlim(R[0] - 0.05, R[-1] + 0.05)
 
-    ps.header(fig, "Oba modele VQE odtwarzają dokładną krzywą energii H₂",
-              "Hartree–Fock myli się coraz bardziej przy rozciąganiu wiązania; "
-              "oba modele VQE trafiają w FCI z dokładnością numeryczną",
-              key=["FCI", "HF", "UCCSD", "HEA"])
-    ps.footer(fig, "H₂, baza STO-3G, symulator wektora stanu (bez szumu), 19 geometrii, HEA: 2 warstwy, 1 ziarno. "
-                   "Błędy < 10⁻¹³ mHa (precyzja maszynowa) narysowano na dolnej krawędzi.")
+    ps.header(fig, "VQE reproduces the exact H₂ curve", key=["FCI", "HF", "UCCSD", "HEA"])
+    ps.footer(fig, "H₂, STO-3G, noiseless statevector. HEA: 2 layers. "
+                   "Errors below 10⁻¹³ mHa are drawn at the floor.")
+
+    ps.end_labels(ax1, R[-1], [(d["HF"][-1], "HF"), (d["FCI"][-1], "FCI = VQE")])
+    e_h, e_u = err["HEA"][-1], err["UCCSD"][-1]
+    vqe = ([(np.sqrt(e_h * e_u), "VQE")] if abs(np.log10(e_h / e_u)) < 1.5
+           else [(e_h, "HEA"), (e_u, "UCCSD")])
+    ps.end_labels(ax2, R[-1], [(err["HF"][-1], "HF")] + vqe)
 
     ps.save(fig, "results/fig_exp01_h2")
 
