@@ -1,0 +1,225 @@
+/* lab notebook: a squared exercise book ("zeszyt w kratkę"), written in pen */
+
+@font-face { font-family: "IM Fell English"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url(fonts/im-fell-english-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "IM Fell English"; font-weight: 400; font-style: italic; font-display: swap;
+  src: url(fonts/im-fell-english-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-ext-400-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 500; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-ext-500-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 500; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-500-normal.woff2) format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 600; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-ext-600-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 600; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-style: italic; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-ext-400-italic.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-style: italic; font-display: swap;
+  src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 400; font-display: swap;
+  src: url(fonts/caveat-latin-ext-400-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Caveat"; font-weight: 400; font-display: swap;
+  src: url(fonts/caveat-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Caveat"; font-weight: 600; font-display: swap;
+  src: url(fonts/caveat-latin-ext-600-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
+@font-face { font-family: "Caveat"; font-weight: 600; font-display: swap;
+  src: url(fonts/caveat-latin-600-normal.woff2) format("woff2"); }
+
+:root {
+  --paper: #f8f9f6;
+  --grid: #dbe4ee;
+  --margin-rule: #e3a3a3;
+  --ink: #2b241e;          /* iron-gall ink: headings and body */
+  --pen: #2846a6;          /* fountain-pen blue: handwritten notes */
+  --pencil: #77746d;       /* pencil: labels, meta */
+  --red-pencil: #b3261e;   /* failures, warnings */
+  --tape: rgba(214, 196, 150, 0.62);
+  --sheet: #fefefc;        /* pasted-in sheets (figures, chart) */
+
+  --row: 24px;             /* one square of the grid = one line of text */
+  --margin: 104px;
+
+  --f-head: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --f-body: "Cormorant Garamond", Garamond, Georgia, serif;
+  --f-hand: "Caveat", "Bradley Hand", "Segoe Print", cursive;
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--paper); }
+body {
+  margin: 0;
+  color: var(--ink);
+  font: 400 19px/var(--row) var(--f-body);
+  font-variant-numeric: lining-nums;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--row) var(--row);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  position: relative;
+  max-width: 1120px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: calc(var(--row) * 3) calc(var(--row) * 1.5) calc(var(--row) * 4) calc(var(--margin) + var(--row));
+}
+/* the red double margin rule of the exercise book */
+.page::before {
+  content: "";
+  position: absolute; top: 0; bottom: 0; left: var(--margin);
+  width: 5px;
+  border-left: 1.5px solid var(--margin-rule);
+  border-right: 1px solid var(--margin-rule);
+  pointer-events: none;
+}
+
+a { color: var(--pen); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--pen); outline-offset: 3px; border-radius: 2px; }
+
+/* ---------- margin notes: written to the left of the red rule ---------- */
+.entry { position: relative; }
+.margin-note {
+  position: absolute;
+  left: calc(-1 * var(--margin) - var(--row) + 8px);
+  width: calc(var(--margin) - 16px);
+  text-align: right;
+  font: 400 20px/var(--row) var(--f-hand);
+  color: var(--pen);
+}
+.margin-note .muted { color: var(--pencil); }
+.margin-note .bad { color: var(--red-pencil); }
+
+.hand { font-family: var(--f-hand); font-size: 22px; color: var(--pen); }
+.pencil { color: var(--pencil); }
+
+/* ---------- headings ---------- */
+h1, h2, h3 { font-family: var(--f-head); font-weight: 400; margin: 0; }
+.book-title {
+  font-size: 60px; line-height: calc(var(--row) * 3);
+  letter-spacing: -0.5px;
+}
+.book-subtitle { margin: 0 0 calc(var(--row) * 2); }
+
+.exp-title { font-size: 42px; line-height: calc(var(--row) * 2); max-width: 32ch; }
+.section-title {
+  font-style: italic;
+  font-size: 28px;
+  line-height: calc(var(--row) * 2);
+  margin-top: calc(var(--row) * 2);
+}
+
+p { margin: 0 0 var(--row); max-width: 68ch; }
+
+.back { display: inline-block; font-family: var(--f-hand); font-size: 22px; margin-bottom: var(--row); }
+
+/* ---------- index: list of experiments ---------- */
+.toc { list-style: none; margin: 0; padding: 0; counter-reset: exp; }
+.toc > li { position: relative; margin-bottom: calc(var(--row) * 2); counter-increment: exp; }
+.toc h2 { font-size: 30px; line-height: calc(var(--row) * 2); }
+.toc h2::before { content: counter(exp) ".  "; color: var(--pencil); }
+.toc h2 a { color: var(--ink); text-decoration: none; }
+.toc h2 a:hover { text-decoration: underline; text-decoration-color: var(--pen); }
+.toc p { margin: 0; }
+.progress {
+  display: block; width: min(320px, 100%); height: 6px; margin-top: 9px;
+  border: 1px solid var(--pen); border-radius: 3px; overflow: hidden;
+}
+.progress > span { display: block; height: 100%; background: var(--pen); }
+
+.empty { font-family: var(--f-hand); font-size: 24px; color: var(--pen); max-width: 40ch; }
+.empty code { font-family: var(--f-body); font-size: 19px; color: var(--ink); }
+
+/* ---------- setup (key: value, like a list written in the book) ---------- */
+.setup { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--row); margin: 0; }
+.setup dt { color: var(--pencil); font-style: italic; }
+.setup dd { margin: 0; overflow-wrap: anywhere; }
+
+/* ---------- things pasted in: figures and the chart, held by tape ---------- */
+.pasted {
+  position: relative;
+  background: var(--sheet);
+  padding: 14px;
+  margin: calc(var(--row) * 1.5) 0 var(--row);
+  box-shadow: 0 1px 0 rgba(43, 36, 30, 0.06), 0 6px 14px -10px rgba(43, 36, 30, 0.35);
+}
+.pasted::before, .pasted::after {
+  content: "";
+  position: absolute; top: -13px;
+  width: 92px; height: 26px;
+  background: var(--tape);
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 3px, transparent 3px 7px);
+  mix-blend-mode: multiply;
+}
+.pasted::before { left: 18px; transform: rotate(-4deg); }
+.pasted::after { right: 18px; transform: rotate(3deg); }
+.figures { display: grid; gap: calc(var(--row) * 1.5); }
+.figures .pasted:nth-child(odd) { transform: rotate(-0.5deg); }
+.figures .pasted:nth-child(even) { transform: rotate(0.45deg); }
+.figures img { display: block; width: 100%; height: auto; }
+.figures figcaption { margin-top: 6px; }
+
+/* ---------- filters: hand-drawn tick boxes ---------- */
+.filters { display: grid; gap: 4px; margin: var(--row) 0 0; }
+.filter { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; }
+.filter-name { min-width: 7ch; color: var(--pencil); font-style: italic; }
+.tick { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+.tick input {
+  appearance: none; -webkit-appearance: none; margin: 0;
+  width: 15px; height: 15px;
+  border: 1.5px solid var(--ink); border-radius: 2px 3px 2px 4px;
+  display: grid; place-content: center; cursor: pointer;
+}
+.tick input::after {
+  content: ""; width: 9px; height: 5px;
+  border-left: 2px solid var(--pen); border-bottom: 2px solid var(--pen);
+  transform: rotate(-48deg) translate(1px, -1px) scale(0);
+}
+.tick input:checked::after { transform: rotate(-48deg) translate(1px, -1px) scale(1); }
+.swatch { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; }
+
+.chart-box { height: 420px; }
+.chart-note { margin-top: 4px; }
+
+/* ---------- runs table ---------- */
+.table-wrap { overflow-x: auto; margin-top: var(--row); }
+table { border-collapse: collapse; font-size: 17px; min-width: 100%; font-variant-numeric: lining-nums tabular-nums; }
+th, td { padding: 0 12px 0 0; height: var(--row); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th {
+  font-weight: 500; font-style: italic; color: var(--pencil);
+  border-bottom: 1.5px solid var(--ink); cursor: pointer; user-select: none;
+}
+th[aria-sort="ascending"]::after { content: " ↑"; color: var(--pen); }
+th[aria-sort="descending"]::after { content: " ↓"; color: var(--pen); }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: rgba(40, 70, 166, 0.06); }
+tbody tr.pinned td { background: rgba(40, 70, 166, 0.12); }
+td.bad { color: var(--red-pencil); }
+td.method { text-align: left; }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+.status-running { color: var(--pen); }
+
+@media (max-width: 760px) {
+  :root { --margin: 0px; }
+  .page { padding: calc(var(--row) * 2) 16px calc(var(--row) * 3); }
+  .page::before { display: none; }
+  .margin-note { position: static; width: auto; text-align: left; margin-bottom: 8px; }
+  .book-title { font-size: 44px; line-height: calc(var(--row) * 2); }
+  .exp-title { font-size: 32px; line-height: calc(var(--row) * 1.5); }
+  .chart-box { height: 320px; }
+  .figures .pasted { transform: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

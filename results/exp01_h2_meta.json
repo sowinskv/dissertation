@@ -49,7 +49,7 @@
     "numpy": "2.5.3",
     "scipy": "1.18.1"
   },
-  "git_commit": "5528bf0",
-  "runtime_s": 31.4,
+  "git_commit": "c4eeeba",
+  "runtime_s": 7.9,
   "rows": 19
 }

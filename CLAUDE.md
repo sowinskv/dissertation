@@ -31,6 +31,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - Metrics: |E - E_FCI| in mHa, % points within 1.6 mHa, NPE, R_eq / D_e errors, fidelity (simulation only), params, CNOT and depth after transpiling to ["cx","rz","sx","x"], circuit evaluations, shots.
 - 5 seeds per stochastic experiment; report mean and spread.
 - Each run saves config, library versions, seed and results to `results/`.
+- Every experiment also logs to the lab notebook via `src/tracking.py`: one `Experiment` per script (title, short description, config, figure files), one `run` per training with `callback=run.log`, final metrics incl. `theta` in `run.finish(...)`. Run ids are readable (`d1.50_HEA_L3_s0`); `is_done` allows resume.
 - Train on simulator; on hardware only evaluate trained parameters (limited free IBM Open plan time). Record backend name and date.
 - Never commit IBM Quantum tokens.
 
@@ -60,8 +61,11 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
   - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
   - `plotstyle.py` figure style
+  - `tracking.py` experiment tracker (MLflow-like, plain files): `results/runs/<exp>/experiment.json`, `<run>.json`, `<run>.history.jsonl` (thinned)
+- `tools/notebook.py` local lab-notebook web UI over `results/runs/` (stdlib server, `uv run python tools/notebook.py`, http://localhost:8765, refreshes live while an experiment runs)
+- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, self-hosted OFL fonts: IM Fell English, Cormorant Garamond, Caveat). New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
 - `tests/` control tests, run with `uv run pytest -q`
-- `results/` CSV/JSON outputs and figures (`fig_expNN_*.pdf/.png`)
+- `results/` CSV/JSON outputs, figures (`fig_expNN_*.pdf/.png`) and training logs (`runs/`)
 
 ## Status
 
