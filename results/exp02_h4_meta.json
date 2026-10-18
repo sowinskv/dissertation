@@ -1,0 +1,49 @@
+{
+  "experiment": "exp02_h4",
+  "config": {
+    "molecule": "H4 linear chain",
+    "basis": "sto3g",
+    "spacings_A": [
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0,
+      2.25,
+      2.5
+    ],
+    "hea_layers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "hea_init": "uniform(-0.1, 0.1)",
+    "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
+    "maxiter": 10000,
+    "gtol": 1e-07
+  },
+  "python": "3.12.3",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-nature": "0.8.0",
+    "pyscf": "2.14.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "git_commit": "9e1d6a5",
+  "runtime_s": 796.0,
+  "rows": 306,
+  "note": "run was interrupted and resumed from the checkpoint; runtime_s covers only the last segment"
+}

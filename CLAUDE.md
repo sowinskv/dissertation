@@ -4,7 +4,7 @@ Engineering (BSc) thesis at PJATK Warsaw by Joanna
 
 Title (declared, Polish): _Zastosowanie kwantowych sieci neuronowych do symulacji i modelowania układów molekularnych_.
 
-The thesis text is written in Polish. Code comments, docstrings and console output: English, mostly lowercase (uppercase only where needed: H2, CSV, HF, FCI, VQE, class names). Plot labels stay in Polish (figures go into the thesis).
+The thesis text is written in Polish. Code comments, docstrings and console output: English, mostly lowercase (uppercase only where needed: H2, CSV, HF, FCI, VQE, class names). Plot labels in English, kept minimal.
 
 ## Research framing (decided)
 
@@ -38,25 +38,37 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 - Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0 (see requirements.txt).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
+- Experiments that use several worker processes must set OMP_NUM_THREADS=1 (done at the top of the script); multithreaded BLAS on tiny matrices otherwise makes training ~30x slower.
 
 ## Figures
 
 - All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
-- Experiments write CSV to `results/`; separate `experiments/plot_expNN.py` scripts read the CSV and draw. Never recompute physics in a plot script.
+- Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
-- Title states the finding (a sentence, not a label), subtitle explains it, footer lists system, basis, simulator, seeds and caveats.
-- Direct labels at line ends + key in the header; annotate the 1-3 things the reader must notice (callout, bracket, threshold). No dual y-axes.
-- Polish number format (decimal comma) on all axes and labels; units in panel subtitles.
+- Minimal text, in English: a short descriptive title in research style (what is plotted, for which system; no marketing phrasing, no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
+- Decimal point; units as the panel subtitle (e.g. "mHa, log scale").
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
 
 ## Repo layout
 
 - `experiments/` runnable experiment scripts (`expNN_<name>.py`), run from repo root
-- `src/` shared modules (hamiltonians, ansatze, energy, train, classical, metrics) - to be extracted from experiments as they repeat
-- `tests/` unit and control tests
+- `src/` shared modules:
+  - `hamiltonians.py` geometries, qubit hamiltonian (ParityMapper), exact ground state in the right electron-number sector
+  - `classical.py` HF / CCSD / FCI from PySCF, HF weight in the FCI state
+  - `ansatze.py` UCCSD, HEA(layers), circuit resources (params, CNOT, depth)
+  - `fastsim.py` exact batched numpy statevector simulation of a qiskit circuit (used for training; tested against StatevectorEstimator to 1e-10)
+  - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
+  - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
+  - `plotstyle.py` figure style
+- `tests/` control tests, run with `uv run pytest -q`
 - `results/` CSV/JSON outputs and figures (`fig_expNN_*.pdf/.png`)
 
 ## Status
 
-- exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models within chemical accuracy everywhere; UCCSD 3 params, 4 CNOT, ~20 evaluations; HEA 12 params, 2 CNOT, ~250 evaluations.
-- Next: same experiment for H4 (and LiH with an active space).
+- exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models reach FCI to numerical precision (< 1e-9 mHa); UCCSD 3 params, 4 CNOT, ~45 circuit evaluations; HEA 12 params, 2 CNOT, ~1100 evaluations (evaluations counted as 2p+1 per gradient).
+- exp02: H4 chain (d = 0.5-2.5 A, 9 points), UCCSD vs HEA 1-6 layers x 5 seeds, CCSD reference.
+  - HF weight in FCI state drops 99% -> 33%; HF error 25 -> 462 mHa; CCSD goes BELOW FCI from d = 1.25 (down to -31 mHa).
+  - UCCSD (26 params, 1072 CNOT, ~1.2k evals): within chemical accuracy up to d = 1.5, max error 5.3 mHa.
+  - HEA: error falls with layers but non-monotonically and seed-dependent; 6 layers (84 params, 30 CNOT) median worst 5.4 mHa, worst seed 57.7 mHa; ~800k evals (~690x UCCSD); 28 runs hit 10k iterations. <N> stays 4.
+  - Open: worst HEA runs (e.g. 57.70 mHa at d = 2.0) have fidelity ~0 with FCI and repeat across depths -> likely a fixed wrong-symmetry state; check its spin.
+- Next: LiH with an active space.
