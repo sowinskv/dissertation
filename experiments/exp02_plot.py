@@ -2,9 +2,10 @@
 figures for experiment 02 (H4: UCCSD vs HEA), drawn from the saved CSV.
 
 run (from repo root):  python experiments/exp02_plot.py
-input:   results/exp02_h4_results.csv
+input:   results/exp02_h4_results.csv, results/exp02_h4_spin_results.csv (exp02_spin_check.py)
 output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation strength
          results/fig_exp02_h4_cost.pdf/.png   cost of accuracy: CNOT count and training cost
+         results/fig_exp02_h4_spin.pdf/.png   final HEA states: energy error vs total spin
 """
 
 import argparse
@@ -14,6 +15,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
+from matplotlib.lines import Line2D
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src import plotstyle as ps  # noqa: E402
@@ -26,9 +28,15 @@ def load(path):
         rows = list(csv.DictReader(f))
     for r in rows:
         for k, v in list(r.items()):
-            if k == "method":
-                continue
-            r[k] = None if v == "" else (v == "True") if v in ("True", "False") else float(v)
+            if v == "":
+                r[k] = None
+            elif v in ("True", "False"):
+                r[k] = v == "True"
+            else:
+                try:
+                    r[k] = float(v)
+                except ValueError:
+                    pass   # text columns (method, spin names) stay strings
     return rows
 
 
@@ -137,6 +145,43 @@ def fig_cost(rows, layers):
     ps.save(fig, "results/fig_exp02_h4_cost")
 
 
+def fig_spin(spin_rows, layers):
+    """energy error of every final HEA state against its total spin <S^2>."""
+    t = ps.theme()
+    floor = 1e-4
+    hea = [r for r in spin_rows if r["method"] == "HEA"]
+    ramp = ps.shades("HEA", len(layers))
+
+    fig, ax = ps.figure(nrows=1, panel_height=3.1)
+    ps.log_axis(ax, "y", every=1)
+    ax.set_ylim(floor / 2, 600)
+    ax.set_xlim(-0.3, 6.6)
+    ax.set_xticks([0, 1, 2, 3, 4, 5, 6])
+    ax.grid(axis="x", visible=False)
+    for s2, name in ((0, "singlet"), (2, "triplet"), (6, "quintet")):
+        ax.axvline(s2, color=t["muted"], lw=0.7, ls=(0, (1, 2)), zorder=0)
+        ax.annotate(name, (s2, 1), xycoords=ax.get_xaxis_transform(), xytext=(4, -3),
+                    textcoords="offset points", ha="left", va="top", fontsize=7, color=t["ink_2"])
+    ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", x=0.42)
+    for L, c in zip(layers, ramp):
+        sel = [r for r in hea if r["layers"] == L]
+        ax.plot([r["S2"] for r in sel], [max(r["dE_mHa"], floor) for r in sel], ls="none",
+                marker="o", markersize=4.2, markerfacecolor=c, markeredgecolor=ps.color("HEA"),
+                markeredgewidth=0.5, alpha=0.9, zorder=3 + L)
+    ax.set_xlabel("Total spin ⟨S²⟩ of the final state")
+    ps.panel_title(ax, "Error vs FCI", "mHa, log scale")
+
+    key = [Line2D([], [], ls="none", marker="o", markersize=4.5, markerfacecolor=c,
+                  markeredgecolor=ps.color("HEA"), markeredgewidth=0.5, label=f"{L} layer{'s' if L > 1 else ''}")
+           for L, c in zip(layers, ramp)]
+    ps.header(fig, "Energy error vs total spin of the final HEA states, H₄\u00a0chain", key=key)
+    n_q = sum(1 for r in hea if r["is_eigenstate"] and r["spin"] == "quintet")
+    ps.footer(fig, f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
+                   f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
+                   f"Errors below 10⁻⁴ mHa are drawn at the floor.")
+    ps.save(fig, "results/fig_exp02_h4_spin")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", default="results/exp02_h4_results.csv")
@@ -146,6 +191,9 @@ def main():
     layers = sorted({int(r["layers"]) for r in rows if r["method"] == "HEA"})
     fig_error_vs_spacing(rows, max(layers))
     fig_cost(rows, layers)
+    spin_csv = Path("results/exp02_h4_spin_results.csv")
+    if spin_csv.exists():
+        fig_spin(load(spin_csv), layers)
 
 
 if __name__ == "__main__":

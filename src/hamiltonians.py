@@ -3,6 +3,12 @@ hamiltonians: molecular geometries and their qubit hamiltonians.
 
 pipeline (thesis chapter 3): PySCF integrals -> second-quantized hamiltonian -> ParityMapper
 with two-qubit Z2 reduction -> sum of pauli strings on qubits.
+
+molecular orbitals are only defined up to a sign. PySCF picks the sign numerically, so it can
+change between runs (e.g. with the number of BLAS threads). the energies do not care, but the
+qubit hamiltonian does: with other signs, the same circuit parameters describe another state.
+build() therefore fixes the sign of every orbital (largest coefficient positive), so saved
+parameters always reproduce the trained state.
 """
 
 from dataclasses import dataclass
@@ -46,8 +52,24 @@ class QubitProblem:
         return self.hamiltonian.to_matrix()
 
 
+def fix_orbital_signs(mo, tol=1e-6):
+    """sign convention for molecular orbitals (columns of mo): the first coefficient whose size
+    is within tol of the largest one is made positive. the tolerance keeps symmetric molecules
+    (equal-size coefficients, e.g. H2) from flipping on rounding noise."""
+    mo = np.array(mo, dtype=float)
+    size = np.abs(mo)
+    for j in range(mo.shape[1]):
+        i = int(np.argmax(size[:, j] >= size[:, j].max() * (1 - tol)))
+        if mo[i, j] < 0:
+            mo[:, j] *= -1
+    return mo
+
+
 def build(atom, basis=BASIS):
-    problem = PySCFDriver(atom=atom, basis=basis).run()
+    driver = PySCFDriver(atom=atom, basis=basis)
+    driver.run_pyscf()
+    driver._calc.mo_coeff = fix_orbital_signs(driver._calc.mo_coeff)   # see module docstring
+    problem = driver.to_problem()
     mapper = ParityMapper(num_particles=problem.num_particles)
     ham = mapper.map(problem.hamiltonian.second_q_op())
     number = mapper.map(problem.properties.particle_number.second_q_ops()["ParticleNumber"])

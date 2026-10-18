@@ -1,0 +1,45 @@
+{
+  "experiment": "exp02_h4_spin",
+  "config": {
+    "source": "results/runs/exp02_h4 (saved final parameters of exp02)",
+    "spacings_A": [
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0,
+      2.25,
+      2.5
+    ],
+    "hea_layers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "eigenstate_variance_tol_Ha2": 1e-08,
+    "spectrum_states_kept": 8
+  },
+  "python": "3.12.3",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-nature": "0.8.0",
+    "pyscf": "2.14.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "git_commit": "4551e23",
+  "runtime_s": 6.3,
+  "rows": 279
+}

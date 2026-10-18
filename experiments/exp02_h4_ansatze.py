@@ -61,7 +61,7 @@ EXP = tracking.Experiment(
     NAME, title="UCCSD vs hardware-efficient ansatz on the H₄ chain",
     description="VQE with UCCSD and HEA (1-6 layers, 5 random starts) on a linear H₄ chain, "
                 "spacing 0.5-2.5 Å, against HF, CCSD and FCI. Research question 1.",
-    config=CONFIG, figures=["fig_exp02_h4.png", "fig_exp02_h4_cost.png"])
+    config=CONFIG, figures=["fig_exp02_h4.png", "fig_exp02_h4_cost.png", "fig_exp02_h4_spin.png"])
 
 
 def _run_id(d, method, layers=None, seed=None):

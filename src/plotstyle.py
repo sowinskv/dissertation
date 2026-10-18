@@ -37,6 +37,7 @@ import textwrap
 from pathlib import Path
 
 import matplotlib as mpl
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 from matplotlib.lines import Line2D
@@ -151,6 +152,14 @@ def color(method):
     return style(method)["color"]
 
 
+def shades(method, n, lightest=0.7):
+    """n steps of one method's color, light to full: a sequential ramp for an ordered variable
+    (e.g. number of layers) that keeps the method's identity."""
+    rgb = mpl.colors.to_rgb(color(method))
+    return [mpl.colors.to_hex([c + (1 - c) * t for c in rgb])
+            for t in np.linspace(lightest, 0, n)] if n > 1 else [color(method)]
+
+
 _SUBS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
 _SUPS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
 
@@ -208,7 +217,7 @@ def _wrap(fig, text, fontsize):
 
 
 def header(fig, title, subtitle=None, key=None):
-    """editorial header: bold title, gray subtitle, horizontal key of methods."""
+    """header: bold title, gray subtitle, horizontal key (method names or Line2D handles)."""
     t, L = theme(), fig._ps
     x = fig.subplotpars.left
     y_in = 0.16
@@ -227,6 +236,9 @@ def header(fig, title, subtitle=None, key=None):
     if key:
         handles = []
         for m in key:
+            if isinstance(m, Line2D):     # a ready-made handle, e.g. shades of one method
+                handles.append(m)
+                continue
             s = style(m)
             handles.append(Line2D([], [], color=s["color"], ls=s["ls"], marker=s["marker"],
                                   markersize=4.5, lw=1.6, label=tex(s["label"]),

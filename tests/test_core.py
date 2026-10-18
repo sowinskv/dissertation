@@ -47,3 +47,26 @@ def test_vqe_uccsd_reaches_fci_for_h2():
     res = run_vqe(circ, qp.matrix(), qp.e_shift, np.zeros(circ.num_parameters))
     e_exact, _, _ = hm.exact_ground_state(qp)
     assert res.energy == pytest.approx(e_exact, abs=1e-9)
+
+
+def test_orbital_sign_convention_makes_hamiltonian_reproducible():
+    """flipping the sign of any molecular orbital must not change the qubit hamiltonian,
+    otherwise saved circuit parameters do not reproduce the trained state."""
+    from qiskit_nature.second_q.drivers import PySCFDriver
+    from qiskit_nature.second_q.mappers import ParityMapper
+
+    def qubit_ham(flip=None):
+        driver = PySCFDriver(atom=hm.h_chain(4, 2.0), basis=hm.BASIS)
+        driver.run_pyscf()
+        mo = driver._calc.mo_coeff.copy()
+        if flip is not None:
+            mo[:, flip] *= -1
+        driver._calc.mo_coeff = hm.fix_orbital_signs(mo)
+        problem = driver.to_problem()
+        return ParityMapper(num_particles=problem.num_particles).map(
+            problem.hamiltonian.second_q_op()).to_matrix()
+
+    ref = qubit_ham()
+    for flip in ([1], [0, 3], [2]):
+        assert np.allclose(qubit_ham(flip), ref, atol=1e-10)
+    assert np.allclose(hm.build(hm.h_chain(4, 2.0)).matrix(), ref, atol=1e-10)
