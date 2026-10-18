@@ -1,225 +1,245 @@
-/* lab notebook: a squared exercise book ("zeszyt w kratkę"), written in pen */
+/* lab notebook: plain early-web pages (Times, blue links, black rules) around one
+   pasted-up notebook sheet written in pen. */
 
-@font-face { font-family: "IM Fell English"; font-weight: 400; font-style: normal; font-display: swap;
-  src: url(fonts/im-fell-english-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "IM Fell English"; font-weight: 400; font-style: italic; font-display: swap;
-  src: url(fonts/im-fell-english-latin-400-italic.woff2) format("woff2"); }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-ext-400-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 500; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-ext-500-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 500; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-500-normal.woff2) format("woff2"); }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 600; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-ext-600-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 600; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-600-normal.woff2) format("woff2"); }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-style: italic; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-ext-400-italic.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Cormorant Garamond"; font-weight: 400; font-style: italic; font-display: swap;
-  src: url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2"); }
-@font-face { font-family: "Caveat"; font-weight: 400; font-display: swap;
-  src: url(fonts/caveat-latin-ext-400-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Caveat"; font-weight: 400; font-display: swap;
-  src: url(fonts/caveat-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Caveat"; font-weight: 600; font-display: swap;
-  src: url(fonts/caveat-latin-ext-600-normal.woff2) format("woff2"); unicode-range: U+0100-024F, U+1E00-1EFF; }
-@font-face { font-family: "Caveat"; font-weight: 600; font-display: swap;
-  src: url(fonts/caveat-latin-600-normal.woff2) format("woff2"); }
+/* Times where the system has it, Tinos (metric-compatible) where it does not */
+@font-face { font-family: "Notebook Serif"; font-weight: 400; font-display: swap;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Times-Roman"), url(fonts/tinos-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Notebook Serif"; font-weight: 400; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Times-Roman"), url(fonts/tinos-latin-ext-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Notebook Serif"; font-weight: 400; font-style: italic; font-display: swap;
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Times-Italic"), url(fonts/tinos-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Notebook Serif"; font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Times-Italic"), url(fonts/tinos-latin-ext-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Notebook Serif"; font-weight: 700; font-display: swap;
+  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Times-Bold"), url(fonts/tinos-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Notebook Serif"; font-weight: 700; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Times-Bold"), url(fonts/tinos-latin-ext-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Just Another Hand"; font-weight: 400; font-display: block;
+  src: url(fonts/just-another-hand-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Just Another Hand"; font-weight: 400; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: url(fonts/just-another-hand-latin-ext-400-normal.woff2) format("woff2"); }
 
 :root {
-  --paper: #f8f9f6;
-  --grid: #dbe4ee;
-  --margin-rule: #e3a3a3;
-  --ink: #2b241e;          /* iron-gall ink: headings and body */
-  --pen: #2846a6;          /* fountain-pen blue: handwritten notes */
-  --pencil: #77746d;       /* pencil: labels, meta */
-  --red-pencil: #b3261e;   /* failures, warnings */
-  --tape: rgba(214, 196, 150, 0.62);
-  --sheet: #fefefc;        /* pasted-in sheets (figures, chart) */
+  --paper: #ffffff;
+  --ink: #000000;           /* ballpoint: all writing and strokes */
+  --pencil: #8f8f8f;        /* things not done yet */
+  --red: #e10600;           /* red pen: live status, failures */
+  --link: #0000ee;
+  --visited: #551a8b;
+  --highlight: #fff200;     /* highlighter on pinned runs */
 
-  --row: 24px;             /* one square of the grid = one line of text */
-  --margin: 104px;
-
-  --f-head: "IM Fell English", "Iowan Old Style", Georgia, serif;
-  --f-body: "Cormorant Garamond", Garamond, Georgia, serif;
-  --f-hand: "Caveat", "Bradley Hand", "Segoe Print", cursive;
+  --f-text: "Notebook Serif", "Times New Roman", Times, serif;
+  --f-hand: "Just Another Hand", "Arial Narrow", sans-serif;
 }
 
 * { box-sizing: border-box; }
-
 html { background: var(--paper); }
 body {
   margin: 0;
+  background: var(--paper);
   color: var(--ink);
-  font: 400 19px/var(--row) var(--f-body);
-  font-variant-numeric: lining-nums;
-  background-color: var(--paper);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: var(--row) var(--row);
+  font: 400 18px/1.35 var(--f-text);
   -webkit-font-smoothing: antialiased;
 }
+.page { min-height: 100vh; padding: 24px 24px 0; }
 
-.page {
+a { color: var(--link); text-underline-offset: 2px; }
+a:visited { color: var(--visited); }
+a[href^="#/"]:visited { color: var(--link); }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.bad { color: var(--red); }
+code { font-size: 0.92em; }
+.error { max-width: 50ch; margin: 120px auto; text-align: center; }
+
+/* ================= the sheet (landing page) ================= */
+
+.sheet {
+  --mx: 0; --my: 0;
   position: relative;
-  max-width: 1120px;
-  min-height: 100vh;
+  width: min(100%, 1280px);
+  aspect-ratio: 1200 / 1000;
   margin: 0 auto;
-  padding: calc(var(--row) * 3) calc(var(--row) * 1.5) calc(var(--row) * 4) calc(var(--margin) + var(--row));
+  container-type: inline-size;
 }
-/* the red double margin rule of the exercise book */
-.page::before {
-  content: "";
-  position: absolute; top: 0; bottom: 0; left: var(--margin);
-  width: 5px;
-  border-left: 1.5px solid var(--margin-rule);
-  border-right: 1px solid var(--margin-rule);
-  pointer-events: none;
-}
+.strokes { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 
-a { color: var(--pen); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 2px solid var(--pen); outline-offset: 3px; border-radius: 2px; }
-
-/* ---------- margin notes: written to the left of the red rule ---------- */
-.entry { position: relative; }
-.margin-note {
+.item {
   position: absolute;
-  left: calc(-1 * var(--margin) - var(--row) + 8px);
-  width: calc(var(--margin) - 16px);
-  text-align: right;
-  font: 400 20px/var(--row) var(--f-hand);
-  color: var(--pen);
+  left: var(--x); top: var(--y); width: var(--w, auto);
+  /* parallax: things lying higher on the sheet follow the pointer more */
+  transform: translate(calc(var(--mx) * var(--d) * 9px), calc(var(--my) * var(--d) * 9px));
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.35s ease;
 }
-.margin-note .muted { color: var(--pencil); }
-.margin-note .bad { color: var(--red-pencil); }
-
-.hand { font-family: var(--f-hand); font-size: 22px; color: var(--pen); }
-.pencil { color: var(--pencil); }
-
-/* ---------- headings ---------- */
-h1, h2, h3 { font-family: var(--f-head); font-weight: 400; margin: 0; }
-.book-title {
-  font-size: 60px; line-height: calc(var(--row) * 3);
-  letter-spacing: -0.5px;
-}
-.book-subtitle { margin: 0 0 calc(var(--row) * 2); }
-
-.exp-title { font-size: 42px; line-height: calc(var(--row) * 2); max-width: 32ch; }
-.section-title {
-  font-style: italic;
-  font-size: 28px;
-  line-height: calc(var(--row) * 2);
-  margin-top: calc(var(--row) * 2);
-}
-
-p { margin: 0 0 var(--row); max-width: 68ch; }
-
-.back { display: inline-block; font-family: var(--f-hand); font-size: 22px; margin-bottom: var(--row); }
-
-/* ---------- index: list of experiments ---------- */
-.toc { list-style: none; margin: 0; padding: 0; counter-reset: exp; }
-.toc > li { position: relative; margin-bottom: calc(var(--row) * 2); counter-increment: exp; }
-.toc h2 { font-size: 30px; line-height: calc(var(--row) * 2); }
-.toc h2::before { content: counter(exp) ".  "; color: var(--pencil); }
-.toc h2 a { color: var(--ink); text-decoration: none; }
-.toc h2 a:hover { text-decoration: underline; text-decoration-color: var(--pen); }
-.toc p { margin: 0; }
-.progress {
-  display: block; width: min(320px, 100%); height: 6px; margin-top: 9px;
-  border: 1px solid var(--pen); border-radius: 3px; overflow: hidden;
-}
-.progress > span { display: block; height: 100%; background: var(--pen); }
-
-.empty { font-family: var(--f-hand); font-size: 24px; color: var(--pen); max-width: 40ch; }
-.empty code { font-family: var(--f-body); font-size: 19px; color: var(--ink); }
-
-/* ---------- setup (key: value, like a list written in the book) ---------- */
-.setup { display: grid; grid-template-columns: max-content 1fr; column-gap: var(--row); margin: 0; }
-.setup dt { color: var(--pencil); font-style: italic; }
-.setup dd { margin: 0; overflow-wrap: anywhere; }
-
-/* ---------- things pasted in: figures and the chart, held by tape ---------- */
-.pasted {
+.item > .inner {
   position: relative;
-  background: var(--sheet);
-  padding: 14px;
-  margin: calc(var(--row) * 1.5) 0 var(--row);
-  box-shadow: 0 1px 0 rgba(43, 36, 30, 0.06), 0 6px 14px -10px rgba(43, 36, 30, 0.35);
+  display: block;
+  transform: rotate(var(--r));
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease;
 }
-.pasted::before, .pasted::after {
-  content: "";
-  position: absolute; top: -13px;
-  width: 92px; height: 26px;
-  background: var(--tape);
-  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 3px, transparent 3px 7px);
-  mix-blend-mode: multiply;
-}
-.pasted::before { left: 18px; transform: rotate(-4deg); }
-.pasted::after { right: 18px; transform: rotate(3deg); }
-.figures { display: grid; gap: calc(var(--row) * 1.5); }
-.figures .pasted:nth-child(odd) { transform: rotate(-0.5deg); }
-.figures .pasted:nth-child(even) { transform: rotate(0.45deg); }
-.figures img { display: block; width: 100%; height: auto; }
-.figures figcaption { margin-top: 6px; }
+a.item { color: inherit; text-decoration: none; }
 
-/* ---------- filters: hand-drawn tick boxes ---------- */
-.filters { display: grid; gap: 4px; margin: var(--row) 0 0; }
-.filter { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 14px; }
-.filter-name { min-width: 7ch; color: var(--pencil); font-style: italic; }
-.tick { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
-.tick input {
-  appearance: none; -webkit-appearance: none; margin: 0;
-  width: 15px; height: 15px;
-  border: 1.5px solid var(--ink); border-radius: 2px 3px 2px 4px;
-  display: grid; place-content: center; cursor: pointer;
-}
-.tick input::after {
-  content: ""; width: 9px; height: 5px;
-  border-left: 2px solid var(--pen); border-bottom: 2px solid var(--pen);
-  transform: rotate(-48deg) translate(1px, -1px) scale(0);
-}
-.tick input:checked::after { transform: rotate(-48deg) translate(1px, -1px) scale(1); }
-.swatch { display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; }
+/* pen */
+path.ink { fill: none; stroke: var(--ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+path.ink.dashed { stroke-dasharray: 4 6; stroke-width: 1.3; }
+.mark path.ink { vector-effect: non-scaling-stroke; stroke-width: 1.8; }
+.dot { fill: var(--ink); }
+.hand-svg { font-family: var(--f-hand); fill: var(--ink); }
 
-.chart-box { height: 420px; }
-.chart-note { margin-top: 4px; }
-
-/* ---------- runs table ---------- */
-.table-wrap { overflow-x: auto; margin-top: var(--row); }
-table { border-collapse: collapse; font-size: 17px; min-width: 100%; font-variant-numeric: lining-nums tabular-nums; }
-th, td { padding: 0 12px 0 0; height: var(--row); text-align: right; white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-th {
-  font-weight: 500; font-style: italic; color: var(--pencil);
-  border-bottom: 1.5px solid var(--ink); cursor: pointer; user-select: none;
+/* handwritten notes */
+.note {
+  font-family: var(--f-hand);
+  font-size: calc(var(--fs) / 12 * 1cqw);
+  line-height: 0.98;
+  white-space: nowrap;
 }
-th[aria-sort="ascending"]::after { content: " ↑"; color: var(--pen); }
-th[aria-sort="descending"]::after { content: " ↓"; color: var(--pen); }
-tbody tr { cursor: pointer; }
-tbody tr:hover td { background: rgba(40, 70, 166, 0.06); }
-tbody tr.pinned td { background: rgba(40, 70, 166, 0.12); }
-td.bad { color: var(--red-pencil); }
+.note small { font-size: 0.8em; }
+.note sub, .note sup { font-size: 0.68em; line-height: 0; }
+.tone-pencil { color: var(--pencil); }
+.tone-pencil path.ink { stroke: var(--pencil); }
+.live { color: var(--red); }
+a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.12em; }
+
+.mark { position: absolute; overflow: visible; pointer-events: none; }
+.mark-strike { left: -2%; top: 12%; width: 104%; height: 66%; }
+.mark-circle { left: -16%; top: -26%; width: 132%; height: 152%; }
+.mark-underline { left: -1%; top: 96%; width: 102%; height: 0.32em; }
+
+/* photos: prints glued flat, black and white until you look at them */
+.photo > .inner {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #ededed;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.16), 0 10px 22px -16px rgba(0, 0, 0, 0.55);
+}
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.06); transition: filter 0.5s ease; }
+.photo.is-figure > .inner { background: #fff; padding: 2.5%; }
+.photo.is-figure img { object-fit: contain; object-position: top; }
+.photo.lit > .inner { transform: rotate(0deg) scale(1.035); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12), 0 22px 40px -22px rgba(0, 0, 0, 0.6); }
+.photo.lit img { filter: none; }
+
+/* sketches */
+.sketch svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sketch-label { display: block; margin-top: 0.3em; text-align: center; font-family: var(--f-hand); font-size: calc(20 / 12 * 1cqw); }
+
+/* empty slot for the next experiment */
+.frame { height: var(--h); }
+.frame > .inner {
+  height: 100%;
+  display: grid; place-items: center; text-align: center;
+  border: 1.5px dashed var(--pencil);
+  font-family: var(--f-hand); font-size: calc(var(--fs) / 12 * 1cqw); line-height: 1;
+}
+
+/* the plan: a real sequence, so it is numbered */
+.plan-title { position: relative; display: inline-block; font-size: 1.2em; }
+.plan ol { margin: 0.35em 0 0; padding: 0; list-style: none; counter-reset: step; }
+.plan li { counter-increment: step; margin: 0.12em 0; transition: opacity 0.35s ease; }
+.plan li::before { content: counter(step) ". "; }
+.plan li:not(.done):not(.running) { color: var(--pencil); }
+.plan .tick { display: none; width: 0.9em; height: 0.75em; margin-left: 0.3em; overflow: visible; vertical-align: -0.05em; }
+.plan li.done .tick { display: inline-block; }
+.plan li.running::after { content: " (RUNNING)"; color: var(--red); }
+
+/* hovering one experiment: its photo, notes and arrows stay, the rest of the page steps back */
+.sheet.focus .item:not(.lit):not(.plan) { opacity: 0.18; }
+.sheet.focus .plan li[data-exp]:not(.lit), .sheet.focus .plan li:not([data-exp]) { opacity: 0.3; }
+.arrow path.redraw, .sketch path.redraw { stroke-dasharray: var(--len); animation: draw 0.55s ease-out; }
+
+.sheet-foot { margin: 8px auto 32px; text-align: center; font-size: 16px; }
+
+/* one entrance: prints land, then the writing appears, then the pen strokes */
+.sheet.enter .photo > .inner, .sheet.enter .frame > .inner {
+  animation: land 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation-delay: calc(var(--i) * 55ms);
+}
+.sheet.enter .note > .inner, .sheet.enter .sketch-label {
+  animation: write 0.75s cubic-bezier(0.4, 0.1, 0.4, 1) backwards;
+  animation-delay: calc(250ms + var(--i) * 55ms);
+}
+.sheet.enter .arrow path.ink, .sheet.enter .sketch path.ink {
+  stroke-dasharray: var(--len);
+  animation: draw 0.8s ease-out backwards;
+  animation-delay: calc(700ms + var(--i) * 55ms);
+}
+@keyframes land { from { opacity: 0; transform: translateY(-14px) rotate(calc(var(--r) * 2.5 + 3deg)) scale(1.06); } }
+@keyframes write { from { clip-path: inset(-60% 100% -60% -20%); } to { clip-path: inset(-60% -20% -60% -20%); } }
+@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+
+/* phones: the sheet becomes a column you scroll through, still taped in by hand */
+@media (max-width: 760px) {
+  .page { padding: 16px 16px 0; }
+  .sheet { aspect-ratio: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; container-type: normal; overflow-x: clip; }
+  .strokes { display: none; }
+  .item { position: static; width: auto; transform: none !important; }
+  .note { font-size: calc(var(--fs) * 0.82px); white-space: normal; }
+  .item > .inner { display: inline-block; }
+  .photo { align-self: stretch; margin: 10px 4px 0; }
+  .photo > .inner { display: block; }
+  .sketch { width: min(calc(var(--sw) * 0.85px), 70%); align-self: center; }
+  .sketch > .inner { display: block; }
+  .sketch-label { font-size: 18px; }
+  .frame { height: 150px; width: 80%; align-self: center; }
+  .frame > .inner { display: grid; font-size: 24px; }
+}
+
+/* ================= experiment pages ================= */
+
+.top { text-align: center; }
+.exp { position: relative; max-width: 1000px; margin: 0 auto; text-align: center; }
+.exp h1 { max-width: 38ch; margin: 28px auto 6px; font-size: 32px; font-weight: 400; line-height: 1.12; }
+.exp h2 { margin: 52px 0 6px; font-size: 22px; font-weight: 700; }
+.exp p { margin: 4px auto; }
+.meta, .links { font-size: 17px; }
+.desc, .setup { max-width: 64ch; }
+.desc { margin-top: 20px !important; margin-bottom: 14px !important; }
+.setup { font-size: 16px; line-height: 1.45; }
+.hint { max-width: 64ch; font-size: 15px; }
+.exp sub { font-size: 0.7em; line-height: 0; }
+
+.stamp {
+  position: absolute; top: 4px; right: 0; margin: 0 !important;
+  font-family: var(--f-hand); font-size: 34px; line-height: 0.95; color: var(--red);
+  transform: rotate(-7deg);
+}
+
+figure { max-width: 900px; margin: 22px auto 30px; }
+figure img { display: block; width: 100%; height: auto; }
+figcaption { margin-top: 6px; font-size: 15px; }
+
+.filters { display: grid; gap: 4px; margin: 10px auto 0; font-size: 16px; }
+.filter b { margin-right: 6px; }
+.filter label { display: inline-block; margin: 0 7px; white-space: nowrap; cursor: pointer; }
+.filter input { margin: 0 4px 0 0; vertical-align: -1px; accent-color: var(--link); }
+.swatch { display: inline-block; width: 16px; height: 3px; margin-right: 5px; vertical-align: middle; }
+
+.chart-box { height: 440px; max-width: 1000px; margin: 14px auto 6px; padding: 10px 10px 4px; border: 1px solid var(--ink); }
+
+.table-wrap { width: calc(100vw - 48px); max-width: 1400px; margin: 10px 0 0 50%; transform: translateX(-50%); overflow-x: auto; }
+table { margin: 0 auto; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+th, td { padding: 2px 7px; border: 1px solid var(--ink); text-align: right; white-space: nowrap; }
+th button { all: unset; cursor: pointer; color: var(--link); text-decoration: underline; font-weight: 700; }
+th button:focus-visible { outline: 2px solid var(--link); }
+th[aria-sort="ascending"] button::after { content: " ▲"; text-decoration: none; display: inline-block; }
+th[aria-sort="descending"] button::after { content: " ▼"; text-decoration: none; display: inline-block; }
 td.method { text-align: left; }
-.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+td.bad { color: var(--red); }
+td.running { color: var(--red); font-style: italic; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: #f1f1f1; }
+tbody tr.pinned td { background: var(--highlight); }
+tr.failed td { text-decoration: line-through; }
 
-.status-running { color: var(--pen); }
+.foot { padding: 64px 16px 48px; text-align: center; font-size: 16px; }
+.foot p { margin: 4px 0; }
 
 @media (max-width: 760px) {
-  :root { --margin: 0px; }
-  .page { padding: calc(var(--row) * 2) 16px calc(var(--row) * 3); }
-  .page::before { display: none; }
-  .margin-note { position: static; width: auto; text-align: left; margin-bottom: 8px; }
-  .book-title { font-size: 44px; line-height: calc(var(--row) * 2); }
-  .exp-title { font-size: 32px; line-height: calc(var(--row) * 1.5); }
-  .chart-box { height: 320px; }
-  .figures .pasted { transform: none !important; }
+  .exp h1 { font-size: 26px; margin-top: 56px; }
+  .stamp { font-size: 28px; top: 28px; }
+  .chart-box { height: 320px; padding: 6px; }
+  .table-wrap { width: calc(100vw - 32px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .item { transform: none !important; }
 }

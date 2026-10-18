@@ -11,7 +11,8 @@ api:
   GET /api/experiments/<name>               experiment metadata + all runs (no histories)
   GET /api/experiments/<name>/history?ids=a,b,c   training histories of the listed runs
   GET /results/<file>                       figures and other files from results/
-  everything else is served from notebook/
+  everything else is served from notebook/ (the landing-page collage is notebook/collage.json,
+  experiment photos go to notebook/photos/<experiment>.jpg)
 """
 
 import argparse
@@ -56,6 +57,12 @@ def _counts(runs):
     return c
 
 
+def _extras(name):
+    """links the page shows next to an experiment: its CSV in results/, if there is one."""
+    csv = RESULTS / f"{name}_results.csv"
+    return {"csv": csv.name if csv.exists() else None}
+
+
 def list_experiments():
     items = []
     for folder in sorted(p for p in RUNS.glob("*") if p.is_dir()):
@@ -64,7 +71,7 @@ def list_experiments():
             continue
         runs = _runs(folder)
         meta.pop("config", None)
-        items.append({**meta, "counts": _counts(runs), "n_logged": len(runs)})
+        items.append({**meta, **_extras(meta["name"]), "counts": _counts(runs), "n_logged": len(runs)})
     return items
 
 
@@ -76,7 +83,7 @@ def get_experiment(name):
     runs = _runs(folder)
     for r in runs:
         r.get("metrics", {}).pop("theta", None)   # parameters are large and not shown
-    return {**meta, "runs": runs, "counts": _counts(runs)}
+    return {**meta, **_extras(name), "runs": runs, "counts": _counts(runs)}
 
 
 def get_history(name, ids):

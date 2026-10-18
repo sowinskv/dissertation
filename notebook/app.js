@@ -21,11 +21,13 @@ const METRIC_ORDER = ["dE_mHa", "converged", "iterations", "evaluations", "durat
 
 const app = document.getElementById("app");
 const state = { name: null, exp: null, filters: null, pinned: new Set(), sort: null,
-  chart: null, timer: null, histories: {}, figuresShown: false };
+  chart: null, timer: null, histories: {} };
 
 /* ---------- helpers ---------- */
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// H2, H4, LiH ... with subscript digits in titles
+const chem = (s) => esc(s).replace(/\b(H|Li|Be|N|O|C)(\d)\b/g, "$1<sub>$2</sub>");
 
 async function getJSON(url) {
   const r = await fetch(url, { cache: "no-store" });
@@ -36,11 +38,11 @@ async function getJSON(url) {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function fmtDate(iso) {
   if (!iso) return "";
-  const [d, t] = iso.split("T");
-  const [, m, day] = d.split("-");
-  return `${Number(day)} ${MONTHS[Number(m) - 1]}`;
+  const [y, m, d] = iso.split("T")[0].split("-");
+  return `${Number(d)} ${MONTHS[Number(m) - 1]} ${y}`;
 }
 const fmtTime = (iso) => (iso ? iso.split("T")[1].slice(0, 5) : "");
+const expNumber = (name) => (name.match(/^exp(\d+)/)?.[1] || "").padStart(4, "0");
 
 const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
 const pow10 = (e) => (e === 0 ? "1" : e === 1 ? "10" : "10" + String(e).split("").map((c) => SUP[c]).join(""));
@@ -78,43 +80,30 @@ document.addEventListener("DOMContentLoaded", route);
 
 function route() {
   stopPolling();
+  document.body.classList.toggle("on-sheet", !location.hash.startsWith("#/exp/"));
   const m = location.hash.match(/^#\/exp\/(.+)$/);
   if (m) showExperiment(decodeURIComponent(m[1]));
-  else showIndex();
+  else { Collage.reset(); state.name = null; showIndex(); }
 }
 
-/* ---------- index ---------- */
+/* ---------- landing page: the collage ---------- */
 async function showIndex(isPoll = false) {
   let list;
   try { list = await getJSON("/api/experiments"); }
   catch (e) { return renderError(e); }
   document.title = "Lab notebook";
-  const entries = list.map((x) => {
-    const total = x.n_runs || x.n_logged;
-    const done = x.counts.done || 0;
-    const running = x.status === "running";
-    const status = running
-      ? `<span>running</span><br><span class="muted">${done} of ${total}</span>`
-      : `<span class="muted">${done} runs</span>`;
-    return `<li class="entry">
-      <div class="margin-note">${esc(fmtDate(x.started_at))}<br>${status}</div>
-      <h2><a href="#/exp/${encodeURIComponent(x.name)}">${esc(x.title)}</a></h2>
-      <p>${esc(x.description)}</p>
-      ${running ? `<span class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><span style="width:${(100 * done / total).toFixed(1)}%"></span></span>` : ""}
-    </li>`;
-  }).join("");
-  app.innerHTML = `
-    <h1 class="book-title">Lab notebook</h1>
-    <p class="book-subtitle hand">Quantum neural networks for molecular simulation</p>
-    ${list.length ? `<ol class="toc">${entries}</ol>`
-      : `<p class="empty">Nothing logged yet. Run an experiment script from the repo root, for example
-         <code>python experiments/exp01_h2_curve.py</code>, and it will appear here.</p>`}`;
+  if (isPoll) Collage.update(list);
+  else {
+    if (state.chart) { state.chart.destroy(); state.chart = null; }
+    window.scrollTo(0, 0);
+    await Collage.show(app, list);
+  }
   if (list.some((x) => x.status === "running")) poll(() => showIndex(true));
 }
 
 function renderError(e) {
-  app.innerHTML = `<p class="empty">Could not reach the notebook server (${esc(e.message)}).
-    Start it from the repo root with <code>python tools/notebook.py</code> and reload this page.</p>`;
+  app.innerHTML = `<p class="error">The notebook server is not answering (${esc(e.message)}).
+    Start it from the repo root with <code>uv run python tools/notebook.py</code> and reload this page.</p>`;
 }
 
 /* ---------- experiment page ---------- */
@@ -132,51 +121,76 @@ async function showExperiment(name) {
   state.exp = exp;
   document.title = `${exp.title} – Lab notebook`;
 
-  if (fresh || !document.getElementById("runs")) renderExperimentShell(exp);
+  if (fresh || !document.getElementById("runs")) { renderShell(exp); window.scrollTo(0, 0); }
   syncFilters(exp);
-  renderMargin(exp);
+  renderMeta(exp);
   renderTable();
   await renderChart();
+  countPixels();
 
   if (exp.status === "running") poll(() => showExperiment(name));
 }
 
-function renderExperimentShell(exp) {
+function renderShell(exp) {
   const setup = Object.entries(exp.config || {}).map(([k, v]) =>
-    `<dt>${esc(k.replaceAll("_", " "))}</dt><dd>${esc(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v)}</dd>`).join("");
-  const figures = (exp.figures || []).map((f) =>
-    `<figure class="pasted"><a href="/results/${encodeURIComponent(f)}" target="_blank" rel="noopener">
-      <img src="/results/${encodeURIComponent(f)}" alt="Figure ${esc(f)}" loading="lazy"></a>
-      <figcaption class="pencil">results/${esc(f)}</figcaption></figure>`).join("");
+    `<b>${esc(k.replaceAll("_", " "))}:</b> ${esc(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v)}`).join("<br>");
+  const figures = (exp.figures || []).map((f) => `
+    <figure>
+      <a href="/results/${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="/results/${encodeURIComponent(f)}" alt="Figure from results/${esc(f)}" loading="lazy"></a>
+      <figcaption>results/${esc(f)} [<a href="/results/${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</figcaption>
+    </figure>`).join("");
+  const links = [
+    figures && `[<a href="#figures" data-jump>figures</a>]`,
+    `[<a href="#curves" data-jump>training curves</a>]`,
+    `[<a href="#runs-title" data-jump>runs</a>]`,
+    exp.csv && `[<a href="/results/${encodeURIComponent(exp.csv)}" download>download CSV</a>]`,
+  ].filter(Boolean).join(" ");
+
   app.innerHTML = `
-    <a class="back" href="#/">All experiments</a>
-    <section class="entry">
-      <div class="margin-note" id="margin"></div>
-      <h1 class="exp-title">${esc(exp.title)}</h1>
-      <p>${esc(exp.description)}</p>
-    </section>
-    ${setup ? `<h2 class="section-title">Setup</h2><dl class="setup">${setup}</dl>` : ""}
-    ${figures ? `<h2 class="section-title">Figures</h2><div class="figures">${figures}</div>` : ""}
-    <h2 class="section-title">Training curves</h2>
-    <div class="filters" id="filters"></div>
-    <div class="pasted"><div class="chart-box"><canvas id="chart" aria-label="Training curves"></canvas></div></div>
-    <p class="chart-note pencil" id="chart-note"></p>
-    <h2 class="section-title">Runs</h2>
-    <p class="pencil" id="runs-note"></p>
-    <div class="table-wrap"><table id="runs"></table></div>`;
+    <nav class="top">[<a href="#/">back to the notebook</a>]</nav>
+    <article class="exp">
+      <p class="hand stamp" id="stamp" hidden></p>
+      <h1><b>Exp. ${esc(expNumber(exp.name).slice(2))}:</b> ${chem(exp.title)}</h1>
+      <p class="meta" id="meta"></p>
+      <p class="links">${links}</p>
+      <p class="desc">${chem(exp.description)}</p>
+      ${setup ? `<p class="setup">${setup}</p>` : ""}
+      ${figures ? `<h2 id="figures">Figures</h2>${figures}` : ""}
+      <h2 id="curves">Training curves</h2>
+      <p class="hint">Error against the exact (FCI) energy at every optimizer iteration. Tick what to show.</p>
+      <div class="filters" id="filters"></div>
+      <div class="chart-box"><canvas id="chart" aria-label="Training curves"></canvas></div>
+      <p class="hint" id="chart-note"></p>
+      <h2 id="runs-title">Runs</h2>
+      <p class="hint" id="runs-note"></p>
+      <div class="table-wrap"><table id="runs"></table></div>
+    </article>
+    <footer class="foot">
+      <p>You just scrolled through <span id="px">0</span> pixels.</p>
+      <p>[<a href="#/">back to the notebook</a>]</p>
+    </footer>`;
+  // in-page links must not touch the router's hash
+  app.querySelectorAll("[data-jump]").forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById(a.getAttribute("href").slice(1))?.scrollIntoView({ behavior: "smooth" });
+  }));
 }
 
-function renderMargin(exp) {
+function renderMeta(exp) {
   const c = exp.counts, total = exp.n_runs || exp.runs.length;
-  const lines = [fmtDate(exp.started_at)];
-  if (exp.status === "running") {
-    lines.push("running", `<span class="muted">${c.done || 0} of ${total}</span>`, `<span class="muted">live</span>`);
-  } else {
-    lines.push(`<span class="muted">${c.done || 0} runs</span>`);
-    if (exp.finished_at) lines.push(`<span class="muted">done ${fmtTime(exp.finished_at)}</span>`);
-  }
-  if (c.failed) lines.push(`<span class="bad">${c.failed} failed</span>`);
-  document.getElementById("margin").innerHTML = lines.join("<br>");
+  const parts = [fmtDate(exp.started_at), `No. ${expNumber(exp.name)}`];
+  if (exp.status === "running") parts.push(`running, ${c.done || 0} of ${total} runs done`);
+  else parts.push(`${c.done || 0} runs${exp.finished_at ? `, finished ${fmtTime(exp.finished_at)}` : ""}`);
+  if (c.failed) parts.push(`<span class="bad">${c.failed} failed</span>`);
+  document.getElementById("meta").innerHTML = parts.join(", ");
+  const stamp = document.getElementById("stamp");
+  stamp.hidden = exp.status !== "running";
+  stamp.innerHTML = `STILL RUNNING!<br>${c.done || 0} OF ${total}`;
+}
+
+function countPixels() {
+  const px = document.getElementById("px");
+  if (px) px.textContent = document.documentElement.scrollHeight.toLocaleString("en-US");
 }
 
 /* ---------- filters ---------- */
@@ -217,10 +231,10 @@ function renderFilters() {
   const el = document.getElementById("filters");
   el.innerHTML = Object.entries(state.filters).filter(([, f]) => f.values.length > 1).map(([key, f]) => `
     <div class="filter" role="group" aria-label="${esc(LABELS[key] || key)}">
-      <span class="filter-name">${esc(LABELS[key] || key)}</span>
-      ${f.values.map((v) => `<label class="tick"><input type="checkbox" data-key="${esc(key)}"
-        data-value="${esc(JSON.stringify(v))}" ${f.selected.has(v) ? "checked" : ""}>
-        ${key === "method" ? `<span class="swatch" style="background:${colorFor(v)}"></span>` : ""}${esc(fmtNum(v))}</label>`).join("")}
+      <b>${esc(LABELS[key] || key)}:</b>
+      ${f.values.map((v) => `<label><input type="checkbox" data-key="${esc(key)}"
+        data-value="${esc(JSON.stringify(v))}" ${f.selected.has(v) ? "checked" : ""}>${key === "method"
+        ? `<span class="swatch" style="background:${colorFor(v)}"></span>` : ""}${esc(fmtNum(v))}</label>`).join("")}
     </div>`).join("");
   el.querySelectorAll("input").forEach((inp) => inp.addEventListener("change", () => {
     const f = state.filters[inp.dataset.key], v = JSON.parse(inp.dataset.value);
@@ -261,32 +275,29 @@ function renderTable() {
     });
   }
   document.getElementById("runs-note").textContent =
-    `${rows.length} of ${exp.runs.length} runs match the ticks above. Click a run to pin its curve.`;
+    `${rows.length} of ${exp.runs.length} runs match the ticks above. Click a row to highlight its curve; click a column name to sort.`;
   const head = cols.map((c) => {
     const sort = state.sort?.key === c.key ? (state.sort.dir > 0 ? "ascending" : "descending") : "none";
-    return `<th scope="col" data-key="${esc(c.key)}" aria-sort="${sort}" tabindex="0">${esc(LABELS[c.key] || c.key)}</th>`;
+    return `<th scope="col" aria-sort="${sort}"><button type="button" data-key="${esc(c.key)}">${esc(LABELS[c.key] || c.key)}</button></th>`;
   }).join("");
   const body = rows.map((r) => {
     const tds = cols.map((c) => {
       const v = cell(r, c);
-      if (c.key === "method") return `<td class="method"><span class="dot" style="background:${colorFor(v)}"></span>${esc(v)}</td>`;
-      if (c.key === "dE_mHa" && r.status === "running") return `<td class="status-running">running…</td>`;
+      if (c.key === "method") return `<td class="method"><span class="swatch" style="background:${colorFor(v)}"></span>${esc(v)}</td>`;
+      if (c.key === "dE_mHa" && r.status === "running") return `<td class="running">running…</td>`;
       const bad = (c.key === "converged" && v === false) || (c.key === "dE_mHa" && typeof v === "number" && Math.abs(v) > CHEM_ACC_MHA);
       return `<td class="${bad ? "bad" : ""}">${esc(fmtNum(v))}</td>`;
     }).join("");
-    return `<tr data-id="${esc(r.run_id)}" class="${state.pinned.has(r.run_id) ? "pinned" : ""}" title="${esc(r.run_id)}" tabindex="0">${tds}</tr>`;
+    const cls = [state.pinned.has(r.run_id) && "pinned", r.status === "failed" && "failed"].filter(Boolean).join(" ");
+    return `<tr data-id="${esc(r.run_id)}" class="${cls}" title="${esc(r.run_id)}" tabindex="0">${tds}</tr>`;
   }).join("");
   table.innerHTML = `<thead><tr>${head}</tr></thead><tbody>${body}</tbody>`;
 
-  table.querySelectorAll("th").forEach((th) => {
-    const sortBy = () => {
-      const key = th.dataset.key;
-      state.sort = state.sort?.key === key ? { key, dir: -state.sort.dir } : { key, dir: 1 };
-      renderTable();
-    };
-    th.addEventListener("click", sortBy);
-    th.addEventListener("keydown", (e) => { if (e.key === "Enter") sortBy(); });
-  });
+  table.querySelectorAll("th button").forEach((b) => b.addEventListener("click", () => {
+    const key = b.dataset.key;
+    state.sort = state.sort?.key === key ? { key, dir: -state.sort.dir } : { key, dir: 1 };
+    renderTable();
+  }));
   table.querySelectorAll("tbody tr").forEach((tr) => {
     const toggle = () => {
       const id = tr.dataset.id;
@@ -307,10 +318,10 @@ const threshold = {
     if (!y || CHEM_ACC_MHA < y.min || CHEM_ACC_MHA > y.max) return;
     const { ctx, chartArea: a } = chart, py = y.getPixelForValue(CHEM_ACC_MHA);
     ctx.save();
-    ctx.strokeStyle = "#2b241e"; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
+    ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
     ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
-    ctx.setLineDash([]); ctx.fillStyle = "#2846a6"; ctx.font = "20px Caveat, cursive";
-    ctx.fillText("chemical accuracy", a.left + 8, py - 6);
+    ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = '24px "Just Another Hand", cursive';
+    ctx.fillText("CHEMICAL ACCURACY", a.left + 8, py - 6);
     ctx.restore();
   },
 };
@@ -342,15 +353,9 @@ function curve(run) {
   }));
 }
 
-function logTicks(value) {
-  const e = Math.log10(value);
-  return Math.abs(e - Math.round(e)) < 1e-9 ? pow10(Math.round(e)) : "";
-}
-
-function decadeGrid(ctx) {
-  const e = Math.log10(ctx.tick?.value ?? 0);
-  return Math.abs(e - Math.round(e)) < 1e-9 ? "rgba(180,196,214,0.9)" : "transparent";
-}
+const isDecade = (v) => { const e = Math.log10(v); return Math.abs(e - Math.round(e)) < 1e-9; };
+const logTicks = (v) => (isDecade(v) ? pow10(Math.round(Math.log10(v))) : "");
+const decadeGrid = (ctx) => (isDecade(ctx.tick?.value ?? 0) ? "#e3e3e3" : "transparent");
 
 async function renderChart() {
   const { shown, total } = plottedRuns();
@@ -367,7 +372,7 @@ async function renderChart() {
   const note = document.getElementById("chart-note");
   note.textContent = !shown.length ? "No training history for the ticked runs (classical methods are not trained)."
     : total > shown.length ? `Showing ${shown.length} of ${total} matching runs; untick some values to see the rest.`
-    : `${shown.length} runs. Error is measured against the exact (FCI) energy.`;
+    : `${shown.length} run${shown.length > 1 ? "s" : ""} shown.`;
 
   if (state.chart) {
     state.chart.data.datasets = datasets;
@@ -375,9 +380,9 @@ async function renderChart() {
     return;
   }
   await document.fonts.ready;
-  Chart.defaults.font.family = '"Cormorant Garamond", Georgia, serif';
+  Chart.defaults.font.family = '"Notebook Serif", "Times New Roman", Times, serif';
   Chart.defaults.font.size = 15;
-  Chart.defaults.color = "#77746d";
+  Chart.defaults.color = "#000";
   state.chart = new Chart(document.getElementById("chart"), {
     type: "line",
     data: { datasets },
@@ -387,17 +392,16 @@ async function renderChart() {
       interaction: { mode: "nearest", intersect: false },
       scales: {
         x: { type: "logarithmic", title: { display: true, text: "optimizer iteration + 1" },
-             ticks: { callback: logTicks, autoSkip: false }, grid: { color: decadeGrid } },
+             ticks: { callback: logTicks, autoSkip: false, maxRotation: 0 }, grid: { color: decadeGrid }, border: { color: "#000" } },
         y: { type: "logarithmic", title: { display: true, text: "error (mHa)" },
-             ticks: { callback: logTicks, autoSkip: false }, grid: { color: decadeGrid } },
+             ticks: { callback: logTicks, autoSkip: false }, grid: { color: decadeGrid }, border: { color: "#000" } },
       },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: "#fefefc", borderColor: "#2b241e", borderWidth: 1,
-          titleColor: "#2b241e", bodyColor: "#2b241e", padding: 10,
-          titleFont: { family: '"Cormorant Garamond", serif', size: 16, weight: "600" },
-          bodyFont: { family: '"Cormorant Garamond", serif', size: 15 },
+          backgroundColor: "#fff", borderColor: "#000", borderWidth: 1, cornerRadius: 0,
+          titleColor: "#000", bodyColor: "#000", padding: 8,
+          titleFont: { weight: "700" },
           callbacks: {
             title: (items) => items[0]?.dataset.label ?? "",
             label: (it) => `iteration ${it.parsed.x - 1}: ${fmtNum(it.parsed.y)} mHa`,
