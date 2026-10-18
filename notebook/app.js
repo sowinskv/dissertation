@@ -1,11 +1,11 @@
 /* lab notebook UI: reads the experiment logs served by tools/notebook.py */
 "use strict";
 
-const COLORS = {           // same identity colors as src/plotstyle.py METHODS
-  UCCSD: "#2a78d6", HEA: "#eb6834", CCSD: "#1baf7a", HF: "#8a867d", FCI: "#141414",
-  "QNN-cond": "#eda100", MLP: "#e87ba4", GP: "#008300",
+const COLORS = {           // same pens as src/plotstyle.py METHODS
+  UCCSD: "#1f4fd1", HEA: "#e0482a", CCSD: "#0f9a7a", HF: "#8a8a8a", FCI: "#000000",
+  "QNN-cond": "#ad7400", MLP: "#c4398c", GP: "#5a5fd6",
 };
-const FALLBACK = ["#6250d6", "#e34948", "#2a78d6", "#eb6834"];
+const FALLBACK = ["#1f4fd1", "#e0482a", "#0f9a7a", "#ad7400"];
 const POLL_MS = 3000;
 const MAX_CURVES = 60;
 const CHEM_ACC_MHA = 1.6;

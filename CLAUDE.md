@@ -43,9 +43,9 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Figures
 
-- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
+- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF), matching the lab notebook: black ink and axis lines, pencil-gray notes, sentence case, bundled Arimo font (`assets/fonts`, Helvetica metrics, same PDF on every machine); sub/superscripts go through mathtext automatically (`ps.tex`).
 - Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
-- Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
+- Each method has a fixed color/marker in `ps.METHODS` (FCI = black ink, HF = pencil gray dashed, studied models = pen colors: UCCSD blue, HEA red-orange, CCSD teal, QNN-cond amber, MLP magenta, GP violet-blue; CVD-validated per research-question group). Add new methods there, never pick colors ad hoc; keep `COLORS` in `notebook/app.js` in sync.
 - Minimal text, in English: a short descriptive title in research style (what is plotted, for which system; no marketing phrasing, no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
 - Decimal point; units as the panel subtitle (e.g. "mHa, log scale").
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.

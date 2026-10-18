@@ -132,7 +132,7 @@ def fig_cost(rows, layers):
         ps.panel_title(ax, title, "log scale")
     ax1.set_ylabel("Worst error on the curve (mHa)")
 
-    ps.header(fig, "VQE accuracy vs circuit size and training cost, H₄ chain", key=["UCCSD", "HEA"])
+    ps.header(fig, "VQE accuracy vs circuit size and training cost, H₄\u00a0chain", key=["UCCSD", "HEA"])
     ps.footer(fig, f"{BASE_NOTE} HEA: median of 5 random starts; numbers = layers.")
     ps.save(fig, "results/fig_exp02_h4_cost")
 
