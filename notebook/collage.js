@@ -4,10 +4,10 @@
 const Collage = (() => {
   const SHEET_W = 1200, SHEET_H = 1000;
   const SVGNS = "http://www.w3.org/2000/svg";
-  const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   /* ---------- pen strokes ---------- */
-  // seeded random numbers: the "handwriting" wobble is the same on every load
+  // seeded random numbers: the pen wobble is the same on every load
   function rng(seed) {
     let s = (seed * 2654435761) >>> 0 || 1;
     return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296);
@@ -95,8 +95,8 @@ const Collage = (() => {
       ink(g, `M${ox - 5} ${top + 8}L${ox} ${top}L${ox + 5} ${top + 8}`);
       ink(g, line([ox, oy], [right, oy], rand, 1));
       ink(g, `M${right - 8} ${oy - 5}L${right} ${oy}L${right - 8} ${oy + 5}`);
-      label(g, ox - 16, top + 14, "E", 22);
-      label(g, right - 4, oy + 22, "R", 22, "end");
+      label(g, ox - 16, top + 14, "E", 15);
+      label(g, right - 4, oy + 22, "R", 15, "end");
       const zero = top + 52, depth = 74, re = 0.3, a = 3.3, pts = [];
       for (let i = 0; i <= 26; i++) {
         const x = 0.05 + i / 26 * 0.95, e = (1 - Math.exp(-a * (x - re))) ** 2 - 1;
@@ -105,10 +105,10 @@ const Collage = (() => {
       }
       ink(g, smooth(pts));
       el("path", { d: `M${ox + 52} ${zero}L${right - 6} ${zero}`, class: "ink dashed" }, g);
-      label(g, right - 6, zero - 7, "H + H", 17, "end");
+      label(g, right - 6, zero - 7, "H + H", 12, "end");
       const minX = ox + re * (right - ox - 10);
       el("circle", { cx: minX, cy: zero + depth, r: 3.2, class: "dot" }, g);
-      label(g, minX + 6, zero + depth + 19, "R eq", 16);
+      label(g, minX + 6, zero + depth + 19, "R eq", 12);
     },
     // H4 chain: four atoms, spacing d
     chain(g, w, h, rand) {
@@ -116,13 +116,13 @@ const Collage = (() => {
       for (let i = 0; i < 4; i++) {
         const cx = 50 + r + i * gap;
         ink(g, loop(cx, cy, r, r, rand, 1.05, 18));
-        label(g, cx, cy + 6, "H", 17, "middle");
+        label(g, cx, cy + 4.5, "H", 12, "middle");
       }
       const y = cy + r + 14, x1 = 50 + r, x2 = x1 + gap;
       ink(g, line([x1, y], [x2, y], rand, 0.8));
       ink(g, `M${x1} ${y - 5}L${x1} ${y + 5}M${x2} ${y - 5}L${x2} ${y + 5}`);
-      label(g, (x1 + x2) / 2, y + 19, "d", 20, "middle");
-      label(g, 0, cy + 7, "H₄", 22);
+      label(g, (x1 + x2) / 2, y + 19, "d", 14, "middle");
+      label(g, 0, cy + 7, "H₄", 15);
     },
     // one hardware-efficient layer: rotations on every qubit, then a ladder of CNOTs
     circuit(g, w, h, rand) {
@@ -148,10 +148,10 @@ const Collage = (() => {
     return `${Number(d)} ${MONTHS[Number(m) - 1]}`;
   }
   function runsText(x) {
-    if (!x) return "NOT RUN YET";
+    if (!x) return "not run yet";
     const done = x.counts.done || 0, total = x.n_runs || x.n_logged;
-    if (x.status === "running") return `<span class="live">RUNNING, ${done} OF ${total}</span>`;
-    return `${done} RUNS`;
+    if (x.status === "running") return `<span class="live">running, ${done} of ${total}</span>`;
+    return `${done} runs`;
   }
   const fill = (tpl, x) => tpl.replace("{date}", x ? fmtDate(x.started_at) : "").replace("{runs}", runsText(x));
 
@@ -191,7 +191,7 @@ const Collage = (() => {
 
   function text(it, x, i, live) {
     const node = document.createElement(it.exp && x && /“/.test(it.html) ? "a" : "div");
-    node.className = `item note${it.tone ? ` tone-${it.tone}` : ""}`;
+    node.className = `item note${it.tone ? ` tone-${it.tone}` : ""}${it.bold ? " bold" : ""}`;
     if (node.tagName === "A") node.href = `#/exp/${encodeURIComponent(it.exp)}`;
     const inner = document.createElement("span");
     inner.className = "inner";
@@ -258,7 +258,7 @@ const Collage = (() => {
     const node = document.createElement("div");
     node.className = "item frame tone-pencil";
     node.style.setProperty("--h", `${(it.h / SHEET_H) * 100}%`);
-    node.style.setProperty("--fs", 26);
+    node.style.setProperty("--fs", it.size || 18);
     node.innerHTML = `<span class="inner"><span class="words">${it.html}</span></span>`;
     return node;
   }

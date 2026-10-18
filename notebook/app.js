@@ -149,7 +149,7 @@ function renderShell(exp) {
   app.innerHTML = `
     <nav class="top">[<a href="#/">back to the notebook</a>]</nav>
     <article class="exp">
-      <p class="hand stamp" id="stamp" hidden></p>
+      <p class="stamp" id="stamp" hidden></p>
       <h1><b>Exp. ${esc(expNumber(exp.name).slice(2))}:</b> ${chem(exp.title)}</h1>
       <p class="meta" id="meta"></p>
       <p class="links">${links}</p>
@@ -185,7 +185,7 @@ function renderMeta(exp) {
   document.getElementById("meta").innerHTML = parts.join(", ");
   const stamp = document.getElementById("stamp");
   stamp.hidden = exp.status !== "running";
-  stamp.innerHTML = `STILL RUNNING!<br>${c.done || 0} OF ${total}`;
+  stamp.innerHTML = `Still running<br>${c.done || 0} of ${total}`;
 }
 
 function countPixels() {
@@ -320,8 +320,8 @@ const threshold = {
     ctx.save();
     ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
     ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
-    ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = '24px "Just Another Hand", cursive';
-    ctx.fillText("CHEMICAL ACCURACY", a.left + 8, py - 6);
+    ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = '12px "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif';
+    ctx.fillText("chemical accuracy", a.left + 8, py - 6);
     ctx.restore();
   },
 };
