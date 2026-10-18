@@ -38,7 +38,7 @@ from pathlib import Path  # noqa: E402
 import numpy as np  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import ansatze, hamiltonians as hm, runlog  # noqa: E402
+from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.train import run_vqe  # noqa: E402
 
@@ -57,6 +57,16 @@ CONFIG = {
 }
 NAME = "exp02_h4"
 PARTIAL = Path(f"results/{NAME}_partial.jsonl")
+EXP = tracking.Experiment(
+    NAME, title="UCCSD vs hardware-efficient ansatz on the H₄ chain",
+    description="VQE with UCCSD and HEA (1-6 layers, 5 random starts) on a linear H₄ chain, "
+                "spacing 0.5-2.5 Å, against HF, CCSD and FCI. Research question 1.",
+    config=CONFIG, figures=["fig_exp02_h4.png", "fig_exp02_h4_cost.png"])
+
+
+def _run_id(d, method, layers=None, seed=None):
+    rid = f"d{d:.2f}_{method}"
+    return rid + (f"_L{layers}_s{seed}" if layers is not None else "")
 
 
 def _verify_with_qiskit(circuit, qp, theta, energy):
@@ -66,19 +76,24 @@ def _verify_with_qiskit(circuit, qp, theta, energy):
 
 
 def _vqe_row(d, method, layers, seed, circuit, qp, e_fci, psi_exact, theta0):
-    res = run_vqe(circuit, qp.matrix(), qp.e_shift, theta0,
-                  maxiter=CONFIG["maxiter"], gtol=CONFIG["gtol"])
-    _verify_with_qiskit(circuit, qp, res.theta, res.energy)
-    psi = res.state
-    return {
-        "d_A": d, "method": method, "layers": layers, "seed": seed,
-        "E_Ha": res.energy, "dE_mHa": 1e3 * (res.energy - e_fci),
-        **ansatze.resources(circuit),
-        "evaluations": res.evaluations, "iterations": res.iterations,
-        "converged": res.converged,
-        "N": float(np.real(psi.conj() @ qp.number_op.to_matrix() @ psi)),
-        "fidelity": float(abs(np.vdot(psi_exact, psi)) ** 2),
-    }
+    params = {"d_A": d, "method": method, "layers": layers, "seed": seed}
+    with EXP.run(_run_id(d, method, layers, seed), params, reference=e_fci) as run:
+        res = run_vqe(circuit, qp.matrix(), qp.e_shift, theta0,
+                      maxiter=CONFIG["maxiter"], gtol=CONFIG["gtol"], callback=run.log)
+        _verify_with_qiskit(circuit, qp, res.theta, res.energy)
+        psi = res.state
+        row = {
+            **params,
+            "E_Ha": res.energy, "dE_mHa": 1e3 * (res.energy - e_fci),
+            **ansatze.resources(circuit),
+            "evaluations": res.evaluations, "iterations": res.iterations,
+            "converged": res.converged,
+            "N": float(np.real(psi.conj() @ qp.number_op.to_matrix() @ psi)),
+            "fidelity": float(abs(np.vdot(psi_exact, psi)) ** 2),
+        }
+        run.finish(**{k: v for k, v in row.items() if k not in params},
+                   theta=[float(t) for t in res.theta])
+    return row
 
 
 def task_reference(d):
@@ -91,6 +106,10 @@ def task_reference(d):
     rows = [{"d_A": d, "method": m, "E_Ha": ref[f"E_{m}_Ha"],
              "dE_mHa": 1e3 * (ref[f"E_{m}_Ha"] - ref["E_FCI_Ha"]),
              "hf_weight": ref["hf_weight"]} for m in ("HF", "CCSD", "FCI")]
+    for r in rows:   # classical results: logged as runs without a training history
+        with EXP.run(_run_id(d, r["method"]), {"d_A": d, "method": r["method"]},
+                     reference=ref["E_FCI_Ha"]) as run:
+            run.finish(E_Ha=r["E_Ha"], dE_mHa=r["dE_mHa"], hf_weight=r["hf_weight"])
     circ = ansatze.uccsd(qp)
     rows.append(_vqe_row(d, "UCCSD", None, None, circ, qp, e_exact, psi_exact,
                          np.zeros(circ.num_parameters)))
@@ -131,6 +150,7 @@ def main():
     jobs += [("hea", (d, L, s)) for L in CONFIG["hea_layers"] for d in CONFIG["spacings_A"]
              for s in CONFIG["seeds"] if (d, "HEA", L, s) not in done_keys]
     print(f"{len(done)} rows already done, {len(jobs)} jobs to run")
+    EXP.start(n_runs=len(CONFIG["spacings_A"]) * (4 + len(CONFIG["hea_layers"]) * len(CONFIG["seeds"])))
 
     PARTIAL.parent.mkdir(exist_ok=True)
     with Pool(args.workers) as pool, open(PARTIAL, "a") as log:
@@ -151,6 +171,7 @@ def main():
     rows = [{c: r.get(c, "") if r.get(c) is not None else "" for c in columns} for r in rows]
     runlog.save(NAME, rows, CONFIG, started)
     PARTIAL.unlink()
+    EXP.finish()
 
 
 if __name__ == "__main__":

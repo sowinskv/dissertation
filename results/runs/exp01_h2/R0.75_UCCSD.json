@@ -1,0 +1,25 @@
+{
+ "run_id": "R0.75_UCCSD",
+ "params": {
+  "R_A": 0.75,
+  "method": "UCCSD",
+  "seed": null
+ },
+ "reference": -1.1371170673457316,
+ "status": "done",
+ "started_at": "2026-10-15T23:52:15",
+ "metrics": {
+  "E_Ha": -1.1371170673457285,
+  "dE_mHa": 3.1086244689504383e-12,
+  "evaluations": 42,
+  "iterations": 4,
+  "converged": true,
+  "theta": [
+   0.0,
+   0.0,
+   -0.11483306122829823
+  ]
+ },
+ "finished_at": "2026-10-15T23:52:15",
+ "duration_s": 0.01
+}

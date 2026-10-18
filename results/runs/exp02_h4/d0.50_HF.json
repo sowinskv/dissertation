@@ -1,0 +1,17 @@
+{
+ "run_id": "d0.50_HF",
+ "params": {
+  "d_A": 0.5,
+  "method": "HF"
+ },
+ "reference": -1.653116951940114,
+ "status": "done",
+ "started_at": "2026-10-15T23:52:29",
+ "metrics": {
+  "E_Ha": -1.6286097030299036,
+  "dE_mHa": 24.5072489102105,
+  "hf_weight": 0.9904510449114134
+ },
+ "finished_at": "2026-10-15T23:52:29",
+ "duration_s": 0.0
+}

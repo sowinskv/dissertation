@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from src import ansatze, hamiltonians as hm, runlog  # noqa: E402
+from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.train import run_vqe  # noqa: E402
 
@@ -36,11 +36,27 @@ CONFIG = {
     "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
 }
 CHEM_ACC_MHA = 1.6
+EXP = tracking.Experiment(
+    "exp01_h2", title="Potential energy curve of H₂",
+    description="Validation of the pipeline: HF, FCI, VQE-UCCSD and VQE-HEA (2 layers) "
+                "on H₂ in STO-3G, bond length 0.3-3.0 Å.",
+    config=CONFIG, figures=["fig_exp01_h2.png"])
+
+
+def _train(name, R, circuit, qp, e_fci, theta0, seed=None):
+    params = {"R_A": R, "method": name, "seed": seed}
+    with EXP.run(f"R{R:.2f}_{name}", params, reference=e_fci) as run:
+        res = run_vqe(circuit, qp.matrix(), qp.e_shift, theta0, callback=run.log)
+        run.finish(E_Ha=res.energy, dE_mHa=1e3 * abs(res.energy - e_fci),
+                   evaluations=res.evaluations, iterations=res.iterations,
+                   converged=res.converged, theta=[float(t) for t in res.theta])
+    return res
 
 
 def main():
     started = time.time()
     rng = np.random.default_rng(CONFIG["seed"])
+    EXP.start(n_runs=4 * len(CONFIG["bond_lengths_A"]))
     rows = []
     print(f"{'R [Å]':>6} {'HF':>11} {'FCI':>11} {'UCCSD':>11} {'HEA':>11}"
           f" {'ΔE UCCSD [mHa]':>15} {'ΔE HEA [mHa]':>13}")
@@ -53,9 +69,13 @@ def main():
         assert abs(e_exact - ref["E_FCI_Ha"]) < 1e-8, f"mapping does not match FCI at R={R}"
 
         uccsd, hea = ansatze.uccsd(qp), ansatze.hea(qp, CONFIG["hea_layers"])
-        r_ucc = run_vqe(uccsd, qp.matrix(), qp.e_shift, np.zeros(uccsd.num_parameters))
-        r_hea = run_vqe(hea, qp.matrix(), qp.e_shift,
-                        rng.uniform(-0.1, 0.1, hea.num_parameters))
+        for m in ("HF", "FCI"):
+            with EXP.run(f"R{R:.2f}_{m}", {"R_A": R, "method": m}, reference=ref["E_FCI_Ha"]) as run:
+                run.finish(E_Ha=ref[f"E_{m}_Ha"],
+                           dE_mHa=1e3 * abs(ref[f"E_{m}_Ha"] - ref["E_FCI_Ha"]))
+        r_ucc = _train("UCCSD", R, uccsd, qp, ref["E_FCI_Ha"], np.zeros(uccsd.num_parameters))
+        r_hea = _train("HEA", R, hea, qp, ref["E_FCI_Ha"],
+                       rng.uniform(-0.1, 0.1, hea.num_parameters), seed=CONFIG["seed"])
 
         row = {"R_A": R, "E_HF_Ha": ref["E_HF_Ha"], "E_FCI_Ha": ref["E_FCI_Ha"],
                "E_UCCSD_Ha": r_ucc.energy, "E_HEA_Ha": r_hea.energy,
@@ -83,6 +103,7 @@ def main():
               f"points within chemical accuracy: {100 * np.mean(d <= CHEM_ACC_MHA):.0f}%")
 
     runlog.save("exp01_h2", rows, CONFIG, started)
+    EXP.finish()
 
 
 if __name__ == "__main__":

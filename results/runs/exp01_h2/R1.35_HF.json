@@ -1,0 +1,16 @@
+{
+ "run_id": "R1.35_HF",
+ "params": {
+  "R_A": 1.35,
+  "method": "HF"
+ },
+ "reference": -1.0250543624687882,
+ "status": "done",
+ "started_at": "2026-10-15T23:52:16",
+ "metrics": {
+  "E_Ha": -0.95720317507473,
+  "dE_mHa": 67.85118739405827
+ },
+ "finished_at": "2026-10-15T23:52:16",
+ "duration_s": 0.0
+}

@@ -42,8 +42,7 @@
     "numpy": "2.5.3",
     "scipy": "1.18.1"
   },
-  "git_commit": "9e1d6a5",
-  "runtime_s": 796.0,
-  "rows": 306,
-  "note": "run was interrupted and resumed from the checkpoint; runtime_s covers only the last segment"
+  "git_commit": "9c30f2b",
+  "runtime_s": 2109.9,
+  "rows": 306
 }

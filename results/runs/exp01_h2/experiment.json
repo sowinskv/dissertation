@@ -1,0 +1,53 @@
+{
+ "name": "exp01_h2",
+ "title": "Potential energy curve of H\u2082",
+ "description": "Validation of the pipeline: HF, FCI, VQE-UCCSD and VQE-HEA (2 layers) on H\u2082 in STO-3G, bond length 0.3-3.0 \u00c5.",
+ "config": {
+  "molecule": "H2",
+  "basis": "sto3g",
+  "bond_lengths_A": [
+   0.3,
+   0.45,
+   0.6,
+   0.75,
+   0.9,
+   1.05,
+   1.2,
+   1.35,
+   1.5,
+   1.65,
+   1.8,
+   1.95,
+   2.1,
+   2.25,
+   2.4,
+   2.55,
+   2.7,
+   2.85,
+   3.0
+  ],
+  "hea_layers": 2,
+  "seed": 42,
+  "hea_init": "uniform(-0.1, 0.1)",
+  "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
+  "circuit_resources": {
+   "UCCSD": {
+    "params": 3,
+    "cnot": 4,
+    "depth": 17
+   },
+   "HEA": {
+    "params": 12,
+    "cnot": 2,
+    "depth": 19
+   }
+  }
+ },
+ "figures": [
+  "fig_exp01_h2.png"
+ ],
+ "status": "done",
+ "started_at": "2026-10-15T23:52:12",
+ "finished_at": "2026-10-15T23:52:20",
+ "n_runs": 76
+}

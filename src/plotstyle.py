@@ -1,5 +1,6 @@
 """
-plotstyle: one consistent, editorial-but-rigorous look for every figure in the thesis.
+plotstyle: one consistent, clean look for every figure in the thesis, matching the lab notebook
+(white paper, black ink, pencil gray, Helvetica-style type, one pen color per method).
 
 white surface, made for the thesis PDF (prints cleanly, also in grayscale).
 
@@ -8,14 +9,18 @@ the rules this module encodes (so individual plot scripts don't have to):
   - FCI (the exact reference) is always ink, HF (the baseline) is always muted gray,
     the models being studied carry the color
   - identity never relies on color alone: distinct markers / line styles + direct labels
-  - recessive chrome: horizontal hairline grid only, no box, muted axis text
+  - quiet chrome: black left/bottom axis lines, horizontal hairline grid, no box
   - a header (title, subtitle, key) and a footer (source / notes) outside the plot area
-  - english labels, kept minimal; decimal point by default (decimal_comma=True switches to polish)
+  - english labels in sentence case, kept minimal; decimal point by default
+    (decimal_comma=True switches to polish)
+  - type: Arimo (bundled in assets/fonts, same letter widths as Helvetica), so the PDF looks the
+    same on every machine; sub- and superscripts (H₂, 10⁻³) are drawn with mathtext in that font
 
-the categorical colors are the first slots of a validated palette:
-all-pairs CVD separation >= 9 (deutan) and normal-vision separation >= 24 on white.
-the light slots (aqua, yellow, magenta) sit below 3:1 contrast, which is why every
-series also gets a marker shape and a direct label.
+the method colors are "pens", checked with a CVD validator (OKLab, light surface):
+  RQ1 group  UCCSD / HEA / CCSD            all pairs: CVD dE >= 11, normal dE >= 27
+  RQ3 group  QNN-cond / MLP / GP           all pairs: CVD dE >= 12, normal dE >= 21
+  all six in slot order                    adjacent pairs pass, contrast >= 3:1 on white
+every series still gets a marker shape and a direct label, so identity never rests on color alone.
 
 usage:
     from src import plotstyle as ps
@@ -39,16 +44,16 @@ from matplotlib.ticker import FuncFormatter, LogLocator, NullLocator
 
 # ---------------- theme ----------------
 THEME = {
-    "surface": "#ffffff",
-    "ink": "#141414",       # titles, reference series
-    "ink_2": "#4d4b46",     # subtitles, labels
-    "muted": "#8a867d",     # axis text, notes, baseline series
-    "grid": "#e6e3dc",      # hairline gridlines
-    "baseline": "#b9b5ab",  # bottom axis line
+    "surface": "#ffffff",   # paper
+    "ink": "#000000",       # titles, reference series (FCI), axis lines
+    "ink_2": "#333333",     # labels, tick labels
+    "muted": "#8a8a8a",     # pencil: notes, baseline series (HF)
+    "grid": "#e6e6e6",      # hairline gridlines
+    "baseline": "#000000",  # axis lines
 }
 
-# validated categorical slots, assigned in this fixed order, never cycled
-SLOTS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"]
+# validated pen colors, assigned in this fixed order, never cycled
+SLOTS = ["#1f4fd1", "#e0482a", "#0f9a7a", "#ad7400", "#c4398c", "#5a5fd6"]
 
 # ---------------- fixed identity of every method ----------------
 # color is a theme role ("ink", "muted") or a slot index; it never changes between figures
@@ -63,7 +68,8 @@ METHODS = {
     "GP":       {"color": 5,       "marker": "X",  "ls": "-",  "label": "Gaussian process"},
 }
 
-FONT_STACK = ["Inter", "Helvetica Neue", "Helvetica", "Arial", "DejaVu Sans"]
+FONT_DIR = Path(__file__).resolve().parents[1] / "assets" / "fonts"
+FONT = "Arimo"
 TEXT_WIDTH_IN = 6.3   # A4 text width with ~2.5 cm margins
 CHEM_ACC_MHA = 1.6    # chemical accuracy in mHa
 
@@ -76,40 +82,47 @@ def use(decimal_comma=False):
     t = THEME
     _state.update(decimal_comma=decimal_comma)
 
-    available = {f.name for f in font_manager.fontManager.ttflist}
-    family = next((f for f in FONT_STACK if f in available), "DejaVu Sans")
-    if family != "Inter":
-        print(f"plotstyle: Inter not found, using {family}. "
-              "install Inter (free) for the intended look: https://rsms.me/inter/")
+    for f in FONT_DIR.glob("*.ttf"):
+        font_manager.fontManager.addfont(str(f))
 
     mpl.rcParams.update({
-        "font.family": family,
+        "font.family": [FONT, "DejaVu Sans"],
+        "mathtext.fontset": "custom",       # 10^{-3}, H_2 in the same typeface
+        "mathtext.rm": FONT,
+        "mathtext.it": f"{FONT}:italic",
+        "mathtext.bf": f"{FONT}:bold",
+        "mathtext.sf": FONT,
+        "mathtext.cal": FONT,
+        "mathtext.default": "regular",
         "font.size": 8.5,
         "text.color": t["ink_2"],
         "axes.facecolor": t["surface"],
         "figure.facecolor": t["surface"],
         "savefig.facecolor": t["surface"],
         "axes.edgecolor": t["baseline"],
-        "axes.linewidth": 0.8,
+        "axes.linewidth": 0.6,
         "axes.labelcolor": t["ink_2"],
         "axes.labelsize": 8.5,
         "axes.spines.top": False,
         "axes.spines.right": False,
-        "axes.spines.left": False,
+        "axes.spines.left": True,
         "axes.grid": True,
         "axes.grid.axis": "y",
         "axes.axisbelow": True,
         "grid.color": t["grid"],
         "grid.linewidth": 0.7,
-        "xtick.color": t["muted"],
-        "ytick.color": t["muted"],
-        "xtick.labelcolor": t["muted"],
-        "ytick.labelcolor": t["muted"],
+        "xtick.color": t["ink"],
+        "ytick.color": t["ink"],
+        "xtick.labelcolor": t["ink_2"],
+        "ytick.labelcolor": t["ink_2"],
         "xtick.labelsize": 7.5,
         "ytick.labelsize": 7.5,
+        "xtick.direction": "out",
+        "ytick.direction": "out",
         "xtick.major.size": 3,
-        "xtick.major.width": 0.8,
-        "ytick.major.size": 0,
+        "xtick.major.width": 0.6,
+        "ytick.major.size": 3,
+        "ytick.major.width": 0.6,
         "ytick.minor.size": 0,
         "lines.linewidth": 1.6,
         "lines.markersize": 4.5,
@@ -136,6 +149,19 @@ def style(method):
 
 def color(method):
     return style(method)["color"]
+
+
+_SUBS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+_SUPS = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻", "0123456789-")
+
+
+def tex(text):
+    """unicode sub/superscripts (H₂, 10⁻³) -> mathtext, so they render in the figure font."""
+    import re
+    if text is None:
+        return None
+    text = re.sub(r"[₀-₉]+", lambda m: "$_{" + m.group().translate(_SUBS) + "}$", text)
+    return re.sub(r"[⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+", lambda m: "$^{" + m.group().translate(_SUPS) + "}$", text)
 
 
 # ---------------- layout ----------------
@@ -187,13 +213,13 @@ def header(fig, title, subtitle=None, key=None):
     x = fig.subplotpars.left
     y_in = 0.16
     if title:   # pass None when the title goes into the thesis caption instead
-        title = _wrap(fig, title, 13 * 1.1)   # bold glyphs are wider
-        a = fig.text(x, 0, title, ha="left", va="top", fontsize=13, fontweight="bold",
+        title = tex(_wrap(fig, title, 12.5 * 1.18))   # bold glyphs are wider
+        a = fig.text(x, 0, title, ha="left", va="top", fontsize=12.5, fontweight="bold",
                      color=t["ink"], linespacing=1.15)
         L["top"].append((a, y_in))
         y_in += 0.32 + 0.24 * title.count("\n")
     if subtitle:
-        sub = _wrap(fig, subtitle, 8.5)
+        sub = tex(_wrap(fig, subtitle, 8.5))
         a = fig.text(x, 0, sub, ha="left", va="top", fontsize=8.5, color=t["ink_2"],
                      linespacing=1.3)
         L["top"].append((a, y_in))
@@ -203,7 +229,7 @@ def header(fig, title, subtitle=None, key=None):
         for m in key:
             s = style(m)
             handles.append(Line2D([], [], color=s["color"], ls=s["ls"], marker=s["marker"],
-                                  markersize=4.5, lw=1.6, label=s["label"],
+                                  markersize=4.5, lw=1.6, label=tex(s["label"]),
                                   markerfacecolor=s["color"], markeredgecolor=t["surface"]))
         leg = fig.legend(handles=handles, loc="upper left", ncol=len(key),
                          bbox_to_anchor=(x - 0.008, 1), fontsize=7.5, handlelength=2.0,
@@ -227,7 +253,7 @@ class _LegendY:
 def footer(fig, text):
     """small muted note at the bottom: source, data, caveats."""
     L = fig._ps
-    note = _wrap(fig, text, 6.5)
+    note = tex(_wrap(fig, text, 6.5))
     a = fig.text(fig.subplotpars.left, 0, note, ha="left", va="bottom", fontsize=6.5,
                  color=theme()["muted"], linespacing=1.2)
     L["bottom"].append((a, 0.12))
@@ -236,13 +262,13 @@ def footer(fig, text):
 
 
 def panel_title(ax, title, subtitle=None):
-    """small uppercase panel title above an axis, left-aligned (offsets in points)."""
+    """small bold panel title above an axis, left-aligned (offsets in points)."""
     t = theme()
-    ax.annotate(title.upper(), (0, 1), xycoords="axes fraction",
+    ax.annotate(tex(title), (0, 1), xycoords="axes fraction",
                 xytext=(0, 21 if subtitle else 8), textcoords="offset points",
-                ha="left", va="bottom", fontsize=7.5, fontweight="bold", color=t["ink"])
+                ha="left", va="bottom", fontsize=8, fontweight="bold", color=t["ink"])
     if subtitle:
-        ax.annotate(subtitle, (0, 1), xycoords="axes fraction", xytext=(0, 8),
+        ax.annotate(tex(subtitle), (0, 1), xycoords="axes fraction", xytext=(0, 8),
                     textcoords="offset points", ha="left", va="bottom",
                     fontsize=7, color=t["muted"])
 
@@ -259,7 +285,7 @@ def plot(ax, x, y, method, markevery=None, **kw):
 
 def end_label(ax, x, y, text, dy=0, dx_pt=6):
     """direct label at the right end of a series, in text ink (never the series color)."""
-    ax.annotate(text, (x, y), xytext=(dx_pt, dy), textcoords="offset points",
+    ax.annotate(tex(text), (x, y), xytext=(dx_pt, dy), textcoords="offset points",
                 ha="left", va="center", fontsize=7.5, color=theme()["ink_2"],
                 annotation_clip=False)
 
@@ -286,7 +312,7 @@ def end_labels(ax, x, items, min_gap_pt=10, dx_pt=6):
             placed[i][0] = max(placed[i][0], placed[i - 1][0] + min_gap_pt)
     for target, y_pt, y, text in placed:
         moved = abs(target - y_pt) > 1
-        ax.annotate(text, (x, y), xytext=(dx_pt + (8 if moved else 0), target - y_pt),
+        ax.annotate(tex(text), (x, y), xytext=(dx_pt + (8 if moved else 0), target - y_pt),
                     textcoords="offset points", ha="left", va="center", fontsize=7.5,
                     color=t["ink_2"], annotation_clip=False,
                     arrowprops=({"arrowstyle": "-", "color": t["muted"], "lw": 0.6,
@@ -296,7 +322,7 @@ def end_labels(ax, x, items, min_gap_pt=10, dx_pt=6):
 def callout(ax, xy, text, xytext, ha="left", va="center"):
     """annotation with a thin leader line, editorial style."""
     t = theme()
-    ax.annotate(text, xy, xytext=xytext, textcoords="data", ha=ha, va=va,
+    ax.annotate(tex(text), xy, xytext=xytext, textcoords="data", ha=ha, va=va,
                 fontsize=7, color=t["ink_2"], linespacing=1.2,
                 arrowprops={"arrowstyle": "-", "color": t["muted"], "lw": 0.7,
                             "shrinkA": 2, "shrinkB": 3})
@@ -308,7 +334,7 @@ def bracket(ax, x, y_low, y_high, text, side="right"):
     ax.annotate("", (x, y_low), xytext=(x, y_high),
                 arrowprops={"arrowstyle": "|-|,widthA=0.25,widthB=0.25",
                             "color": t["ink_2"], "lw": 0.8})
-    ax.annotate(text, (x, (y_low + y_high) / 2), xytext=(6 if side == "right" else -6, 0),
+    ax.annotate(tex(text), (x, (y_low + y_high) / 2), xytext=(6 if side == "right" else -6, 0),
                 textcoords="offset points", ha="left" if side == "right" else "right",
                 va="center", fontsize=7, color=t["ink_2"], linespacing=1.2)
 
@@ -317,10 +343,10 @@ def threshold(ax, y, text, x=0.01, above=False):
     """horizontal threshold line (e.g. chemical accuracy) with a label just below (or above) it.
     x is the label position as a fraction of the axis width."""
     t = theme()
-    ax.axhline(y, color=t["ink_2"], lw=0.9, ls=(0, (1, 1.8)), zorder=1)
-    ax.annotate(text, (x, y), xycoords=ax.get_yaxis_transform(), xytext=(0, 3 if above else -3),
+    ax.axhline(y, color=t["ink"], lw=0.8, ls=(0, (1, 2)), zorder=1)
+    ax.annotate(tex(text), (x, y), xycoords=ax.get_yaxis_transform(), xytext=(0, 3 if above else -3),
                 textcoords="offset points", ha="left", va="bottom" if above else "top", fontsize=7,
-                color=t["ink_2"], zorder=5,
+                color=t["ink_2"], zorder=2,   # under the axis lines, so its backing never cuts them
                 bbox={"facecolor": t["surface"], "edgecolor": "none", "pad": 1.2})
 
 
@@ -341,7 +367,7 @@ def sci(v, digits=1):
     e = int(math.floor(math.log10(abs(v))))
     m = round(v / 10 ** e, digits)
     mant = _num(m, digits) if digits else str(int(m))
-    return f"{mant}·10{str(e).translate(_SUP)}" if e != 0 else mant
+    return f"{mant}·$10^{{{str(e).replace('-', '−')}}}$" if e != 0 else mant
 
 
 def number_axis(ax, axis="y", decimals=None):
@@ -357,7 +383,7 @@ def log_axis(ax, axis="y", every=1):
 
     def fmt(v, _):
         e = int(round(math.log10(v)))
-        return {0: "1", 1: "10"}.get(e, "10" + str(e).translate(_SUP))
+        return {0: "1", 1: "10"}.get(e, f"$10^{{{str(e).replace('-', '−')}}}$")
 
     target.set_major_locator(LogLocator(base=10.0 ** every, numticks=30))
     target.set_minor_locator(NullLocator())

@@ -31,6 +31,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 - Metrics: |E - E_FCI| in mHa, % points within 1.6 mHa, NPE, R_eq / D_e errors, fidelity (simulation only), params, CNOT and depth after transpiling to ["cx","rz","sx","x"], circuit evaluations, shots.
 - 5 seeds per stochastic experiment; report mean and spread.
 - Each run saves config, library versions, seed and results to `results/`.
+- Every experiment also logs to the lab notebook via `src/tracking.py`: one `Experiment` per script (title, short description, config, figure files), one `run` per training with `callback=run.log`, final metrics incl. `theta` in `run.finish(...)`. Run ids are readable (`d1.50_HEA_L3_s0`); `is_done` allows resume.
 - Train on simulator; on hardware only evaluate trained parameters (limited free IBM Open plan time). Record backend name and date.
 - Never commit IBM Quantum tokens.
 
@@ -42,9 +43,9 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Figures
 
-- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF).
+- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF), matching the lab notebook: black ink and axis lines, pencil-gray notes, sentence case, bundled Arimo font (`assets/fonts`, Helvetica metrics, same PDF on every machine); sub/superscripts go through mathtext automatically (`ps.tex`).
 - Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
-- Each method has a fixed color/marker in `ps.METHODS` (FCI = ink, HF = muted gray, studied models = colored slots). Add new methods there, never pick colors ad hoc.
+- Each method has a fixed color/marker in `ps.METHODS` (FCI = black ink, HF = pencil gray dashed, studied models = pen colors: UCCSD blue, HEA red-orange, CCSD teal, QNN-cond amber, MLP magenta, GP violet-blue; CVD-validated per research-question group). Add new methods there, never pick colors ad hoc; keep `COLORS` in `notebook/app.js` in sync.
 - Minimal text, in English: a short descriptive title in research style (what is plotted, for which system; no marketing phrasing, no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
 - Decimal point; units as the panel subtitle (e.g. "mHa, log scale").
 - Save PDF (vector, goes into the thesis) and PNG via `ps.save`.
@@ -60,8 +61,11 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
   - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
   - `plotstyle.py` figure style
+  - `tracking.py` experiment tracker (MLflow-like, plain files): `results/runs/<exp>/experiment.json`, `<run>.json`, `<run>.history.jsonl` (thinned)
+- `tools/notebook.py` local lab-notebook web UI over `results/runs/` (stdlib server, `uv run python tools/notebook.py`, http://localhost:8765, refreshes live while an experiment runs)
+- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, one typeface everywhere: Helvetica, with self-hosted Arimo as fallback; arrows and sketches are drawn as pen strokes). Landing page = hand-made collage, one photo per experiment: layout and notes in `notebook/collage.json` (1200x1000 sheet coordinates, reading order = phone order), photos in `notebook/photos/<exp>.jpg` (set "aspect" in collage.json; falls back to the first figure). Experiment pages are plain early-web style (Helvetica, blue [links], bordered tables). New experiments: add photo + notes to collage.json. New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
 - `tests/` control tests, run with `uv run pytest -q`
-- `results/` CSV/JSON outputs and figures (`fig_expNN_*.pdf/.png`)
+- `results/` CSV/JSON outputs, figures (`fig_expNN_*.pdf/.png`) and training logs (`runs/`)
 
 ## Status
 
@@ -70,5 +74,6 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - HF weight in FCI state drops 99% -> 33%; HF error 25 -> 462 mHa; CCSD goes BELOW FCI from d = 1.25 (down to -31 mHa).
   - UCCSD (26 params, 1072 CNOT, ~1.2k evals): within chemical accuracy up to d = 1.5, max error 5.3 mHa.
   - HEA: error falls with layers but non-monotonically and seed-dependent; 6 layers (84 params, 30 CNOT) median worst 5.4 mHa, worst seed 57.7 mHa; ~800k evals (~690x UCCSD); 28 runs hit 10k iterations. <N> stays 4.
+  - Reproducibility: rerun with tracking (single-threaded BLAS throughout) changed 16 HEA runs with 1-2 layers (moved between near-degenerate local minima, e.g. 22.57 <-> 24.51 mHa); L >= 3 and UCCSD bit-identical, per-layer median/worst unchanged. Shallow HEA is sensitive to floating-point summation order.
   - Open: worst HEA runs (e.g. 57.70 mHa at d = 2.0) have fidelity ~0 with FCI and repeat across depths -> likely a fixed wrong-symmetry state; check its spin.
 - Next: LiH with an active space.

@@ -1,0 +1,17 @@
+{
+ "run_id": "d0.75_FCI",
+ "params": {
+  "d_A": 0.75,
+  "method": "FCI"
+ },
+ "reference": -2.1451106471862253,
+ "status": "done",
+ "started_at": "2026-10-15T23:52:29",
+ "metrics": {
+  "E_Ha": -2.1451106471862253,
+  "dE_mHa": 0.0,
+  "hf_weight": 0.9731178338586873
+ },
+ "finished_at": "2026-10-15T23:52:29",
+ "duration_s": 0.0
+}
