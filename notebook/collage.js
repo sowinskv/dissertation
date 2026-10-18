@@ -175,6 +175,7 @@ const Collage = (() => {
     if (x) { a.href = `#/exp/${encodeURIComponent(it.exp)}`; a.setAttribute("aria-label", `${x.title}: open experiment`); }
     const inner = document.createElement("span");
     inner.className = "inner";
+    if (it.aspect) inner.style.setProperty("--ar", it.aspect);
     const img = document.createElement("img");
     img.alt = "";
     img.src = `photos/${it.exp}.jpg`;

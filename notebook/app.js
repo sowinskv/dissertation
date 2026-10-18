@@ -380,8 +380,8 @@ async function renderChart() {
     return;
   }
   await document.fonts.ready;
-  Chart.defaults.font.family = '"Notebook Serif", "Times New Roman", Times, serif';
-  Chart.defaults.font.size = 15;
+  Chart.defaults.font.family = '"Helvetica Neue", Helvetica, Arimo, Arial, sans-serif';
+  Chart.defaults.font.size = 12;
   Chart.defaults.color = "#000";
   state.chart = new Chart(document.getElementById("chart"), {
     type: "line",

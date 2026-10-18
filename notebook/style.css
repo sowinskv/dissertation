@@ -1,19 +1,19 @@
-/* lab notebook: plain early-web pages (Times, blue links, black rules) around one
+/* lab notebook: plain early-web pages (Helvetica, blue links, black rules) around one
    pasted-up notebook sheet written in pen. */
 
-/* Times where the system has it, Tinos (metric-compatible) where it does not */
-@font-face { font-family: "Notebook Serif"; font-weight: 400; font-display: swap;
-  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Times-Roman"), url(fonts/tinos-latin-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Notebook Serif"; font-weight: 400; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
-  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Times-Roman"), url(fonts/tinos-latin-ext-400-normal.woff2) format("woff2"); }
-@font-face { font-family: "Notebook Serif"; font-weight: 400; font-style: italic; font-display: swap;
-  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Times-Italic"), url(fonts/tinos-latin-400-italic.woff2) format("woff2"); }
-@font-face { font-family: "Notebook Serif"; font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
-  src: local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Times-Italic"), url(fonts/tinos-latin-ext-400-italic.woff2) format("woff2"); }
-@font-face { font-family: "Notebook Serif"; font-weight: 700; font-display: swap;
-  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Times-Bold"), url(fonts/tinos-latin-700-normal.woff2) format("woff2"); }
-@font-face { font-family: "Notebook Serif"; font-weight: 700; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
-  src: local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Times-Bold"), url(fonts/tinos-latin-ext-700-normal.woff2) format("woff2"); }
+/* Helvetica where the system has it; Arimo (same letter widths, open licence) elsewhere */
+@font-face { font-family: "Arimo"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url(fonts/arimo-latin-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Arimo"; font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: url(fonts/arimo-latin-ext-400-normal.woff2) format("woff2"); }
+@font-face { font-family: "Arimo"; font-weight: 400; font-style: italic; font-display: swap;
+  src: url(fonts/arimo-latin-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Arimo"; font-weight: 400; font-style: italic; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: url(fonts/arimo-latin-ext-400-italic.woff2) format("woff2"); }
+@font-face { font-family: "Arimo"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url(fonts/arimo-latin-700-normal.woff2) format("woff2"); }
+@font-face { font-family: "Arimo"; font-weight: 700; font-style: normal; font-display: swap; unicode-range: U+0100-024F, U+1E00-1EFF;
+  src: url(fonts/arimo-latin-ext-700-normal.woff2) format("woff2"); }
 @font-face { font-family: "Just Another Hand"; font-weight: 400; font-display: block;
   src: url(fonts/just-another-hand-latin-400-normal.woff2) format("woff2"); }
 @font-face { font-family: "Just Another Hand"; font-weight: 400; font-display: block; unicode-range: U+0100-024F, U+1E00-1EFF;
@@ -28,7 +28,7 @@
   --visited: #551a8b;
   --highlight: #fff200;     /* highlighter on pinned runs */
 
-  --f-text: "Notebook Serif", "Times New Roman", Times, serif;
+  --f-text: "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif;
   --f-hand: "Just Another Hand", "Arial Narrow", sans-serif;
 }
 
@@ -38,7 +38,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 18px/1.35 var(--f-text);
+  font: 400 16px/1.4 var(--f-text);
   -webkit-font-smoothing: antialiased;
 }
 .page { min-height: 100vh; padding: 24px 24px 0; }
@@ -106,7 +106,7 @@ a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; t
 
 /* photos: prints glued flat, black and white until you look at them */
 .photo > .inner {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: var(--ar, 4 / 3);
   overflow: hidden;
   background: #ededed;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.16), 0 10px 22px -16px rgba(0, 0, 0, 0.55);
@@ -145,7 +145,7 @@ a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; t
 .sheet.focus .plan li[data-exp]:not(.lit), .sheet.focus .plan li:not([data-exp]) { opacity: 0.3; }
 .arrow path.redraw, .sketch path.redraw { stroke-dasharray: var(--len); animation: draw 0.55s ease-out; }
 
-.sheet-foot { margin: 8px auto 32px; text-align: center; font-size: 16px; }
+.sheet-foot { margin: 8px auto 32px; text-align: center; font-size: 14px; }
 
 /* one entrance: prints land, then the writing appears, then the pen strokes */
 .sheet.enter .photo > .inner, .sheet.enter .frame > .inner {
@@ -186,14 +186,14 @@ a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; t
 
 .top { text-align: center; }
 .exp { position: relative; max-width: 1000px; margin: 0 auto; text-align: center; }
-.exp h1 { max-width: 38ch; margin: 28px auto 6px; font-size: 32px; font-weight: 400; line-height: 1.12; }
-.exp h2 { margin: 52px 0 6px; font-size: 22px; font-weight: 700; }
+.exp h1 { max-width: 40ch; margin: 28px auto 6px; font-size: 28px; font-weight: 400; line-height: 1.15; letter-spacing: -0.01em; }
+.exp h2 { margin: 52px 0 6px; font-size: 18px; font-weight: 700; }
 .exp p { margin: 4px auto; }
-.meta, .links { font-size: 17px; }
+.meta, .links { font-size: 15px; }
 .desc, .setup { max-width: 64ch; }
 .desc { margin-top: 20px !important; margin-bottom: 14px !important; }
-.setup { font-size: 16px; line-height: 1.45; }
-.hint { max-width: 64ch; font-size: 15px; }
+.setup { font-size: 14px; line-height: 1.5; }
+.hint { max-width: 64ch; font-size: 13px; }
 .exp sub { font-size: 0.7em; line-height: 0; }
 
 .stamp {
@@ -204,9 +204,9 @@ a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; t
 
 figure { max-width: 900px; margin: 22px auto 30px; }
 figure img { display: block; width: 100%; height: auto; }
-figcaption { margin-top: 6px; font-size: 15px; }
+figcaption { margin-top: 6px; font-size: 13px; }
 
-.filters { display: grid; gap: 4px; margin: 10px auto 0; font-size: 16px; }
+.filters { display: grid; gap: 4px; margin: 10px auto 0; font-size: 14px; }
 .filter b { margin-right: 6px; }
 .filter label { display: inline-block; margin: 0 7px; white-space: nowrap; cursor: pointer; }
 .filter input { margin: 0 4px 0 0; vertical-align: -1px; accent-color: var(--link); }
@@ -215,7 +215,7 @@ figcaption { margin-top: 6px; font-size: 15px; }
 .chart-box { height: 440px; max-width: 1000px; margin: 14px auto 6px; padding: 10px 10px 4px; border: 1px solid var(--ink); }
 
 .table-wrap { width: calc(100vw - 48px); max-width: 1400px; margin: 10px 0 0 50%; transform: translateX(-50%); overflow-x: auto; }
-table { margin: 0 auto; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; }
+table { margin: 0 auto; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
 th, td { padding: 2px 7px; border: 1px solid var(--ink); text-align: right; white-space: nowrap; }
 th button { all: unset; cursor: pointer; color: var(--link); text-decoration: underline; font-weight: 700; }
 th button:focus-visible { outline: 2px solid var(--link); }
@@ -229,7 +229,7 @@ tbody tr:hover td { background: #f1f1f1; }
 tbody tr.pinned td { background: var(--highlight); }
 tr.failed td { text-decoration: line-through; }
 
-.foot { padding: 64px 16px 48px; text-align: center; font-size: 16px; }
+.foot { padding: 64px 16px 48px; text-align: center; font-size: 14px; }
 .foot p { margin: 4px 0; }
 
 @media (max-width: 760px) {
