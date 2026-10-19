@@ -18,6 +18,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_nature.second_q.drivers import PySCFDriver
 from qiskit_nature.second_q.mappers import ParityMapper
 from qiskit_nature.second_q.problems import ElectronicStructureProblem
+from qiskit_nature.second_q.properties import AngularMomentum, Magnetization
 
 BASIS = "sto3g"
 
@@ -92,3 +93,12 @@ def exact_ground_state(qp: QubitProblem, tol=1e-6):
         if abs(np.real(v.conj() @ nmat @ v) - qp.n_electrons) < tol:
             return evals[k] + qp.e_shift, v, evals[0] + qp.e_shift
     raise RuntimeError("no eigenstate with the right electron number")
+
+
+def spin_operators(qp: QubitProblem):
+    """total spin S^2 and its z projection S_z on the reduced qubits (same mapping as H).
+    S^2 = 0 singlet, 2 triplet, 6 quintet."""
+    n = qp.problem.num_spatial_orbitals
+    s2 = qp.mapper.map(AngularMomentum(n).second_q_ops()["AngularMomentum"])
+    sz = qp.mapper.map(Magnetization(n).second_q_ops()["Magnetization"])
+    return s2, sz

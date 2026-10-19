@@ -6,6 +6,8 @@ input:   results/exp02_h4_results.csv, results/exp02_h4_spin_results.csv (exp02_
 output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation strength
          results/fig_exp02_h4_cost.pdf/.png   cost of accuracy: CNOT count and training cost
          results/fig_exp02_h4_spin.pdf/.png   final HEA states: energy error vs total spin
+         results/fig_exp02_h4_penalty.pdf/.png  same runs with and without a spin penalty
+                                                (input: results/exp02_h4_penalty_results.csv)
 """
 
 import argparse
@@ -182,6 +184,51 @@ def fig_spin(spin_rows, layers):
     ps.save(fig, "results/fig_exp02_h4_spin")
 
 
+def fig_penalty(rows):
+    """paired runs: error with a spin penalty against the same start without it."""
+    t = ps.theme()
+    floor = 1e-4
+    key = lambda r: (r["d_A"], r["layers"], r["seed"])
+    control = {key(r): r for r in rows if r["mu_Ha"] == 0}
+    mus = sorted({r["mu_Ha"] for r in rows if r["mu_Ha"] > 0})
+    layers = sorted({int(r["layers"]) for r in rows})
+    ramp = dict(zip(layers, ps.shades("HEA", len(layers), lightest=0.6)))
+
+    fig, axes = ps.figure(nrows=1, ncols=len(mus), panel_height=3.0, sharey=True)
+    axes = np.atleast_1d(axes)
+    fig.subplots_adjust(wspace=0.12, right=0.95)
+    lim = (floor / 2, 600)
+    for ax, mu in zip(axes, mus):
+        ps.log_axis(ax, "x", every=2)
+        ps.log_axis(ax, "y", every=2)
+        ax.set_xlim(*lim)
+        ax.set_ylim(*lim)
+        ax.grid(axis="x", visible=False)
+        ax.plot(lim, lim, color=t["muted"], lw=0.7, ls=(0, (1, 2)), zorder=1)
+        ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", x=0.02)
+        for r in rows:
+            if r["mu_Ha"] != mu:
+                continue
+            c = control[key(r)]
+            x, y = max(c["dE_mHa"], floor), max(r["dE_mHa"], floor)
+            ax.plot([x], [y], ls="none", marker="o", markersize=4.6, markerfacecolor=ramp[int(r["layers"])],
+                    markeredgecolor=t["ink"] if c["quintet_trap"] else ps.color("HEA"),
+                    markeredgewidth=1.1 if c["quintet_trap"] else 0.5, zorder=3)
+        ps.panel_title(ax, f"$\\mu$ = {mu:g} Ha", "error with penalty, mHa, log scale")
+        ax.set_xlabel("Error without penalty (mHa)")
+
+    key_handles = [Line2D([], [], ls="none", marker="o", markersize=4.6, markerfacecolor=ramp[L],
+                          markeredgecolor=ps.color("HEA"), markeredgewidth=0.5, label=f"HEA, {L} layers")
+                   for L in layers]
+    key_handles.append(Line2D([], [], ls="none", marker="o", markersize=4.6, markerfacecolor="white",
+                              markeredgecolor=t["ink"], markeredgewidth=1.1, label="quintet trap without penalty"))
+    ps.header(fig, "Error with vs without a spin penalty, HEA on the H₄\u00a0chain", key=key_handles)
+    ps.footer(fig, f"{BASE_NOTE} Cost E + $\\mu$ S²; each point is one start, run with and without the "
+                   "penalty from the same parameters (d = 1.5-2.5 Å, 5 starts). Below the dotted diagonal "
+                   "the penalty lowered the error. Errors below 10⁻⁴ mHa are drawn at the floor.")
+    ps.save(fig, "results/fig_exp02_h4_penalty")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", default="results/exp02_h4_results.csv")
@@ -194,6 +241,9 @@ def main():
     spin_csv = Path("results/exp02_h4_spin_results.csv")
     if spin_csv.exists():
         fig_spin(load(spin_csv), layers)
+    penalty_csv = Path("results/exp02_h4_penalty_results.csv")
+    if penalty_csv.exists():
+        fig_penalty(load(penalty_csv))
 
 
 if __name__ == "__main__":
