@@ -33,13 +33,28 @@
   "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
   "maxiter": 10000,
   "gtol": 1e-07,
-  "eigenstate_variance_tol_Ha2": 1e-08
+  "eigenstate_variance_tol_Ha2": 1e-08,
+  "extra": {
+   "spacings_A": [
+    0.5,
+    0.75,
+    1.0,
+    1.25
+   ],
+   "hea_layers": [
+    6
+   ],
+   "mu_Ha": [
+    0.1
+   ]
+  }
  },
  "figures": [
-  "fig_exp02_h4_penalty.png"
+  "fig_exp02_h4_penalty.png",
+  "fig_exp02_h4_summary.png"
  ],
  "status": "done",
  "started_at": "2026-10-19T21:32:10",
- "finished_at": "2026-10-19T21:48:35",
- "n_runs": 150
+ "finished_at": "2026-10-19T22:43:40",
+ "n_runs": 170
 }

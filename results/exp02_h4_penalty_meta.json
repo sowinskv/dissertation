@@ -31,7 +31,21 @@
     "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
     "maxiter": 10000,
     "gtol": 1e-07,
-    "eigenstate_variance_tol_Ha2": 1e-08
+    "eigenstate_variance_tol_Ha2": 1e-08,
+    "extra": {
+      "spacings_A": [
+        0.5,
+        0.75,
+        1.0,
+        1.25
+      ],
+      "hea_layers": [
+        6
+      ],
+      "mu_Ha": [
+        0.1
+      ]
+    }
   },
   "python": "3.12.3",
   "packages": {
@@ -41,7 +55,7 @@
     "numpy": "2.5.3",
     "scipy": "1.18.1"
   },
-  "git_commit": "292cf6b",
-  "runtime_s": 984.5,
-  "rows": 150
+  "git_commit": "f989ded",
+  "runtime_s": 648.1,
+  "rows": 170
 }
