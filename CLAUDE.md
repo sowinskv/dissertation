@@ -43,7 +43,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Figures
 
-- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF), matching the lab notebook: black ink and axis lines, pencil-gray notes, sentence case, bundled Arimo font (`assets/fonts`, Helvetica metrics, same PDF on every machine); sub/superscripts go through mathtext automatically (`ps.tex`).
+- All figures use `src/plotstyle.py` (`ps.use()`, white style for the thesis PDF), matching the lab notebook: centred header and footer, title in regular weight, black ink and axis lines, pencil-gray notes, sentence case, bundled Arimo font (`assets/fonts`, Helvetica metrics, same PDF on every machine); sub/superscripts go through mathtext automatically (`ps.tex`).
 - Experiments write CSV to `results/`; separate `experiments/expNN_plot.py` scripts read the CSV and draw. Never recompute physics in a plot script.
 - Each method has a fixed color/marker in `ps.METHODS` (FCI = black ink, HF = pencil gray dashed, studied models = pen colors: UCCSD blue, HEA red-orange, CCSD teal, QNN-cond amber, MLP magenta, GP violet-blue; CVD-validated per research-question group). Add new methods there, never pick colors ad hoc; keep `COLORS` in `notebook/app.js` in sync.
 - Minimal text, in English: a short descriptive title in research style (what is plotted, for which system; no marketing phrasing, no subtitle), key in the header, direct labels at line ends, one short footer line (system, basis, simulator, seeds, caveats). Avoid callouts unless essential. No dual y-axes.
@@ -63,7 +63,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `plotstyle.py` figure style
   - `tracking.py` experiment tracker (MLflow-like, plain files): `results/runs/<exp>/experiment.json`, `<run>.json`, `<run>.history.jsonl` (thinned)
 - `tools/notebook.py` local lab-notebook web UI over `results/runs/` (stdlib server, `uv run python tools/notebook.py`, http://localhost:8765, refreshes live while an experiment runs)
-- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, one typeface everywhere: Helvetica, with self-hosted Arimo as fallback; arrows and sketches are drawn as pen strokes). Landing page = hand-made collage, one photo per experiment: layout and notes in `notebook/collage.json` (1200x1000 sheet coordinates, reading order = phone order), photos in `notebook/photos/<exp>.jpg` (set "aspect" in collage.json; falls back to the first figure). Experiment pages are plain early-web style (Helvetica, blue [links], bordered tables). New experiments: add photo + notes to collage.json. New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
+- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, one typeface everywhere: Helvetica, with self-hosted Arimo as fallback), plain early-web style (centred, blue [links], bordered tables). Landing page = list of every logged experiment, built from the logs (no manual config), numbered by the server: exp02 -> 02, a later exp02_* follow-up -> 02b. Photo per experiment: `notebook/photos/<exp>.jpg` (falls back to its first figure). New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
 - `tests/` control tests, run with `uv run pytest -q`
 - `results/` CSV/JSON outputs, figures (`fig_expNN_*.pdf/.png`) and training logs (`runs/`)
 

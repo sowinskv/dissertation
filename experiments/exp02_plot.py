@@ -101,7 +101,7 @@ def fig_error_vs_spacing(rows, best_l):
     ps.number_axis(ax2, "x", decimals=1)
     ax2.set_xlim(d[0] - 0.08, d[-1] + 0.08)
 
-    ps.header(fig, "Error of approximate methods for the linear H₄ chain vs atom spacing",
+    ps.header(fig, "Error of approximate methods for the linear H₄\u00a0chain vs atom spacing",
               key=["HF", "CCSD", "UCCSD", "HEA"])
     ps.footer(fig, f"{BASE_NOTE} HEA: {best_l} layers, median and range of 5 random starts. "
                    "Hollow diamonds: CCSD below the exact energy.")

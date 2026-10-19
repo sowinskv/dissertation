@@ -10,7 +10,7 @@ the rules this module encodes (so individual plot scripts don't have to):
     the models being studied carry the color
   - identity never relies on color alone: distinct markers / line styles + direct labels
   - quiet chrome: black left/bottom axis lines, horizontal hairline grid, no box
-  - a header (title, subtitle, key) and a footer (source / notes) outside the plot area
+  - a centred header (title in regular weight, subtitle, key) and footer, like the notebook pages
   - english labels in sentence case, kept minimal; decimal point by default
     (decimal_comma=True switches to polish)
   - type: Arimo (bundled in assets/fonts, same letter widths as Helvetica), so the PDF looks the
@@ -210,27 +210,29 @@ def _relayout(fig):
 
 
 def _wrap(fig, text, fontsize):
-    """wrap text to the figure's usable width (approximate, from average glyph width)."""
-    usable_in = fig.get_figwidth() * (1 - fig.subplotpars.left) - 0.15
+    """wrap text to the figure's usable width (approximate, from average glyph width).
+    text is centred, so it keeps the same margin on both sides."""
+    usable_in = fig.get_figwidth() * (1 - 2 * fig.subplotpars.left) - 0.15
     chars = max(20, int(usable_in / (fontsize * 0.53 / 72)))
     return "\n".join(textwrap.fill(par, chars) for par in text.split("\n"))
 
 
 def header(fig, title, subtitle=None, key=None):
-    """header: bold title, gray subtitle, horizontal key (method names or Line2D handles)."""
+    """header, centred like the lab notebook pages: title in regular weight, gray subtitle,
+    horizontal key (method names or Line2D handles)."""
     t, L = theme(), fig._ps
-    x = fig.subplotpars.left
+    x = 0.5
     y_in = 0.16
     if title:   # pass None when the title goes into the thesis caption instead
-        title = tex(_wrap(fig, title, 12.5 * 1.18))   # bold glyphs are wider
-        a = fig.text(x, 0, title, ha="left", va="top", fontsize=12.5, fontweight="bold",
-                     color=t["ink"], linespacing=1.15)
+        title = tex(_wrap(fig, title, 13))
+        a = fig.text(x, 0, title, ha="center", va="top", fontsize=13, color=t["ink"],
+                     linespacing=1.15, multialignment="center")
         L["top"].append((a, y_in))
         y_in += 0.32 + 0.24 * title.count("\n")
     if subtitle:
         sub = tex(_wrap(fig, subtitle, 8.5))
-        a = fig.text(x, 0, sub, ha="left", va="top", fontsize=8.5, color=t["ink_2"],
-                     linespacing=1.3)
+        a = fig.text(x, 0, sub, ha="center", va="top", fontsize=8.5, color=t["ink_2"],
+                     linespacing=1.3, multialignment="center")
         L["top"].append((a, y_in))
         y_in += 0.17 * (sub.count("\n") + 1) + 0.08
     if key:
@@ -243,11 +245,11 @@ def header(fig, title, subtitle=None, key=None):
             handles.append(Line2D([], [], color=s["color"], ls=s["ls"], marker=s["marker"],
                                   markersize=4.5, lw=1.6, label=tex(s["label"]),
                                   markerfacecolor=s["color"], markeredgecolor=t["surface"]))
-        leg = fig.legend(handles=handles, loc="upper left", ncol=len(key),
-                         bbox_to_anchor=(x - 0.008, 1), fontsize=7.5, handlelength=2.0,
+        leg = fig.legend(handles=handles, loc="upper center", ncol=len(key),
+                         bbox_to_anchor=(x, 1), fontsize=7.5, handlelength=2.0,
                          columnspacing=1.4, handletextpad=0.5, borderaxespad=0,
                          labelcolor=t["ink_2"])
-        L["top"].append((_LegendY(leg, x - 0.008), y_in))
+        L["top"].append((_LegendY(leg, x), y_in))
         y_in += 0.22
     L["header_in"] = y_in + PANEL_TITLE_IN
     _relayout(fig)
@@ -266,22 +268,22 @@ def footer(fig, text):
     """small muted note at the bottom: source, data, caveats."""
     L = fig._ps
     note = tex(_wrap(fig, text, 6.5))
-    a = fig.text(fig.subplotpars.left, 0, note, ha="left", va="bottom", fontsize=6.5,
-                 color=theme()["muted"], linespacing=1.2)
+    a = fig.text(0.5, 0, note, ha="center", va="bottom", fontsize=6.5,
+                 color=theme()["muted"], linespacing=1.2, multialignment="center")
     L["bottom"].append((a, 0.12))
     L["footer_in"] = 0.12 + 0.13 * (note.count("\n") + 1) + 0.05
     _relayout(fig)
 
 
 def panel_title(ax, title, subtitle=None):
-    """small bold panel title above an axis, left-aligned (offsets in points)."""
+    """small bold panel title, centred above its axis (offsets in points)."""
     t = theme()
-    ax.annotate(tex(title), (0, 1), xycoords="axes fraction",
+    ax.annotate(tex(title), (0.5, 1), xycoords="axes fraction",
                 xytext=(0, 21 if subtitle else 8), textcoords="offset points",
-                ha="left", va="bottom", fontsize=8, fontweight="bold", color=t["ink"])
+                ha="center", va="bottom", fontsize=8, fontweight="bold", color=t["ink"])
     if subtitle:
-        ax.annotate(tex(subtitle), (0, 1), xycoords="axes fraction", xytext=(0, 8),
-                    textcoords="offset points", ha="left", va="bottom",
+        ax.annotate(tex(subtitle), (0.5, 1), xycoords="axes fraction", xytext=(0, 8),
+                    textcoords="offset points", ha="center", va="bottom",
                     fontsize=7, color=t["muted"])
 
 

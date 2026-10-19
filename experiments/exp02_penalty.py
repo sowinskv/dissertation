@@ -67,7 +67,7 @@ EXP = tracking.Experiment(
     description="Same HEA runs with and without a spin penalty μ⟨S²⟩ in the cost (μ = 0, 0.1, 1 Ha), "
                 "identical random starts, spacing 1.5-2.5 Å. Does the penalty keep VQE out of "
                 "the quintet traps found in exp02? Research question 1.",
-    config=CONFIG, figures=["fig_exp02_h4_penalty.png"])
+    config=CONFIG, figures=["fig_exp02_h4_penalty.png", "fig_exp02_h4_summary.png"])
 
 
 def _run_id(d, layers, seed, mu):
