@@ -1,0 +1,45 @@
+{
+ "name": "exp02_h4_penalty",
+ "title": "Spin penalty for the hardware-efficient ansatz, H\u2084 chain",
+ "description": "Same HEA runs with and without a spin penalty \u03bc\u27e8S\u00b2\u27e9 in the cost (\u03bc = 0, 0.1, 1 Ha), identical random starts, spacing 1.5-2.5 \u00c5. Does the penalty keep VQE out of the quintet traps found in exp02? Research question 1.",
+ "config": {
+  "molecule": "H4 linear chain",
+  "basis": "sto3g",
+  "spacings_A": [
+   1.5,
+   1.75,
+   2.0,
+   2.25,
+   2.5
+  ],
+  "hea_layers": [
+   2,
+   6
+  ],
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "mu_Ha": [
+   0.0,
+   0.1,
+   1.0
+  ],
+  "cost": "<H> + mu <S^2>",
+  "hea_init": "uniform(-0.1, 0.1), same seed in both arms",
+  "optimizer": "L-BFGS-B, central finite-difference gradient (batched)",
+  "maxiter": 10000,
+  "gtol": 1e-07,
+  "eigenstate_variance_tol_Ha2": 1e-08
+ },
+ "figures": [
+  "fig_exp02_h4_penalty.png"
+ ],
+ "status": "done",
+ "started_at": "2026-10-19T21:32:10",
+ "finished_at": "2026-10-19T21:48:35",
+ "n_runs": 150
+}
