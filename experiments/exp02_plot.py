@@ -8,6 +8,7 @@ output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation
          results/fig_exp02_h4_spin.pdf/.png   final HEA states: energy error vs total spin
          results/fig_exp02_h4_penalty.pdf/.png  same runs with and without a spin penalty
                                                 (input: results/exp02_h4_penalty_results.csv)
+         results/fig_exp02_h4_summary.pdf/.png  closing figure: best penalised HEA vs UCCSD, CCSD, HF
 """
 
 import argparse
@@ -229,6 +230,59 @@ def fig_penalty(rows):
     ps.save(fig, "results/fig_exp02_h4_penalty")
 
 
+def fig_summary(rows, pen_rows, layers=6, mu=0.1):
+    """closing figure of exp02: the best of 5 penalised HEA starts against UCCSD, CCSD and HF."""
+    t = ps.theme()
+    floor = 1e-4
+    d = by_spacing(rows, "HF")[0]
+    hf = np.array([v[0] for v in by_spacing(rows, "HF")[1]])
+    cc = np.array([v[0] for v in by_spacing(rows, "CCSD")[1]])
+    uc = np.array([v[0] for v in by_spacing(rows, "UCCSD")[1]])
+    starts = defaultdict(list)
+    for r in pen_rows:
+        if r["layers"] == layers and r["mu_Ha"] == mu:
+            starts[r["d_A"]].append(r["dE_mHa"])
+    if sorted(starts) != list(d):
+        print("summary figure skipped: penalised HEA runs do not cover every spacing yet")
+        return
+    runs = [np.maximum(np.array(starts[x]), floor) for x in d]
+    best = np.array([v.min() for v in runs])
+    worst = np.array([v.max() for v in runs])
+
+    fig, ax = ps.figure(nrows=1, panel_height=3.2)
+    ps.log_axis(ax, "y", every=1)
+    ax.set_ylim(floor / 2, 2e3)
+    ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", above=True)
+    ps.plot(ax, d, hf, "HF")
+    ps.plot(ax, d, np.abs(cc), "CCSD")
+    below = cc < 0
+    s = ps.style("CCSD")
+    ax.plot(d[below], np.abs(cc[below]), ls="none", marker=s["marker"], markersize=6,
+            markerfacecolor=t["surface"], markeredgecolor=s["color"], markeredgewidth=1.2, zorder=6)
+    ps.plot(ax, d, uc, "UCCSD")
+    ax.vlines(d, best, worst, color=ps.color("HEA"), lw=1.3, alpha=0.45, zorder=2)
+    ps.plot(ax, d, best, "HEA", label="VQE-HEA + spin penalty, best of 5")
+
+    ps.panel_title(ax, "Error vs FCI", "mHa, log scale")
+    ax.set_xlabel("Atom spacing d (Å)")
+    ax.set_xticks(d[::2])
+    ps.number_axis(ax, "x", decimals=1)
+    ax.set_xlim(d[0] - 0.08, d[-1] + 0.08)
+
+    hs = ps.style("HEA")
+    hea_key = Line2D([], [], color=hs["color"], marker=hs["marker"], markersize=4.5, lw=1.6,
+                     markerfacecolor=hs["color"], markeredgecolor=t["surface"],
+                     label="VQE-HEA + spin penalty, best of 5")
+    ps.header(fig, "Error vs FCI along the H₄ chain: spin-penalised HEA, UCCSD and CCSD",
+              key=["HF", "CCSD", "UCCSD", hea_key])
+    ps.footer(fig, f"{BASE_NOTE} HEA: {layers} layers, cost E + $\\mu$ S² with $\\mu$ = {mu:g} Ha, "
+                   "best of 5 random starts, bars span all 5. Hollow diamonds: CCSD below the exact "
+                   "energy. Errors below 10⁻⁴ mHa are drawn at the floor.")
+    ps.end_labels(ax, d[-1], [(hf[-1], "HF"), (abs(cc[-1]), "CCSD"), (uc[-1], "UCCSD"),
+                              (best[-1], "HEA + penalty")])
+    ps.save(fig, "results/fig_exp02_h4_summary")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", default="results/exp02_h4_results.csv")
@@ -243,7 +297,9 @@ def main():
         fig_spin(load(spin_csv), layers)
     penalty_csv = Path("results/exp02_h4_penalty_results.csv")
     if penalty_csv.exists():
-        fig_penalty(load(penalty_csv))
+        pen = load(penalty_csv)
+        fig_penalty([r for r in pen if r["d_A"] >= 1.5])
+        fig_summary(rows, pen)
 
 
 if __name__ == "__main__":

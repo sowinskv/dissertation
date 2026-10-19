@@ -28,6 +28,7 @@ for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ.setdefault(_var, "1")   # one BLAS thread per worker (see exp02_h4_ansatze.py)
 
 import argparse  # noqa: E402
+import csv  # noqa: E402
 import json  # noqa: E402
 import sys  # noqa: E402
 import time  # noqa: E402
@@ -56,6 +57,8 @@ CONFIG = {
     "maxiter": 10000,
     "gtol": 1e-7,
     "eigenstate_variance_tol_Ha2": 1e-8,
+    # completes the curve for the closing figure: the short spacings, best setting only
+    "extra": {"spacings_A": [0.5, 0.75, 1.0, 1.25], "hea_layers": [6], "mu_Ha": [0.1]},
 }
 NAME = "exp02_h4_penalty"
 PARTIAL = Path(f"results/{NAME}_partial.jsonl")
@@ -109,6 +112,21 @@ def task(args):
     return row
 
 
+def _typed(r):
+    """a row read back from the results CSV, with its original types."""
+    out = {}
+    for k, v in r.items():
+        if v in ("True", "False"):
+            out[k] = v == "True"
+        elif k in ("layers", "seed", "params", "cnot", "depth", "evaluations", "iterations"):
+            out[k] = int(float(v))
+        elif k == "method":
+            out[k] = v
+        else:
+            out[k] = float(v)
+    return out
+
+
 def _key(r):
     return (r["d_A"], r["layers"], r["seed"], r["mu_Ha"])
 
@@ -120,12 +138,16 @@ def main():
     started = time.time()
 
     done = [json.loads(l) for l in PARTIAL.read_text().splitlines() if l] if PARTIAL.exists() else []
+    out_csv = Path(f"results/{NAME}_results.csv")
+    if not done and out_csv.exists():     # finished earlier: keep those runs, add only new ones
+        done = [_typed(r) for r in csv.DictReader(out_csv.open())]
     done_keys = {_key(r) for r in done}
+    grids = [CONFIG, CONFIG["extra"]]
     # expensive deep circuits first, so the two workers finish together
-    jobs = [(d, L, s, mu) for L in sorted(CONFIG["hea_layers"], reverse=True)
-            for d in CONFIG["spacings_A"] for s in CONFIG["seeds"] for mu in CONFIG["mu_Ha"]
+    jobs = [(d, L, s, mu) for g in grids for L in sorted(g["hea_layers"], reverse=True)
+            for d in g["spacings_A"] for s in CONFIG["seeds"] for mu in g["mu_Ha"]
             if (d, L, s, mu) not in done_keys]
-    total = len(CONFIG["spacings_A"]) * len(CONFIG["hea_layers"]) * len(CONFIG["seeds"]) * len(CONFIG["mu_Ha"])
+    total = sum(len(g["spacings_A"]) * len(g["hea_layers"]) * len(g["mu_Ha"]) for g in grids) * len(CONFIG["seeds"])
     print(f"{len(done)} runs already done, {len(jobs)} to run")
     EXP.start(n_runs=total)
 
