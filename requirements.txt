@@ -4,3 +4,4 @@ pyscf==2.14.0
 matplotlib
 scipy
 numpy
+scikit-learn==1.9.1

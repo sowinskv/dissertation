@@ -1,0 +1,48 @@
+{
+  "experiment": "exp03_h4_baselines",
+  "config": {
+    "molecule": "H4 linear chain",
+    "basis": "sto3g",
+    "labels": "FCI energies at the training spacings",
+    "targets": {
+      "E": "total energy E_FCI(d)",
+      "E-HF": "correlation energy E_FCI(d) - E_HF(d) (delta learning); HF is computed at every test spacing and added back"
+    },
+    "train_range_A": [
+      0.5,
+      2.5
+    ],
+    "n_train": [
+      3,
+      5,
+      9
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "gp": "ConstantKernel * RBF, length scale bounds 0.05-10 A, normalize_y, 5 restarts, alpha 1e-10",
+    "mlp": "2 x 32 tanh, lbfgs, max_iter 5000, alpha 1e-4, inputs to [-1, 1], targets standardised",
+    "test_grid_A": [
+      0.4,
+      3.0,
+      0.05
+    ],
+    "chemical_accuracy_mHa": 1.6,
+    "scikit-learn": "1.9.1"
+  },
+  "python": "3.12.3",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-nature": "0.8.0",
+    "pyscf": "2.14.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "git_commit": "9d795a1",
+  "runtime_s": 9.0,
+  "rows": 1908
+}

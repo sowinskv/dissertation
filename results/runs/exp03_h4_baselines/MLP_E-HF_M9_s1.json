@@ -1,0 +1,24 @@
+{
+ "run_id": "MLP_E-HF_M9_s1",
+ "params": {
+  "method": "MLP",
+  "target": "E-HF",
+  "n_train": 9,
+  "seed": 1
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-10-20T22:30:11",
+ "metrics": {
+  "interp_max_abs_dE_mHa": 0.31477143572722355,
+  "interp_median_abs_dE_mHa": 0.14326119620911015,
+  "interp_frac_chem_acc": 1.0,
+  "extrap_short_max_abs_dE_mHa": 0.25248006610323337,
+  "extrap_long_max_abs_dE_mHa": 3.2148736147750157,
+  "d_eq_error_A": 0.0006938000220850782,
+  "fci_labels": 9,
+  "iterations": 447
+ },
+ "finished_at": "2026-10-20T22:30:11",
+ "duration_s": 0.1
+}

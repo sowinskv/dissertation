@@ -1,0 +1,24 @@
+{
+ "run_id": "GP_E_M9",
+ "params": {
+  "method": "GP",
+  "target": "E",
+  "n_train": 9,
+  "seed": 0
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-10-20T22:30:10",
+ "metrics": {
+  "interp_max_abs_dE_mHa": 131.93266896509303,
+  "interp_median_abs_dE_mHa": 2.2465442746741893,
+  "interp_frac_chem_acc": 0.4146341463414634,
+  "extrap_short_max_abs_dE_mHa": 601.10737355841,
+  "extrap_long_max_abs_dE_mHa": 89.31555036720407,
+  "d_eq_error_A": -0.02565589722556061,
+  "fci_labels": 9,
+  "kernel": "1.07**2 * RBF(length_scale=0.188)"
+ },
+ "finished_at": "2026-10-20T22:30:10",
+ "duration_s": 0.08
+}

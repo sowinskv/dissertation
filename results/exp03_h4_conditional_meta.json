@@ -1,0 +1,54 @@
+{
+  "experiment": "exp03_h4_conditional",
+  "config": {
+    "molecule": "H4 linear chain",
+    "basis": "sto3g",
+    "circuit": "UCCSD (26 angles)",
+    "encoder": "theta(d) = W @ Chebyshev features T_0..T_K of d, scaled from the training range to [-1, 1]",
+    "train_range_A": [
+      0.5,
+      2.5
+    ],
+    "degrees": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "n_train": [
+      3,
+      5,
+      9
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "encoder_init": "uniform(-0.05, 0.05)",
+    "loss": "mean energy over the training spacings (no energy labels)",
+    "test_grid_A": [
+      0.4,
+      3.0,
+      0.05
+    ],
+    "uccsd_per_point": "best of three starts: HF, warm start sweeping up, warm start sweeping down",
+    "optimizer": "L-BFGS-B, central finite-difference gradient (batched), chain rule for the encoder",
+    "maxiter": 5000,
+    "gtol": 1e-07,
+    "chemical_accuracy_mHa": 1.6
+  },
+  "python": "3.12.3",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-nature": "0.8.0",
+    "pyscf": "2.14.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "git_commit": "9d795a1",
+  "runtime_s": 713.2,
+  "rows": 3180
+}

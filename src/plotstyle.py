@@ -217,9 +217,9 @@ def _wrap(fig, text, fontsize):
     return "\n".join(textwrap.fill(par, chars) for par in text.split("\n"))
 
 
-def header(fig, title, subtitle=None, key=None):
+def header(fig, title, subtitle=None, key=None, key_cols=None):
     """header, centred like the lab notebook pages: title in regular weight, gray subtitle,
-    horizontal key (method names or Line2D handles)."""
+    horizontal key (method names or Line2D handles); key_cols < len(key) wraps it onto rows."""
     t, L = theme(), fig._ps
     x = 0.5
     y_in = 0.16
@@ -245,12 +245,13 @@ def header(fig, title, subtitle=None, key=None):
             handles.append(Line2D([], [], color=s["color"], ls=s["ls"], marker=s["marker"],
                                   markersize=4.5, lw=1.6, label=tex(s["label"]),
                                   markerfacecolor=s["color"], markeredgecolor=t["surface"]))
-        leg = fig.legend(handles=handles, loc="upper center", ncol=len(key),
+        ncol = key_cols or len(key)
+        leg = fig.legend(handles=handles, loc="upper center", ncol=ncol,
                          bbox_to_anchor=(x, 1), fontsize=7.5, handlelength=2.0,
                          columnspacing=1.4, handletextpad=0.5, borderaxespad=0,
                          labelcolor=t["ink_2"])
         L["top"].append((_LegendY(leg, x), y_in))
-        y_in += 0.22
+        y_in += 0.22 + 0.17 * (math.ceil(len(key) / ncol) - 1)
     L["header_in"] = y_in + PANEL_TITLE_IN
     _relayout(fig)
 
