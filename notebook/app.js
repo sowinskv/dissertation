@@ -42,7 +42,6 @@ function fmtDate(iso) {
   return `${Number(d)} ${MONTHS[Number(m) - 1]} ${y}`;
 }
 const fmtTime = (iso) => (iso ? iso.split("T")[1].slice(0, 5) : "");
-const expNumber = (name) => (name.match(/^exp(\d+)/)?.[1] || "").padStart(4, "0");
 
 const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
 const pow10 = (e) => (e === 0 ? "1" : e === 1 ? "10" : "10" + String(e).split("").map((c) => SUP[c]).join(""));
@@ -80,23 +79,66 @@ document.addEventListener("DOMContentLoaded", route);
 
 function route() {
   stopPolling();
-  document.body.classList.toggle("on-sheet", !location.hash.startsWith("#/exp/"));
-  const m = location.hash.match(/^#\/exp\/(.+)$/);
-  if (m) showExperiment(decodeURIComponent(m[1]));
-  else { Collage.reset(); state.name = null; showIndex(); }
+  const m = location.hash.match(/^#\/exp\/([^/]+)(?:\/(\w+))?$/);   // #/exp/<name>[/<section>]
+  if (m) showExperiment(decodeURIComponent(m[1]), m[2]);
+  else { state.name = null; showIndex(); }
 }
 
-/* ---------- landing page: the collage ---------- */
+/* ---------- landing page: every logged experiment, newest number last ---------- */
+function runsLine(x) {
+  const done = x.counts.done || 0, total = x.n_runs || x.n_logged;
+  const runs = x.status === "running"
+    ? `<span class="bad">running, ${done} of ${total} runs done</span>` : `${done} runs`;
+  return `${fmtDate(x.started_at)}, ${runs}`;
+}
+
+function entryHTML(x) {
+  const href = `#/exp/${encodeURIComponent(x.name)}`, fig = x.figures?.[0];
+  const links = [`[<a href="${href}">open</a>]`,
+    fig && `[<a href="${href}/figures">figures</a>]`,
+    x.csv && `[<a href="/results/${encodeURIComponent(x.csv)}" download>CSV</a>]`].filter(Boolean).join(" ");
+  return `<article class="entry" data-name="${esc(x.name)}">
+      ${fig ? `<a class="thumb" href="${href}/figures" tabindex="-1" aria-hidden="true">
+        <img src="/results/${encodeURIComponent(fig)}" alt="" loading="lazy"></a>` : `<span class="thumb"></span>`}
+      <div class="entry-text">
+        <h2><a href="${href}"><b>Exp. ${esc(x.label)}:</b> ${chem(x.title)}</a></h2>
+        <p class="meta" data-live>${runsLine(x)}</p>
+        <p class="desc">${chem(x.description)}</p>
+        <p class="links">${links}</p>
+      </div>
+    </article>`;
+}
+
+let shownIndex = "";
 async function showIndex(isPoll = false) {
   let list;
   try { list = await getJSON("/api/experiments"); }
   catch (e) { return renderError(e); }
   document.title = "Lab notebook";
-  if (isPoll) Collage.update(list);
-  else {
+  const signature = list.map((x) => `${x.name}:${x.status}`).join("|");
+  if (isPoll && signature === shownIndex) {
+    // only the run counts change while training: update those lines, keep the page still
+    list.forEach((x) => {
+      const el = app.querySelector(`.entry[data-name="${CSS.escape(x.name)}"] [data-live]`);
+      if (el) el.innerHTML = runsLine(x);
+    });
+  } else {
     if (state.chart) { state.chart.destroy(); state.chart = null; }
-    window.scrollTo(0, 0);
-    await Collage.show(app, list);
+    if (!isPoll) window.scrollTo(0, 0);
+    app.innerHTML = `
+      <header class="masthead">
+        <h1>Lab notebook</h1>
+        <p>Quantum neural networks for molecular simulation</p>
+        <p class="by">J. Sowińska</p>
+      </header>
+      ${list.length ? `<div class="entries">${list.map(entryHTML).join("")}</div>`
+        : `<p class="error">Nothing logged yet. Run an experiment script from the repo root, for example
+           <code>uv run python experiments/exp01_h2_curve.py</code>, and it will appear here.</p>`}
+      <footer class="foot"><p>You just scrolled through <span id="px">0</span> pixels.</p></footer>`;
+    // a figure not drawn yet (experiment still running): leave the slot empty
+    app.querySelectorAll(".thumb img").forEach((img) => img.addEventListener("error", () => img.remove()));
+    shownIndex = signature;
+    countPixels();
   }
   if (list.some((x) => x.status === "running")) poll(() => showIndex(true));
 }
@@ -107,7 +149,7 @@ function renderError(e) {
 }
 
 /* ---------- experiment page ---------- */
-async function showExperiment(name) {
+async function showExperiment(name, section) {
   let exp;
   try { exp = await getJSON(`/api/experiments/${encodeURIComponent(name)}`); }
   catch (e) { return renderError(e); }
@@ -121,14 +163,18 @@ async function showExperiment(name) {
   state.exp = exp;
   document.title = `${exp.title} – Lab notebook`;
 
-  if (fresh || !document.getElementById("runs")) { renderShell(exp); window.scrollTo(0, 0); }
+  if (fresh || !document.getElementById("runs")) {
+    renderShell(exp);
+    window.scrollTo(0, 0);
+    if (section) requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView());
+  }
   syncFilters(exp);
   renderMeta(exp);
   renderTable();
   await renderChart();
   countPixels();
 
-  if (exp.status === "running") poll(() => showExperiment(name));
+  if (exp.status === "running") poll(() => showExperiment(name, section));
 }
 
 function renderShell(exp) {
@@ -150,7 +196,7 @@ function renderShell(exp) {
     <nav class="top">[<a href="#/">back to the notebook</a>]</nav>
     <article class="exp">
       <p class="stamp" id="stamp" hidden></p>
-      <h1><b>Exp. ${esc(expNumber(exp.name).slice(2))}:</b> ${chem(exp.title)}</h1>
+      <h1><b>Exp. ${esc(exp.label)}:</b> ${chem(exp.title)}</h1>
       <p class="meta" id="meta"></p>
       <p class="links">${links}</p>
       <p class="desc">${chem(exp.description)}</p>
@@ -178,7 +224,7 @@ function renderShell(exp) {
 
 function renderMeta(exp) {
   const c = exp.counts, total = exp.n_runs || exp.runs.length;
-  const parts = [fmtDate(exp.started_at), `No. ${expNumber(exp.name)}`];
+  const parts = [fmtDate(exp.started_at)];
   if (exp.status === "running") parts.push(`running, ${c.done || 0} of ${total} runs done`);
   else parts.push(`${c.done || 0} runs${exp.finished_at ? `, finished ${fmtTime(exp.finished_at)}` : ""}`);
   if (c.failed) parts.push(`<span class="bad">${c.failed} failed</span>`);

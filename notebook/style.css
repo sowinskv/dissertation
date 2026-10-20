@@ -1,5 +1,4 @@
-/* lab notebook: plain early-web pages (Helvetica, blue links, black rules) around one
-   pasted-up notebook sheet with pen strokes. */
+/* lab notebook: plain early-web pages (Helvetica, blue links, black rules). */
 
 /* Helvetica where the system has it; Arimo (same letter widths, open licence) elsewhere */
 @font-face { font-family: "Arimo"; font-weight: 400; font-style: normal; font-display: swap;
@@ -46,136 +45,28 @@ a[href^="#/"]:visited { color: var(--link); }
 code { font-size: 0.92em; }
 .error { max-width: 50ch; margin: 120px auto; text-align: center; }
 
-/* ================= the sheet (landing page) ================= */
+/* ================= landing page: list of experiments ================= */
 
-.sheet {
-  --mx: 0; --my: 0;
-  position: relative;
-  width: min(100%, 1280px);
-  aspect-ratio: 1200 / 1000;
-  margin: 0 auto;
-  container-type: inline-size;
-}
-.strokes { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.masthead { margin: 28px auto 48px; text-align: center; }
+.masthead h1 { margin: 0 0 6px; font-size: 32px; font-weight: 700; letter-spacing: -0.01em; }
+.masthead p { margin: 2px 0; }
+.masthead .by { color: var(--pencil); font-size: 14px; }
 
-.item {
-  position: absolute;
-  left: var(--x); top: var(--y); width: var(--w, auto);
-  /* parallax: things lying higher on the sheet follow the pointer more */
-  transform: translate(calc(var(--mx) * var(--d) * 9px), calc(var(--my) * var(--d) * 9px));
-  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.35s ease;
-}
-.item > .inner {
-  position: relative;
-  display: block;
-  transform: rotate(var(--r));
-  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease;
-}
-a.item { color: inherit; text-decoration: none; }
+.entries { display: grid; gap: 44px; max-width: 880px; margin: 0 auto; }
+.entries { max-width: 960px; }
+.entry { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
+.thumb img { display: block; width: 100%; height: auto; }
+.entry h2 { margin: 0 0 6px; font-size: 21px; font-weight: 400; line-height: 1.2; }
+.entry h2 a { color: var(--ink); text-decoration: none; }
+.entry h2 a:hover { text-decoration: underline; }
+.entry h2 sub, .entry .desc sub { font-size: 0.7em; line-height: 0; }
+.entry p { margin: 0 0 6px; max-width: 64ch; }
+.entry .meta, .entry .links { font-size: 15px; }
+.entry .desc { font-size: 15px; }
 
-/* pen */
-path.ink { fill: none; stroke: var(--ink); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-path.ink.dashed { stroke-dasharray: 4 6; stroke-width: 1.3; }
-.mark path.ink { vector-effect: non-scaling-stroke; stroke-width: 1.8; }
-.dot { fill: var(--ink); }
-.hand-svg { font-family: var(--f-text); fill: var(--ink); }
-
-/* notes on the sheet */
-.note {
-  font-size: calc(var(--fs) / 12 * 1cqw);
-  line-height: 1.22;
-  letter-spacing: -0.005em;
-  white-space: nowrap;
-}
-.note small { font-size: 0.82em; }
-.note.bold, .plan-title { font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; }
-.note sub, .note sup { font-size: 0.68em; line-height: 0; }
-.tone-pencil { color: var(--pencil); }
-.tone-pencil path.ink { stroke: var(--pencil); }
-.live { color: var(--red); }
-a.note:hover .words, a.note:focus-visible .words { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.12em; }
-
-.mark { position: absolute; overflow: visible; pointer-events: none; }
-.mark-strike { left: -2%; top: 12%; width: 104%; height: 66%; }
-.mark-circle { left: -19%; top: -36%; width: 138%; height: 172%; }
-.mark-underline { left: -1%; top: 96%; width: 102%; height: 0.32em; }
-
-/* photos: prints glued flat, black and white until you look at them */
-.photo > .inner {
-  aspect-ratio: var(--ar, 4 / 3);
-  overflow: hidden;
-  background: #ededed;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.16), 0 10px 22px -16px rgba(0, 0, 0, 0.55);
-}
-.photo img { display: block; width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.06); transition: filter 0.5s ease; }
-.photo.is-figure > .inner { background: #fff; padding: 2.5%; }
-.photo.is-figure img { object-fit: contain; object-position: top; }
-.photo.lit > .inner { transform: rotate(0deg) scale(1.035); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12), 0 22px 40px -22px rgba(0, 0, 0, 0.6); }
-.photo.lit img { filter: none; }
-
-/* sketches */
-.sketch svg { display: block; width: 100%; height: auto; overflow: visible; }
-.sketch-label { display: block; margin-top: 0.3em; text-align: center; font-size: calc(14 / 12 * 1cqw); }
-
-/* empty slot for the next experiment */
-.frame { height: var(--h); }
-.frame > .inner {
-  height: 100%;
-  display: grid; place-items: center; text-align: center;
-  border: 1.5px dashed var(--pencil);
-  font-size: calc(var(--fs) / 12 * 1cqw); line-height: 1.25;
-}
-
-/* the plan: a real sequence, so it is numbered */
-.plan-title { position: relative; display: inline-block; font-size: 1.15em; }
-.plan ol { margin: 0.35em 0 0; padding: 0; list-style: none; counter-reset: step; }
-.plan li { counter-increment: step; margin: 0.12em 0; transition: opacity 0.35s ease; }
-.plan li::before { content: counter(step) ". "; }
-.plan li:not(.done):not(.running) { color: var(--pencil); }
-.plan .tick { display: none; width: 0.9em; height: 0.75em; margin-left: 0.3em; overflow: visible; vertical-align: -0.05em; }
-.plan li.done .tick { display: inline-block; }
-.plan li.running::after { content: " (running)"; color: var(--red); }
-
-/* hovering one experiment: its photo, notes and arrows stay, the rest of the page steps back */
-.sheet.focus .item:not(.lit):not(.plan) { opacity: 0.18; }
-.sheet.focus .plan li[data-exp]:not(.lit), .sheet.focus .plan li:not([data-exp]) { opacity: 0.3; }
-.arrow path.redraw, .sketch path.redraw { stroke-dasharray: var(--len); animation: draw 0.55s ease-out; }
-
-.sheet-foot { margin: 8px auto 32px; text-align: center; font-size: 14px; }
-
-/* one entrance: prints land, then the writing appears, then the pen strokes */
-.sheet.enter .photo > .inner, .sheet.enter .frame > .inner {
-  animation: land 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
-  animation-delay: calc(var(--i) * 55ms);
-}
-.sheet.enter .note > .inner, .sheet.enter .sketch-label {
-  animation: write 0.75s cubic-bezier(0.4, 0.1, 0.4, 1) backwards;
-  animation-delay: calc(250ms + var(--i) * 55ms);
-}
-.sheet.enter .arrow path.ink, .sheet.enter .sketch path.ink {
-  stroke-dasharray: var(--len);
-  animation: draw 0.8s ease-out backwards;
-  animation-delay: calc(700ms + var(--i) * 55ms);
-}
-@keyframes land { from { opacity: 0; transform: translateY(-14px) rotate(calc(var(--r) * 2.5 + 3deg)) scale(1.06); } }
-@keyframes write { from { clip-path: inset(-60% 100% -60% -20%); } to { clip-path: inset(-60% -20% -60% -20%); } }
-@keyframes draw { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
-
-/* phones: the sheet becomes a column you scroll through, still taped in by hand */
 @media (max-width: 760px) {
-  .page { padding: 16px 16px 0; }
-  .sheet { aspect-ratio: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; container-type: normal; overflow-x: clip; }
-  .strokes { display: none; }
-  .item { position: static; width: auto; transform: none !important; }
-  .note { font-size: calc(var(--fs) * 0.9px); white-space: normal; }
-  .item > .inner { display: inline-block; }
-  .photo { align-self: stretch; margin: 10px 4px 0; }
-  .photo > .inner { display: block; }
-  .sketch { width: min(calc(var(--sw) * 0.85px), 70%); align-self: center; }
-  .sketch > .inner { display: block; }
-  .sketch-label { font-size: 13px; }
-  .frame { height: 150px; width: 80%; align-self: center; }
-  .frame > .inner { display: grid; font-size: 16px; }
+  .entry { grid-template-columns: 1fr; gap: 12px; }
+  .masthead h1 { font-size: 28px; }
 }
 
 /* ================= experiment pages ================= */
@@ -237,5 +128,4 @@ tr.failed td { text-decoration: line-through; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .item { transform: none !important; }
 }

@@ -3,6 +3,12 @@ hamiltonians: molecular geometries and their qubit hamiltonians.
 
 pipeline (thesis chapter 3): PySCF integrals -> second-quantized hamiltonian -> ParityMapper
 with two-qubit Z2 reduction -> sum of pauli strings on qubits.
+
+molecular orbitals are only defined up to a sign. PySCF picks the sign numerically, so it can
+change between runs (e.g. with the number of BLAS threads). the energies do not care, but the
+qubit hamiltonian does: with other signs, the same circuit parameters describe another state.
+build() therefore fixes the sign of every orbital (largest coefficient positive), so saved
+parameters always reproduce the trained state.
 """
 
 from dataclasses import dataclass
@@ -12,6 +18,7 @@ from qiskit.quantum_info import SparsePauliOp
 from qiskit_nature.second_q.drivers import PySCFDriver
 from qiskit_nature.second_q.mappers import ParityMapper
 from qiskit_nature.second_q.problems import ElectronicStructureProblem
+from qiskit_nature.second_q.properties import AngularMomentum, Magnetization
 
 BASIS = "sto3g"
 
@@ -46,8 +53,24 @@ class QubitProblem:
         return self.hamiltonian.to_matrix()
 
 
+def fix_orbital_signs(mo, tol=1e-6):
+    """sign convention for molecular orbitals (columns of mo): the first coefficient whose size
+    is within tol of the largest one is made positive. the tolerance keeps symmetric molecules
+    (equal-size coefficients, e.g. H2) from flipping on rounding noise."""
+    mo = np.array(mo, dtype=float)
+    size = np.abs(mo)
+    for j in range(mo.shape[1]):
+        i = int(np.argmax(size[:, j] >= size[:, j].max() * (1 - tol)))
+        if mo[i, j] < 0:
+            mo[:, j] *= -1
+    return mo
+
+
 def build(atom, basis=BASIS):
-    problem = PySCFDriver(atom=atom, basis=basis).run()
+    driver = PySCFDriver(atom=atom, basis=basis)
+    driver.run_pyscf()
+    driver._calc.mo_coeff = fix_orbital_signs(driver._calc.mo_coeff)   # see module docstring
+    problem = driver.to_problem()
     mapper = ParityMapper(num_particles=problem.num_particles)
     ham = mapper.map(problem.hamiltonian.second_q_op())
     number = mapper.map(problem.properties.particle_number.second_q_ops()["ParticleNumber"])
@@ -70,3 +93,12 @@ def exact_ground_state(qp: QubitProblem, tol=1e-6):
         if abs(np.real(v.conj() @ nmat @ v) - qp.n_electrons) < tol:
             return evals[k] + qp.e_shift, v, evals[0] + qp.e_shift
     raise RuntimeError("no eigenstate with the right electron number")
+
+
+def spin_operators(qp: QubitProblem):
+    """total spin S^2 and its z projection S_z on the reduced qubits (same mapping as H).
+    S^2 = 0 singlet, 2 triplet, 6 quintet."""
+    n = qp.problem.num_spatial_orbitals
+    s2 = qp.mapper.map(AngularMomentum(n).second_q_ops()["AngularMomentum"])
+    sz = qp.mapper.map(Magnetization(n).second_q_ops()["Magnetization"])
+    return s2, sz

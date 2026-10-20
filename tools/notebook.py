@@ -11,13 +11,13 @@ api:
   GET /api/experiments/<name>               experiment metadata + all runs (no histories)
   GET /api/experiments/<name>/history?ids=a,b,c   training histories of the listed runs
   GET /results/<file>                       figures and other files from results/
-  everything else is served from notebook/ (the landing-page collage is notebook/collage.json,
-  experiment photos go to notebook/photos/<experiment>.jpg)
+  everything else is served from notebook/
 """
 
 import argparse
 import json
 import mimetypes
+import re
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -63,6 +63,22 @@ def _extras(name):
     return {"csv": csv.name if csv.exists() else None}
 
 
+def _labels():
+    """experiment numbers as shown on the pages: 01, 02, then 02b, 02c for follow-ups that share
+    a number (ordered by start date)."""
+    groups = {}
+    for folder in RUNS.glob("*"):
+        meta = _read_json(folder / "experiment.json") if folder.is_dir() else None
+        m = re.match(r"exp(\d+)", folder.name)
+        if meta and m:
+            groups.setdefault(m.group(1), []).append((meta.get("started_at") or "", folder.name))
+    out = {}
+    for num, items in groups.items():
+        for i, (_, name) in enumerate(sorted(items)):
+            out[name] = num + ("" if i == 0 else "bcdefghij"[i - 1])
+    return out
+
+
 def list_experiments():
     items = []
     for folder in sorted(p for p in RUNS.glob("*") if p.is_dir()):
@@ -72,7 +88,10 @@ def list_experiments():
         runs = _runs(folder)
         meta.pop("config", None)
         items.append({**meta, **_extras(meta["name"]), "counts": _counts(runs), "n_logged": len(runs)})
-    return items
+    labels = _labels()
+    for x in items:
+        x["label"] = labels.get(x["name"], "")
+    return sorted(items, key=lambda x: (x["label"], x["name"]))
 
 
 def get_experiment(name):
@@ -83,7 +102,8 @@ def get_experiment(name):
     runs = _runs(folder)
     for r in runs:
         r.get("metrics", {}).pop("theta", None)   # parameters are large and not shown
-    return {**meta, **_extras(name), "runs": runs, "counts": _counts(runs)}
+    return {**meta, **_extras(name), "label": _labels().get(name, ""), "runs": runs,
+            "counts": _counts(runs)}
 
 
 def get_history(name, ids):
