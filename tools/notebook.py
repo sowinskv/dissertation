@@ -11,7 +11,7 @@ api:
   GET /api/experiments/<name>               experiment metadata + all runs (no histories)
   GET /api/experiments/<name>/history?ids=a,b,c   training histories of the listed runs
   GET /results/<file>                       figures and other files from results/
-  everything else is served from notebook/ (experiment photos: notebook/photos/<experiment>.jpg)
+  everything else is served from notebook/
 """
 
 import argparse

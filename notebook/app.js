@@ -98,9 +98,8 @@ function entryHTML(x) {
     fig && `[<a href="${href}/figures">figures</a>]`,
     x.csv && `[<a href="/results/${encodeURIComponent(x.csv)}" download>CSV</a>]`].filter(Boolean).join(" ");
   return `<article class="entry" data-name="${esc(x.name)}">
-      <a class="thumb" href="${href}" tabindex="-1" aria-hidden="true">
-        <img src="photos/${encodeURIComponent(x.name)}.jpg" alt="" loading="lazy"
-             data-fallback="${fig ? `/results/${encodeURIComponent(fig)}` : ""}"></a>
+      ${fig ? `<a class="thumb" href="${href}/figures" tabindex="-1" aria-hidden="true">
+        <img src="/results/${encodeURIComponent(fig)}" alt="" loading="lazy"></a>` : `<span class="thumb"></span>`}
       <div class="entry-text">
         <h2><a href="${href}"><b>Exp. ${esc(x.label)}:</b> ${chem(x.title)}</a></h2>
         <p class="meta" data-live>${runsLine(x)}</p>
@@ -136,11 +135,8 @@ async function showIndex(isPoll = false) {
         : `<p class="error">Nothing logged yet. Run an experiment script from the repo root, for example
            <code>uv run python experiments/exp01_h2_curve.py</code>, and it will appear here.</p>`}
       <footer class="foot"><p>You just scrolled through <span id="px">0</span> pixels.</p></footer>`;
-    app.querySelectorAll(".thumb img").forEach((img) => img.addEventListener("error", () => {
-      const fb = img.dataset.fallback;
-      if (fb && img.getAttribute("src") !== fb) { img.src = fb; img.parentElement.classList.add("is-figure"); }
-      else img.parentElement.remove();
-    }));
+    // a figure not drawn yet (experiment still running): leave the slot empty
+    app.querySelectorAll(".thumb img").forEach((img) => img.addEventListener("error", () => img.remove()));
     shownIndex = signature;
     countPixels();
   }

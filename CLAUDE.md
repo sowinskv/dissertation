@@ -63,7 +63,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `plotstyle.py` figure style
   - `tracking.py` experiment tracker (MLflow-like, plain files): `results/runs/<exp>/experiment.json`, `<run>.json`, `<run>.history.jsonl` (thinned)
 - `tools/notebook.py` local lab-notebook web UI over `results/runs/` (stdlib server, `uv run python tools/notebook.py`, http://localhost:8765, refreshes live while an experiment runs)
-- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, one typeface everywhere: Helvetica, with self-hosted Arimo as fallback), plain early-web style (centred, blue [links], bordered tables). Landing page = list of every logged experiment, built from the logs (no manual config), numbered by the server: exp02 -> 02, a later exp02_* follow-up -> 02b. Photo per experiment: `notebook/photos/<exp>.jpg` (falls back to its first figure). New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
+- `notebook/` its front end (vanilla JS, vendored Chart.js 4.5.1, one typeface everywhere: Helvetica, with self-hosted Arimo as fallback), plain early-web style (centred, blue [links], bordered tables). Landing page = list of every logged experiment, built from the logs (no manual config), numbered by the server: exp02 -> 02, a later exp02_* follow-up -> 02b. Picture per experiment = its first figure (the first entry of `figures` in the `Experiment`), linking to its figures. New methods also need a color in `COLORS` in `notebook/app.js`, same as `ps.METHODS`.
 - `tests/` control tests, run with `uv run pytest -q`
 - `results/` CSV/JSON outputs, figures (`fig_expNN_*.pdf/.png`) and training logs (`runs/`)
 

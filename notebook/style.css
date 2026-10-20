@@ -53,9 +53,9 @@ code { font-size: 0.92em; }
 .masthead .by { color: var(--pencil); font-size: 14px; }
 
 .entries { display: grid; gap: 44px; max-width: 880px; margin: 0 auto; }
-.entry { display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start; }
-.thumb img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
-.thumb.is-figure img { object-fit: contain; object-position: top; background: var(--paper); }
+.entries { max-width: 960px; }
+.entry { display: grid; grid-template-columns: 320px 1fr; gap: 28px; align-items: start; }
+.thumb img { display: block; width: 100%; height: auto; }
 .entry h2 { margin: 0 0 6px; font-size: 21px; font-weight: 400; line-height: 1.2; }
 .entry h2 a { color: var(--ink); text-decoration: none; }
 .entry h2 a:hover { text-decoration: underline; }
