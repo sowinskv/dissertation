@@ -37,7 +37,9 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Environment
 
-- Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0, scikit-learn 1.9.1 (RQ3 baselines) (see requirements.txt).
+- Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0, scikit-learn 1.9.1 (RQ3 baselines), qiskit-ibm-runtime 0.51.0 + qiskit-aer 0.18.2 (RQ4) (see requirements.txt).
+- IBM Quantum is not reachable from the cloud container (network allowlist): hardware runs happen on Joanna's machine (`experiments/exp04_h2_hardware.py --backend ibm`), account saved once with `QiskitRuntimeService.save_account(...)` in ~/.qiskit, never in the repo.
+- Noisy simulation: use Aer's SamplerV2 with `AerSimulator.from_backend(fake)`; the local mode of qiskit-ibm-runtime's SamplerV2 ignores `seed_simulator` (runs not reproducible).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
 - Experiments that use several worker processes must set OMP_NUM_THREADS=1 (done at the top of the script); multithreaded BLAS on tiny matrices otherwise makes training ~30x slower.
 - If the parent process builds hamiltonians (PySCF / qiskit) before starting workers, use a `spawn` pool: forked workers deadlocked inside qiskit's StatevectorEstimator (exp03).
@@ -60,6 +62,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `ansatze.py` UCCSD, HEA(layers), circuit resources (params, CNOT, depth)
   - `fastsim.py` exact batched numpy statevector simulation of a qiskit circuit (used for training; tested against StatevectorEstimator to 1e-10)
   - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
+  - `hardware.py` energy from shots (qubit-wise commuting measurement groups), readout mitigation (full assignment matrix), ZNE by folding two-qubit gates + extrapolation
   - `conditional.py` conditional QNN (Meta-VQE style): Chebyshev encoder d -> circuit angles, trained on the mean energy over M geometries (no labels), chain-rule gradient
   - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
   - `plotstyle.py` figure style
@@ -87,4 +90,8 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - Extrapolation beyond 2.5 A: 14-45 mHa, worse with higher degree (K=5,M=9: 251 mHa); per-point UCCSD itself switches to a lower branch from ~2.7 A.
   - Baselines (`experiments/exp03_baselines.py`, RQ3, label 03b): GP and MLP on FCI labels at the same spacings. On the total energy they fail (worst 83-395 mHa, steep wall at short d); on the correlation energy E_FCI - E_HF (HF at every test point) they win: M=5 MLP 1.0 mHa / GP 2.5 mHa, M=9 GP 0.05 mHa. Honest result: with exact labels classical regression beats the conditional QNN, which is capped by UCCSD; the QNN needs no labels and returns a state.
   - Figures: `fig_exp03_h4_curve`, `fig_exp03_h4_grid`, `fig_exp03_h4_baselines`.
-- Next: conditional HEA + spin penalty (can it beat the UCCSD ceiling?), LiH with an active space, IBM hardware.
+- exp04 (`experiments/exp04_h2_hardware.py`, RQ4, branch exp04): trained H2 circuits (UCCSD 3 angles / 4 CZ, HEA L2 best of 5 / 2 CZ; both reach FCI exactly, angles in `results/exp04_h2_params.json`) evaluated from shots. Own mitigation (same code on simulator and hardware): readout (4x4 assignment matrix) and ZNE (fold CZ x1/x3/x5, linear fit); raw counts saved per run (`results/exp04_h2_counts_<label>.json`). Qubits: best connected pair by CZ + readout error (Fez: 96-103), optimization_level 1.
+  - Noisy simulator of IBM Fez (calibration noise model), 16384 shots, 5 seeds, R = 0.5-2.5 A (6 points): raw error 11-37 mHa (UCCSD) / 7-24 mHa (HEA), readout mitigation alone small gain (8-31 / 4-17), readout + ZNE mean 1.4-3.8 / 0.04-3.4 mHa with seed spread 1-4 mHa (shot noise, amplified by the extrapolation). Single runs within 1.6 mHa: raw 0/30, readout+ZNE 8/30 (UCCSD), 13/30 (HEA). Fewer two-qubit gates = less noise: HEA beats UCCSD on hardware although both are exact. Richardson (1,3,5) and linear (1,3) fits: larger variance.
+  - Hardware (pending, Joanna's machine): default R = 0.735, 1.5, 2.5 A, 40 circuits x 16384 shots, estimated ~3 min QPU (IBM Open plan: 10 min / month); script prints the estimate and asks before submitting; `--dry-run` checks the account without using QPU time. Results append to the same CSV (kind = hardware); `exp04_plot.py` adds them as hollow markers.
+  - Figures: `fig_exp04_h2_noise`, `fig_exp04_h2_zne`.
+- Next: H2 on IBM hardware (run above), conditional HEA + spin penalty (can it beat the UCCSD ceiling?), LiH with an active space.

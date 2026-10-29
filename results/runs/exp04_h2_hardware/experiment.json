@@ -1,0 +1,51 @@
+{
+ "name": "exp04_h2_hardware",
+ "title": "H\u2082 on a noisy IBM processor: readout mitigation and zero-noise extrapolation",
+ "description": "Trained UCCSD and HEA circuits for H\u2082 evaluated from shots on a noisy simulator of IBM Fez and on real IBM hardware, raw and with readout mitigation and zero-noise extrapolation. Research question 4.",
+ "config": {
+  "molecule": "H2",
+  "basis": "sto3g",
+  "qubits": 2,
+  "bond_lengths_A": [
+   0.5,
+   0.735,
+   1.0,
+   1.5,
+   2.0,
+   2.5
+  ],
+  "methods": {
+   "UCCSD": "from HF (theta = 0)",
+   "HEA_L2": "2 layers, best of 5 random starts uniform(-0.1, 0.1)"
+  },
+  "hardware_bond_lengths_A": [
+   0.735,
+   1.5,
+   2.5
+  ],
+  "fake_backend": "FakeFez",
+  "simulator_seeds": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ],
+  "shots": 16384,
+  "fold_factors": [
+   1,
+   3,
+   5
+  ],
+  "zne_fit": "linear least squares over all fold factors, value at 0",
+  "transpile": "optimization_level 1 (keeps the circuit as designed), one fixed pair of physical qubits for every circuit",
+  "readout_calibration": "all 4 basis states, same qubits and shots, full 4x4 assignment matrix inverted"
+ },
+ "figures": [
+  "fig_exp04_h2_noise.png"
+ ],
+ "status": "done",
+ "started_at": "2026-10-30T00:26:25",
+ "finished_at": "2026-10-30T00:35:30",
+ "n_runs": null
+}
