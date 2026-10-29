@@ -1,0 +1,24 @@
+{
+ "run_id": "GP_E-HF_M5",
+ "params": {
+  "method": "GP",
+  "target": "E-HF",
+  "n_train": 5,
+  "seed": 0
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-10-20T22:30:11",
+ "metrics": {
+  "interp_max_abs_dE_mHa": 2.4855349796286674,
+  "interp_median_abs_dE_mHa": 0.4620057552906509,
+  "interp_frac_chem_acc": 0.8780487804878049,
+  "extrap_short_max_abs_dE_mHa": 0.049937880697514814,
+  "extrap_long_max_abs_dE_mHa": 47.54263683356474,
+  "d_eq_error_A": 0.0008620147852331783,
+  "fci_labels": 5,
+  "kernel": "1.25**2 * RBF(length_scale=1.16)"
+ },
+ "finished_at": "2026-10-20T22:30:11",
+ "duration_s": 0.03
+}

@@ -1,0 +1,24 @@
+{
+ "run_id": "MLP_E_M5_s3",
+ "params": {
+  "method": "MLP",
+  "target": "E",
+  "n_train": 5,
+  "seed": 3
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-10-20T22:30:10",
+ "metrics": {
+  "interp_max_abs_dE_mHa": 206.58519275007592,
+  "interp_median_abs_dE_mHa": 5.300503959031699,
+  "interp_frac_chem_acc": 0.2682926829268293,
+  "extrap_short_max_abs_dE_mHa": 540.7840117686882,
+  "extrap_long_max_abs_dE_mHa": 8.40930041198562,
+  "d_eq_error_A": 0.1596678936521435,
+  "fci_labels": 5,
+  "iterations": 620
+ },
+ "finished_at": "2026-10-20T22:30:10",
+ "duration_s": 0.12
+}

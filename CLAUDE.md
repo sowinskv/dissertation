@@ -37,9 +37,10 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Environment
 
-- Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0 (see requirements.txt).
+- Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0, scikit-learn 1.9.1 (RQ3 baselines) (see requirements.txt).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
 - Experiments that use several worker processes must set OMP_NUM_THREADS=1 (done at the top of the script); multithreaded BLAS on tiny matrices otherwise makes training ~30x slower.
+- If the parent process builds hamiltonians (PySCF / qiskit) before starting workers, use a `spawn` pool: forked workers deadlocked inside qiskit's StatevectorEstimator (exp03).
 
 ## Figures
 
@@ -59,6 +60,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - `ansatze.py` UCCSD, HEA(layers), circuit resources (params, CNOT, depth)
   - `fastsim.py` exact batched numpy statevector simulation of a qiskit circuit (used for training; tested against StatevectorEstimator to 1e-10)
   - `train.py` VQE: L-BFGS-B + batched central finite-difference gradient
+  - `conditional.py` conditional QNN (Meta-VQE style): Chebyshev encoder d -> circuit angles, trained on the mean energy over M geometries (no labels), chain-rule gradient
   - `runlog.py` saves `<name>_results.csv` + `<name>_meta.json` (config, versions, git commit, runtime)
   - `plotstyle.py` figure style
   - `tracking.py` experiment tracker (MLflow-like, plain files): `results/runs/<exp>/experiment.json`, `<run>.json`, `<run>.history.jsonl` (thinned)
@@ -79,4 +81,10 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
   - Reproducibility bug found: PySCF orbital signs varied between runs, so 71/270 saved HEA parameter sets did not reproduce their state with a freshly built hamiltonian (energies unaffected). Fixed in `hamiltonians.build` (sign convention, tested); the spin check recovers each old run's signs by matching its logged energy.
   - Spin penalty (`experiments/exp02_penalty.py`, cost <H> + mu <S^2>, mu = 0 / 0.1 / 1 Ha, same starts and fixed-sign hamiltonian in every arm, d = 1.5-2.5 A, L = 2 and 6, 5 seeds; figure `fig_exp02_h4_penalty`): the control arm reproduces the quintet traps (L=2: 14/25, L=6: 5/25). Penalty removes every quintet trap and all spin contamination at L=6 (mu=0.1: chemical accuracy 10 -> 16 of 25, median error 2.77 -> 0.92 mHa, worst 57.7 -> 22.1 mHa, same training cost). mu=1 is too strong (median 1.10 mHa but worst 118.8 mHa). At L=2 the penalty cannot help: the circuit cannot represent a good singlet, the quintet was its lowest reachable energy; mu=0.1 leaves S^2 ~ 0.9 and mu=1 forces a near-HF singlet (median 214 mHa). Takeaway: a penalty fixes wrong-symmetry traps only when the ansatz is expressive enough; it adds no expressivity.
   - Closing result (`fig_exp02_h4_summary`, extra runs d = 0.5-1.25 A at L=6, mu=0.1): HEA 6 layers + spin penalty, best of 5 starts, is within chemical accuracy at all 9 spacings (worst best-of-5: 0.082 mHa at 2.25 A); single starts still fail (worst 22 mHa). UCCSD exceeds 1.6 mHa from 1.75 A (up to 5.3 mHa), CCSD from 1.5 A. Shallow circuit (30 CNOT) + penalty + restarts beats deep UCCSD (1072 CNOT) where correlation is strong, at ~680x the training cost per start (~3400x for 5 starts; median circuit evaluations, 863k vs 1272).
-- Next: conditional QNN (RQ2/RQ3), LiH with an active space, IBM hardware.
+- exp03 (`experiments/exp03_conditional.py`, RQ2): one UCCSD circuit for the whole H4 curve, angles = Chebyshev encoder of d (degree K = 1 linear Meta-VQE, 2, 3, 5), trained on the mean energy of M = 3 / 5 / 9 spacings in 0.5-2.5 A (no labels), 5 inits; test grid 0.40-3.00 A step 0.05. Reference "UCCSD per point" = best of 3 starts (HF, warm sweep up, warm sweep down): per-point UCCSD has several local minima above ~2.3 A (HF start best at 18/53 points).
+  - K = 3, M = 5: worst error in 0.5-2.5 A 5.19 mHa (UCCSD per point 5.28), 49% of spacings within 1.6 mHa (per point 51%), at most 1.14 mHa above UCCSD per point and up to 2.5 mHa below it near 2.4 A (shared encoder finds lower minima); d_eq error 0.002 A. Training 64.7k circuit evaluations vs 48.6k for 41 separate UCCSD runs; afterwards 1 evaluation per new d.
+  - Linear encoder too weak (worst 7.7-10.5 mHa). Overfitting when K + 1 > M (K=3,M=3: 290 mHa; K=5,M<=5: 460-580 mHa) although no labels are used. Full-rank cases: all 5 inits identical.
+  - Extrapolation beyond 2.5 A: 14-45 mHa, worse with higher degree (K=5,M=9: 251 mHa); per-point UCCSD itself switches to a lower branch from ~2.7 A.
+  - Baselines (`experiments/exp03_baselines.py`, RQ3, label 03b): GP and MLP on FCI labels at the same spacings. On the total energy they fail (worst 83-395 mHa, steep wall at short d); on the correlation energy E_FCI - E_HF (HF at every test point) they win: M=5 MLP 1.0 mHa / GP 2.5 mHa, M=9 GP 0.05 mHa. Honest result: with exact labels classical regression beats the conditional QNN, which is capped by UCCSD; the QNN needs no labels and returns a state.
+  - Figures: `fig_exp03_h4_curve`, `fig_exp03_h4_grid`, `fig_exp03_h4_baselines`.
+- Next: conditional HEA + spin penalty (can it beat the UCCSD ceiling?), LiH with an active space, IBM hardware.
