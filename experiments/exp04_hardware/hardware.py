@@ -15,13 +15,13 @@ hardware noise (gate errors, decoherence, readout errors).
                its calibration data), 5 shot seeds  -- runs anywhere
                a real IBM processor                  -- needs an IBM Quantum account
 
-every run saves the raw counts (results/exp04_h2_counts_<label>.json), so the mitigation can
+every run saves the raw counts (results/counts/exp04_h2_counts_<label>.json), so the mitigation can
 be recomputed later without touching the hardware again.
 
 run (from repo root):
-  python experiments/exp04_h2_hardware.py                        # noisy simulator, 5 seeds
-  python experiments/exp04_h2_hardware.py --backend ibm          # least busy real IBM processor
-  python experiments/exp04_h2_hardware.py --backend ibm_fez      # a named one
+  python experiments/exp04_hardware/hardware.py                        # noisy simulator, 5 seeds
+  python experiments/exp04_hardware/hardware.py --backend ibm          # least busy real IBM processor
+  python experiments/exp04_hardware/hardware.py --backend ibm_fez      # a named one
 options: --shots N, --bond-lengths 0.735 1.5, --dry-run (build and estimate QPU time, submit nothing)
 
 IBM account (once, on your own machine, never in the repo):
@@ -50,7 +50,8 @@ import numpy as np  # noqa: E402
 from qiskit.quantum_info import Statevector  # noqa: E402
 from qiskit.transpiler import generate_preset_pass_manager  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import ansatze, hamiltonians as hm, hardware as hw, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.fastsim import FastCircuit  # noqa: E402
@@ -74,14 +75,14 @@ CONFIG = {
     "readout_calibration": "all 4 basis states, same qubits and shots, full 4x4 assignment matrix inverted",
 }
 NAME = "exp04_h2_hardware"
-PARAMS = Path("results/exp04_h2_params.json")
-RESULTS = Path(f"results/{NAME}_results.csv")
+PARAMS = OUT / "exp04_h2_params.json"
+RESULTS = OUT / f"{NAME}_results.csv"
 EXP = tracking.Experiment(
     NAME, title="H₂ on a noisy IBM processor: readout mitigation and zero-noise extrapolation",
     description="Trained UCCSD and HEA circuits for H₂ evaluated from shots on a noisy simulator of "
                 "IBM Fez and on real IBM hardware, raw and with readout mitigation and zero-noise "
                 "extrapolation. Research question 4.",
-    config=CONFIG, figures=["fig_exp04_h2_noise.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp04_h2_noise.png"])
 
 
 def circuit_for(method, qp):
@@ -300,7 +301,8 @@ def main():
         counts, meta = run_sampler(backend, circuits, args.shots, seed, hardware=kind == "hardware")
         cal_counts = counts[len(keys):]
         rows = evaluate(keys, counts[:len(keys)], cal_counts, info, bond_lengths)
-        Path(f"results/exp04_h2_counts_{label}.json").write_text(json.dumps({
+        (OUT / "counts").mkdir(parents=True, exist_ok=True)
+        (OUT / "counts" / f"exp04_h2_counts_{label}.json").write_text(json.dumps({
             "backend": backend.name, "kind": kind, "date": date, "seed": seed, "shots": args.shots,
             "layout": layout, "qubit_properties": props, **meta,
             "counts": {f"{m}|{d}|{b}|x{f}": c for (m, d, b, f), c in zip(keys, counts)},
@@ -335,7 +337,7 @@ def main():
     rows.sort(key=lambda r: (r["kind"], r["run_label"], r["method"], float(r["d_A"])))
     runlog.save(NAME, rows, {**CONFIG, "qiskit-ibm-runtime": version("qiskit-ibm-runtime"),
                              "qiskit-aer": version("qiskit-aer"), "last_backend": backend.name,
-                             "last_shots": args.shots}, started)
+                             "last_shots": args.shots}, started, out_dir=OUT)
     EXP.finish()
 
 

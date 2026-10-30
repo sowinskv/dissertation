@@ -96,10 +96,10 @@ function entryHTML(x) {
   const href = `#/exp/${encodeURIComponent(x.name)}`, fig = x.figures?.[0];
   const links = [`[<a href="${href}">open</a>]`,
     fig && `[<a href="${href}/figures">figures</a>]`,
-    x.csv && `[<a href="/results/${encodeURIComponent(x.csv)}" download>CSV</a>]`].filter(Boolean).join(" ");
+    x.csv && `[<a href="${x.files}${encodeURIComponent(x.csv)}" download>CSV</a>]`].filter(Boolean).join(" ");
   return `<article class="entry" data-name="${esc(x.name)}">
       ${fig ? `<a class="thumb" href="${href}/figures" tabindex="-1" aria-hidden="true">
-        <img src="/results/${encodeURIComponent(fig)}" alt="" loading="lazy"></a>` : `<span class="thumb"></span>`}
+        <img src="${x.files}${encodeURIComponent(fig)}" alt="" loading="lazy"></a>` : `<span class="thumb"></span>`}
       <div class="entry-text">
         <h2><a href="${href}"><b>Exp. ${esc(x.label)}:</b> ${chem(x.title)}</a></h2>
         <p class="meta" data-live>${runsLine(x)}</p>
@@ -182,14 +182,14 @@ function renderShell(exp) {
     `<b>${esc(k.replaceAll("_", " "))}:</b> ${esc(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v)}`).join("<br>");
   const figures = (exp.figures || []).map((f) => `
     <figure>
-      <a href="/results/${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="/results/${encodeURIComponent(f)}" alt="Figure from results/${esc(f)}" loading="lazy"></a>
-      <figcaption>results/${esc(f)} [<a href="/results/${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</figcaption>
+      <a href="${exp.files}${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="${exp.files}${encodeURIComponent(f)}" alt="Figure from ${esc(exp.folder)}/results/${esc(f)}" loading="lazy"></a>
+      <figcaption>${esc(exp.folder)}/results/${esc(f)} [<a href="${exp.files}${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</figcaption>
     </figure>`).join("");
   const links = [
     figures && `[<a href="#figures" data-jump>figures</a>]`,
     `[<a href="#curves" data-jump>training curves</a>]`,
     `[<a href="#runs-title" data-jump>runs</a>]`,
-    exp.csv && `[<a href="/results/${encodeURIComponent(exp.csv)}" download>download CSV</a>]`,
+    exp.csv && `[<a href="${exp.files}${encodeURIComponent(exp.csv)}" download>download CSV</a>]`,
   ].filter(Boolean).join(" ");
 
   app.innerHTML = `

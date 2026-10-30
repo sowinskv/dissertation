@@ -7,9 +7,9 @@ compares four methods for H2 in the STO-3G basis:
   - VQE-UCCSD (QNN with a chemistry-inspired ansatz)
   - VQE-HEA   (QNN with a hardware-efficient ansatz, 2 layers)
 
-run (from repo root):  python experiments/exp01_h2_curve.py
+run (from repo root):  python experiments/exp01_h2_curve/run.py
 output: results/exp01_h2_results.csv, results/exp01_h2_meta.json
-figure: python experiments/exp01_plot.py
+figure: python experiments/exp01_h2_curve/plot.py
 """
 
 import sys
@@ -19,7 +19,8 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.train import run_vqe  # noqa: E402
@@ -40,7 +41,7 @@ EXP = tracking.Experiment(
     "exp01_h2", title="Potential energy curve of H₂",
     description="Validation of the pipeline: HF, FCI, VQE-UCCSD and VQE-HEA (2 layers) "
                 "on H₂ in STO-3G, bond length 0.3-3.0 Å.",
-    config=CONFIG, figures=["fig_exp01_h2.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp01_h2.png"])
 
 
 def _train(name, R, circuit, qp, e_fci, theta0, seed=None):
@@ -102,7 +103,7 @@ def main():
               f"max ΔE={d.max():.2e} mHa  "
               f"points within chemical accuracy: {100 * np.mean(d <= CHEM_ACC_MHA):.0f}%")
 
-    runlog.save("exp01_h2", rows, CONFIG, started)
+    runlog.save("exp01_h2", rows, CONFIG, started, out_dir=OUT)
     EXP.finish()
 
 

@@ -16,7 +16,7 @@ so each run may have used other signs than today's hamiltonian. flipping orbital
 every basis state by (-1)^(n_i), so for every run we try all 2^4 sign patterns and keep the
 one that reproduces its logged energy (and fidelity) exactly.
 
-run (from repo root):  python experiments/exp02_spin_check.py
+run (from repo root):  python experiments/exp02_h4/spin_check.py
 output: results/exp02_h4_spin_results.csv, results/exp02_h4_spin_meta.json,
         results/exp02_h4_spectrum.csv (lowest exact states with their spin, per spacing)
 """
@@ -30,7 +30,8 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from qiskit_nature.second_q.operators import FermionicOp  # noqa: E402
 from qiskit_nature.second_q.properties import AngularMomentum, Magnetization  # noqa: E402
 
@@ -39,7 +40,7 @@ from src.fastsim import FastCircuit  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
-RUNS = Path("results/runs/exp02_h4")
+RUNS = OUT / "runs" / "exp02_h4"
 CONFIG = {
     "source": "results/runs/exp02_h4 (saved final parameters of exp02)",
     "spacings_A": [round(x, 2) for x in np.arange(0.5, 2.51, 0.25)],
@@ -143,9 +144,9 @@ def main():
             })
         print(f"d={d}: done")
 
-    runlog.save("exp02_h4_spin", rows, CONFIG, started)
+    runlog.save("exp02_h4_spin", rows, CONFIG, started, out_dir=OUT)
     keys = list(spec_rows[0])
-    with open("results/exp02_h4_spectrum.csv", "w") as f:
+    with open(OUT / "exp02_h4_spectrum.csv", "w") as f:
         f.write(",".join(keys) + "\n")
         for r in spec_rows:
             f.write(",".join(str(r[k]) for k in keys) + "\n")

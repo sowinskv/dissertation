@@ -1,10 +1,11 @@
 """
 tracking: a small experiment tracker (like MLflow, but plain files in the repo).
 
-layout, one folder per experiment:
-    results/runs/<experiment>/experiment.json        title, description, config, status, figures
-    results/runs/<experiment>/<run_id>.json          params, status, final metrics
-    results/runs/<experiment>/<run_id>.history.jsonl training history, one line per logged step
+layout, one folder per experiment, inside the experiment folder's results/runs/
+(root=OUT / "runs" in every script, OUT = experiments/expNN_<name>/results):
+    <root>/<experiment>/experiment.json        title, description, config, status, figures
+    <root>/<experiment>/<run_id>.json          params, status, final metrics
+    <root>/<experiment>/<run_id>.history.jsonl training history, one line per logged step
 
 every run writes only its own files, so parallel worker processes never collide.
 files are replaced atomically (write to tmp, then rename), so the notebook UI never reads
@@ -15,7 +16,7 @@ up to 1000, then every 100th, plus the final step.
 
 usage:
     exp = tracking.Experiment("exp02_h4", title="...", description="...", config=CONFIG,
-                              figures=["fig_exp02_h4.png"])
+                              root=OUT / "runs", figures=["fig_exp02_h4.png"])
     exp.start(n_runs=279)
     with exp.run("d1.50_hea_L3_s0", params={...}, reference=e_fci) as run:
         res = run_vqe(..., callback=run.log)
@@ -30,7 +31,7 @@ import os
 import time
 from pathlib import Path
 
-ROOT = Path("results/runs")
+ROOT = Path("results/runs")   # fallback only; experiment scripts pass their own root
 
 
 def _now():

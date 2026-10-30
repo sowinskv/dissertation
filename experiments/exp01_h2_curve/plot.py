@@ -3,7 +3,7 @@ figure for experiment 01 (H2 potential energy curve), drawn from the saved CSV.
 
 plots are separate from experiments: change the figure without re-running the physics.
 
-run (from repo root):  python experiments/exp01_plot.py
+run (from repo root):  python experiments/exp01_h2_curve/plot.py
 input:   results/exp01_h2_results.csv
 output:  results/fig_exp01_h2.pdf, results/fig_exp01_h2.png
 """
@@ -14,7 +14,8 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import plotstyle as ps  # noqa: E402
 
 FLOOR_MHA = 1e-13   # errors below this are at machine precision; drawn on the floor
@@ -28,7 +29,7 @@ def load(path):
 
 def main():
     ps.use()
-    raw = load("results/exp01_h2_results.csv")
+    raw = load(OUT / "exp01_h2_results.csv")
     R = raw["R_A"]
     d = {m: raw[f"E_{m}_Ha"] for m in ("HF", "FCI", "UCCSD", "HEA")}
 
@@ -72,7 +73,7 @@ def main():
            else [(e_h, "HEA"), (e_u, "UCCSD")])
     ps.end_labels(ax2, R[-1], [(err["HF"][-1], "HF")] + vqe)
 
-    ps.save(fig, "results/fig_exp01_h2")
+    ps.save(fig, OUT / "fig_exp01_h2")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 """
 figures for experiment 02 (H4: UCCSD vs HEA), drawn from the saved CSV.
 
-run (from repo root):  python experiments/exp02_plot.py
-input:   results/exp02_h4_results.csv, results/exp02_h4_spin_results.csv (exp02_spin_check.py)
+run (from repo root):  python experiments/exp02_h4/plot.py
+input:   results/exp02_h4_results.csv, results/exp02_h4_spin_results.csv (experiments/exp02_h4/spin_check.py)
 output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation strength
          results/fig_exp02_h4_cost.pdf/.png   cost of accuracy: CNOT count and training cost
          results/fig_exp02_h4_spin.pdf/.png   final HEA states: energy error vs total spin
@@ -12,7 +12,6 @@ output:  results/fig_exp02_h4.pdf/.png        error vs spacing, with correlation
 """
 
 import argparse
-import csv
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -20,27 +19,13 @@ from pathlib import Path
 import numpy as np
 from matplotlib.lines import Line2D
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import plotstyle as ps  # noqa: E402
+from src.runlog import load  # noqa: E402
 
 BASE_NOTE = "H₄ chain, STO-3G, noiseless statevector."
 
-
-def load(path):
-    with open(path) as f:
-        rows = list(csv.DictReader(f))
-    for r in rows:
-        for k, v in list(r.items()):
-            if v == "":
-                r[k] = None
-            elif v in ("True", "False"):
-                r[k] = v == "True"
-            else:
-                try:
-                    r[k] = float(v)
-                except ValueError:
-                    pass   # text columns (method, spin names) stay strings
-    return rows
 
 
 def by_spacing(rows, method, layers=None, key="dE_mHa"):
@@ -107,7 +92,7 @@ def fig_error_vs_spacing(rows, best_l):
                    "Hollow diamonds: CCSD below the exact energy.")
     ps.end_labels(ax2, d[-1], [(hf[-1], "HF"), (abs(cc[-1]), "CCSD"),
                                (uc[-1], "UCCSD"), (med[-1], "HEA")])
-    ps.save(fig, "results/fig_exp02_h4")
+    ps.save(fig, OUT / "fig_exp02_h4")
 
 
 def fig_cost(rows, layers):
@@ -145,7 +130,7 @@ def fig_cost(rows, layers):
 
     ps.header(fig, "VQE accuracy vs circuit size and training cost, H₄\u00a0chain", key=["UCCSD", "HEA"])
     ps.footer(fig, f"{BASE_NOTE} HEA: median of 5 random starts; numbers = layers.")
-    ps.save(fig, "results/fig_exp02_h4_cost")
+    ps.save(fig, OUT / "fig_exp02_h4_cost")
 
 
 def fig_spin(spin_rows, layers):
@@ -182,7 +167,7 @@ def fig_spin(spin_rows, layers):
     ps.footer(fig, f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
                    f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
                    f"Errors below 10⁻⁴ mHa are drawn at the floor.")
-    ps.save(fig, "results/fig_exp02_h4_spin")
+    ps.save(fig, OUT / "fig_exp02_h4_spin")
 
 
 def fig_penalty(rows):
@@ -227,7 +212,7 @@ def fig_penalty(rows):
     ps.footer(fig, f"{BASE_NOTE} Cost E + $\\mu$ S²; each point is one start, run with and without the "
                    "penalty from the same parameters (d = 1.5-2.5 Å, 5 starts). Below the dotted diagonal "
                    "the penalty lowered the error. Errors below 10⁻⁴ mHa are drawn at the floor.")
-    ps.save(fig, "results/fig_exp02_h4_penalty")
+    ps.save(fig, OUT / "fig_exp02_h4_penalty")
 
 
 def fig_summary(rows, pen_rows, layers=6, mu=0.1):
@@ -280,22 +265,22 @@ def fig_summary(rows, pen_rows, layers=6, mu=0.1):
                    "energy. Errors below 10⁻⁴ mHa are drawn at the floor.")
     ps.end_labels(ax, d[-1], [(hf[-1], "HF"), (abs(cc[-1]), "CCSD"), (uc[-1], "UCCSD"),
                               (best[-1], "HEA + penalty")])
-    ps.save(fig, "results/fig_exp02_h4_summary")
+    ps.save(fig, OUT / "fig_exp02_h4_summary")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv", default="results/exp02_h4_results.csv")
+    parser.add_argument("--csv", default=OUT / "exp02_h4_results.csv")
     args = parser.parse_args()
     ps.use()
     rows = load(args.csv)
     layers = sorted({int(r["layers"]) for r in rows if r["method"] == "HEA"})
     fig_error_vs_spacing(rows, max(layers))
     fig_cost(rows, layers)
-    spin_csv = Path("results/exp02_h4_spin_results.csv")
+    spin_csv = OUT / "exp02_h4_spin_results.csv"
     if spin_csv.exists():
         fig_spin(load(spin_csv), layers)
-    penalty_csv = Path("results/exp02_h4_penalty_results.csv")
+    penalty_csv = OUT / "exp02_h4_penalty_results.csv"
     if penalty_csv.exists():
         pen = load(penalty_csv)
         fig_penalty([r for r in pen if r["d_A"] >= 1.5])

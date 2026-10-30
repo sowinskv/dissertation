@@ -21,7 +21,7 @@ references on the same test grid:
     of the three is the best this circuit can do at that spacing ("UCCSD per point"): the
     conditional model cannot beat it, so (E_cond - E_UCCSD) is the price of the encoder.
 
-run (from repo root):  python experiments/exp03_conditional.py [--workers 2]
+run (from repo root):  python experiments/exp03_conditional/conditional.py [--workers 2]
 output: results/exp03_h4_conditional_results.csv  (conditional models, one row per model x test spacing)
         results/exp03_h4_conditional_summary.csv  (one row per conditional model)
         results/exp03_h4_reference.csv            (references per test spacing)
@@ -32,7 +32,7 @@ partial results: results/exp03_h4_conditional_partial.jsonl (resume after an int
 import os
 
 for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
-    os.environ.setdefault(_var, "1")   # one BLAS thread per worker (see exp02_h4_ansatze.py)
+    os.environ.setdefault(_var, "1")   # one BLAS thread per worker (see experiments/exp02_h4/ansatze.py)
 
 import argparse  # noqa: E402
 import csv  # noqa: E402
@@ -45,7 +45,8 @@ from pathlib import Path  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.conditional import ConditionalQNN  # noqa: E402
@@ -74,7 +75,7 @@ CONFIG = {
     "chemical_accuracy_mHa": CHEM_ACC_mHa,
 }
 NAME = "exp03_h4_conditional"
-PARTIAL = Path(f"results/{NAME}_partial.jsonl")
+PARTIAL = OUT / f"{NAME}_partial.jsonl"
 GRID = [round(x, 2) for x in np.arange(0.40, 3.0001, 0.05)]
 LO, HI = CONFIG["train_range_A"]
 EXP = tracking.Experiment(
@@ -83,7 +84,7 @@ EXP = tracking.Experiment(
                 "trained on 3, 5 or 9 spacings with energy only, no FCI labels. Tested on "
                 "0.4-3.0 Å: interpolation inside 0.5-2.5 Å, extrapolation outside. "
                 "Research question 2.",
-    config=CONFIG, figures=["fig_exp03_h4_curve.png", "fig_exp03_h4_grid.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp03_h4_curve.png", "fig_exp03_h4_grid.png"])
 
 # filled in each worker by _init: hamiltonians and exact states on the test grid, the circuit
 DATA, SIM, CIRC, QP_CHECK = {}, None, None, None
@@ -289,11 +290,11 @@ def main():
                     "dE_UCCSD_hf_mHa": 1e3 * (pp["hf"]["E_Ha"] - r["E_FCI_Ha"]),
                     "dE_UCCSD_mHa": 1e3 * (pp[best]["E_Ha"] - r["E_FCI_Ha"])})
         ref_rows.append(row)
-    _write_csv(Path("results/exp03_h4_reference.csv"), ref_rows)
+    _write_csv(OUT / "exp03_h4_reference.csv", ref_rows)
 
     cond = sorted((r for r in done if r["kind"] == "cond"), key=lambda r: r["key"])
-    _write_csv(Path(f"results/{NAME}_summary.csv"), [r["out"]["summary"] for r in cond])
-    runlog.save(NAME, [row for r in cond for row in r["out"]["rows"]], CONFIG, started)
+    _write_csv(OUT / f"{NAME}_summary.csv", [r["out"]["summary"] for r in cond])
+    runlog.save(NAME, [row for r in cond for row in r["out"]["rows"]], CONFIG, started, out_dir=OUT)
     PARTIAL.unlink()
     EXP.finish()
 

@@ -17,7 +17,7 @@ the same circuits and the same random starts, so every penalised run has a twin 
 we report the true energy <H> (not the cost), <S^2>, <S_z>, <N>, fidelity with FCI, and
 whether the run ended in an exact quintet eigenstate.
 
-run (from repo root):  python experiments/exp02_penalty.py [--workers 2]
+run (from repo root):  python experiments/exp02_h4/penalty.py [--workers 2]
 output: results/exp02_h4_penalty_results.csv, results/exp02_h4_penalty_meta.json
 partial results: results/exp02_h4_penalty_partial.jsonl (resume after an interruption)
 """
@@ -25,7 +25,7 @@ partial results: results/exp02_h4_penalty_partial.jsonl (resume after an interru
 import os
 
 for _var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
-    os.environ.setdefault(_var, "1")   # one BLAS thread per worker (see exp02_h4_ansatze.py)
+    os.environ.setdefault(_var, "1")   # one BLAS thread per worker (see experiments/exp02_h4/ansatze.py)
 
 import argparse  # noqa: E402
 import csv  # noqa: E402
@@ -38,7 +38,8 @@ from pathlib import Path  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.train import run_vqe  # noqa: E402
 
@@ -61,13 +62,13 @@ CONFIG = {
     "extra": {"spacings_A": [0.5, 0.75, 1.0, 1.25], "hea_layers": [6], "mu_Ha": [0.1]},
 }
 NAME = "exp02_h4_penalty"
-PARTIAL = Path(f"results/{NAME}_partial.jsonl")
+PARTIAL = OUT / f"{NAME}_partial.jsonl"
 EXP = tracking.Experiment(
     NAME, title="Spin penalty for the hardware-efficient ansatz, H₄ chain",
     description="Same HEA runs with and without a spin penalty μ⟨S²⟩ in the cost (μ = 0, 0.1, 1 Ha), "
                 "identical random starts, spacing 1.5-2.5 Å. Does the penalty keep VQE out of "
                 "the quintet traps found in exp02? Research question 1.",
-    config=CONFIG, figures=["fig_exp02_h4_penalty.png", "fig_exp02_h4_summary.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp02_h4_penalty.png", "fig_exp02_h4_summary.png"])
 
 
 def _run_id(d, layers, seed, mu):
@@ -138,7 +139,7 @@ def main():
     started = time.time()
 
     done = [json.loads(l) for l in PARTIAL.read_text().splitlines() if l] if PARTIAL.exists() else []
-    out_csv = Path(f"results/{NAME}_results.csv")
+    out_csv = OUT / f"{NAME}_results.csv"
     if not done and out_csv.exists():     # finished earlier: keep those runs, add only new ones
         done = [_typed(r) for r in csv.DictReader(out_csv.open())]
     done_keys = {_key(r) for r in done}
@@ -165,7 +166,7 @@ def main():
                "N", "fidelity", "energy_variance_Ha2", "quintet_trap", "params", "cnot", "depth",
                "evaluations", "iterations", "converged"]
     rows = sorted(done, key=lambda r: (r["d_A"], r["layers"], r["seed"], r["mu_Ha"]))
-    runlog.save(NAME, [{c: r[c] for c in columns} for r in rows], CONFIG, started)
+    runlog.save(NAME, [{c: r[c] for c in columns} for r in rows], CONFIG, started, out_dir=OUT)
     PARTIAL.unlink()
     EXP.finish()
 

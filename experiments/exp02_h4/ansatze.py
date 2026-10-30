@@ -13,7 +13,7 @@ per VQE run we record energy error, circuit resources, training cost, <N> and fi
 training uses src.fastsim (exact numpy statevector); every final energy is re-checked
 with qiskit's StatevectorEstimator.
 
-run (from repo root):  python experiments/exp02_h4_ansatze.py [--workers 2]
+run (from repo root):  python experiments/exp02_h4/ansatze.py [--workers 2]
 output: results/exp02_h4_results.csv (one row per method x spacing x layers x seed),
         results/exp02_h4_meta.json
 partial results are checkpointed to results/exp02_h4_partial.jsonl, so an interrupted
@@ -37,7 +37,8 @@ from pathlib import Path  # noqa: E402
 
 import numpy as np  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import ansatze, hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 from src.train import run_vqe  # noqa: E402
@@ -56,12 +57,12 @@ CONFIG = {
     "gtol": 1e-7,
 }
 NAME = "exp02_h4"
-PARTIAL = Path(f"results/{NAME}_partial.jsonl")
+PARTIAL = OUT / f"{NAME}_partial.jsonl"
 EXP = tracking.Experiment(
     NAME, title="UCCSD vs hardware-efficient ansatz on the H₄ chain",
     description="VQE with UCCSD and HEA (1-6 layers, 5 random starts) on a linear H₄ chain, "
                 "spacing 0.5-2.5 Å, against HF, CCSD and FCI. Research question 1.",
-    config=CONFIG, figures=["fig_exp02_h4.png", "fig_exp02_h4_cost.png", "fig_exp02_h4_spin.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp02_h4.png", "fig_exp02_h4_cost.png", "fig_exp02_h4_spin.png"])
 
 
 def _run_id(d, method, layers=None, seed=None):
@@ -169,7 +170,7 @@ def main():
     rows = sorted(done, key=lambda r: (r["d_A"], order[r["method"]], r.get("layers") or 0,
                                        r.get("seed") or 0))
     rows = [{c: r.get(c, "") if r.get(c) is not None else "" for c in columns} for r in rows]
-    runlog.save(NAME, rows, CONFIG, started)
+    runlog.save(NAME, rows, CONFIG, started, out_dir=OUT)
     PARTIAL.unlink()
     EXP.finish()
 

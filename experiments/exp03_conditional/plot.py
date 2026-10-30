@@ -1,9 +1,9 @@
 """
 figures for experiment 03 (one conditional QNN for the H4 curve), drawn from the saved CSV.
 
-run (from repo root):  python experiments/exp03_plot.py
+run (from repo root):  python experiments/exp03_conditional/plot.py
 input:   results/exp03_h4_conditional_results.csv, results/exp03_h4_conditional_summary.csv,
-         results/exp03_h4_reference.csv, results/exp03_h4_baselines_*.csv (exp03_baselines.py)
+         results/exp03_h4_reference.csv, results/exp03_h4_baselines_*.csv (experiments/exp03_conditional/baselines.py)
 output:  results/fig_exp03_h4_curve.pdf/.png  error along the chain: conditional QNN vs UCCSD per point
          results/fig_exp03_h4_grid.pdf/.png   worst error inside / outside the training range,
                                               by encoder degree and number of training spacings
@@ -17,9 +17,10 @@ from pathlib import Path
 import numpy as np
 from matplotlib.lines import Line2D
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import plotstyle as ps  # noqa: E402
-from exp02_plot import load  # noqa: E402
+from src.runlog import load  # noqa: E402
 
 BASE_NOTE = "H₄ chain, STO-3G, noiseless statevector, UCCSD circuit (26 angles)."
 LO, HI = 0.5, 2.5
@@ -90,7 +91,7 @@ def fig_curve(rows, ref, m=5, degrees=(1, 3)):
                    f"mean energy of {m} spacings (no FCI labels), K = encoder degree; line = median of 5 initialisations, "
                    "band = all 5. UCCSD per point: best of 3 starts. Gray: outside the training range. "
                    "Errors below 10⁻³ mHa are drawn at the floor.")
-    ps.save(fig, "results/fig_exp03_h4_curve")
+    ps.save(fig, OUT / "fig_exp03_h4_curve")
 
 
 def fig_grid(summary, ref):
@@ -140,7 +141,7 @@ def fig_grid(summary, ref):
               key=key)
     ps.footer(fig, f"{BASE_NOTE} K = 1 is the linear encoder of Meta-VQE. Markers: median of 5 initialisations, bars: all 5. Test spacings every "
                    "0.05 Å. Dashed: worst error of UCCSD trained separately at every spacing of the same range.")
-    ps.save(fig, "results/fig_exp03_h4_grid")
+    ps.save(fig, OUT / "fig_exp03_h4_grid")
 
 
 def baseline_curves(rows, method, target, m):
@@ -188,7 +189,7 @@ def fig_baselines(rows, base_rows, base_summary, ref, m=5, degree=3):
     ms = sorted({int(r["n_train"]) for r in base_summary})
     ps.log_axis(ax2, "y", every=1)
     ps.threshold(ax2, ps.CHEM_ACC_MHA, "chemical accuracy", above=True, x=0.6)
-    qnn = load("results/exp03_h4_conditional_summary.csv")
+    qnn = load(OUT / "exp03_h4_conditional_summary.csv")
     ends = []
     pts = [("QNN-cond", [[r["interp_max_dE_mHa"] for r in qnn if r["degree"] == degree and r["n_train"] == k]
                          for k in ms], "QNN")]
@@ -222,19 +223,19 @@ def fig_baselines(rows, base_rows, base_summary, ref, m=5, degree=3):
                    "spacings, HF is computed at every test spacing; dotted, bottom: fitted to the total FCI "
                    "energy instead. Lines: median of 5 initialisations (GP: one fit), bands and bars: all 5. "
                    "Gray: outside the training range. Errors below 10⁻³ mHa are drawn at the floor.")
-    ps.save(fig, "results/fig_exp03_h4_baselines")
+    ps.save(fig, OUT / "fig_exp03_h4_baselines")
 
 
 def main():
     ps.use()
-    rows = load("results/exp03_h4_conditional_results.csv")
-    summary = load("results/exp03_h4_conditional_summary.csv")
-    ref = load("results/exp03_h4_reference.csv")
+    rows = load(OUT / "exp03_h4_conditional_results.csv")
+    summary = load(OUT / "exp03_h4_conditional_summary.csv")
+    ref = load(OUT / "exp03_h4_reference.csv")
     fig_curve(rows, ref)
     fig_grid(summary, ref)
-    if Path("results/exp03_h4_baselines_results.csv").exists():
-        fig_baselines(rows, load("results/exp03_h4_baselines_results.csv"),
-                      load("results/exp03_h4_baselines_summary.csv"), ref)
+    if (OUT / "exp03_h4_baselines_results.csv").exists():
+        fig_baselines(rows, load(OUT / "exp03_h4_baselines_results.csv"),
+                      load(OUT / "exp03_h4_baselines_summary.csv"), ref)
 
 
 if __name__ == "__main__":

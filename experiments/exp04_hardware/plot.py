@@ -1,7 +1,7 @@
 """
 figures for experiment 04 (H2 on a noisy processor), drawn from the saved CSV.
 
-run (from repo root):  python experiments/exp04_plot.py
+run (from repo root):  python experiments/exp04_hardware/plot.py
 input:   results/exp04_h2_hardware_results.csv
 output:  results/fig_exp04_h2_noise.pdf/.png  energy error along the bond: raw, readout mitigation,
                                                readout mitigation + ZNE (simulator seeds; hardware
@@ -17,9 +17,10 @@ from pathlib import Path
 import numpy as np
 from matplotlib.lines import Line2D
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import plotstyle as ps  # noqa: E402
-from exp02_plot import load  # noqa: E402
+from src.runlog import load  # noqa: E402
 
 ARMS = [("raw", "raw", ":"), ("readout", "readout mitigation", "--"),
         ("readout_zne", "readout mitigation + ZNE", "-")]
@@ -78,7 +79,7 @@ def fig_noise(rows):
     ps.footer(fig, f"H₂, STO-3G, 2 qubits. Noisy simulator of IBM {backend.replace('fake_', '').title()} "
                    f"(calibration noise model), {shots} shots per circuit, lines: mean of 5 shot seeds, bars: all 5. "
                    "ZNE: two-qubit gates folded ×1, ×3, ×5, linear fit to zero noise. Dotted: chemical accuracy, ±1.6 mHa.")
-    ps.save(fig, "results/fig_exp04_h2_noise")
+    ps.save(fig, OUT / "fig_exp04_h2_noise")
 
 
 def fig_zne(rows, d=0.735):
@@ -117,12 +118,12 @@ def fig_zne(rows, d=0.735):
     ps.footer(fig, "H₂, STO-3G, noisy simulator of IBM Fez, readout mitigation applied. Filled: measured at noise "
                    "factor 1, 3, 5 (mean of 5 shot seeds, bars: all 5); dashed: linear fit; hollow: extrapolated "
                    "value at zero noise.")
-    ps.save(fig, "results/fig_exp04_h2_zne")
+    ps.save(fig, OUT / "fig_exp04_h2_zne")
 
 
 def main():
     ps.use()
-    rows = load("results/exp04_h2_hardware_results.csv")
+    rows = load(OUT / "exp04_h2_hardware_results.csv")
     fig_noise(rows)
     fig_zne(rows)
 

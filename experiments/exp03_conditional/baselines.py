@@ -1,7 +1,7 @@
 """
 experiment 03, classical baselines (RQ3): regression on the same training spacings, but with labels.
 
-the conditional QNN of exp03_conditional.py learns the H4 curve from M spacings using only the
+the conditional QNN of experiments/exp03_conditional/conditional.py learns the H4 curve from M spacings using only the
 energy as its loss. a classical regressor needs the answer at those spacings: here it gets the
 exact FCI energies (labels) at the same M spacings and fits E(d):
 
@@ -20,9 +20,9 @@ both predict only the energy curve. the QNN also returns a quantum state at ever
 observable can be measured on it), and needs no FCI labels, which for larger molecules are exactly
 what cannot be computed.
 
-test grid, training spacings and chemical accuracy are the same as in exp03_conditional.py.
+test grid, training spacings and chemical accuracy are the same as in experiments/exp03_conditional/conditional.py.
 
-run (from repo root):  python experiments/exp03_baselines.py
+run (from repo root):  python experiments/exp03_conditional/baselines.py
 output: results/exp03_h4_baselines_results.csv  (one row per model x test spacing)
         results/exp03_h4_baselines_summary.csv  (one row per model)
         results/exp03_h4_baselines_meta.json
@@ -40,12 +40,13 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel
 from sklearn.neural_network import MLPRegressor
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+OUT = Path(__file__).resolve().parent / "results"   # this experiment's outputs
 from src import hamiltonians as hm, runlog, tracking  # noqa: E402
 from src.classical import reference_energies  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from exp03_conditional import CHEM_ACC_mHa, GRID, HI, LO, _d_eq, train_spacings  # noqa: E402
+from conditional import CHEM_ACC_mHa, GRID, HI, LO, _d_eq, train_spacings  # noqa: E402
 
 warnings.filterwarnings("ignore")
 
@@ -71,7 +72,7 @@ EXP = tracking.Experiment(
     description="Gaussian process and MLP fitted to exact FCI energies at the same 3, 5 or 9 "
                 "spacings as the conditional QNN, tested on 0.4-3.0 Å. The QNN needs no labels; "
                 "these models do. Research question 3.",
-    config=CONFIG, figures=["fig_exp03_h4_baselines.png"])
+    config=CONFIG, root=OUT / "runs", figures=["fig_exp03_h4_baselines.png"])
 
 
 def _x(d):
@@ -140,14 +141,14 @@ def main():
                 print(f"{model} on {target}, M={m} seed={seed}: max |error| 0.5-2.5 A {s['interp_max_abs_dE_mHa']:.2f} mHa, "
                       f"beyond 2.5 A {s['extrap_long_max_abs_dE_mHa']:.1f} mHa")
 
-    path = Path(f"results/{NAME}_summary.csv")
+    path = OUT / f"{NAME}_summary.csv"
     keys = list(summary[0]) + sorted({k for s in summary for k in s} - set(summary[0]))
     with open(path, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=keys)
         w.writeheader()
         w.writerows(summary)
     print(f"saved: {path}")
-    runlog.save(NAME, rows, CONFIG, started)
+    runlog.save(NAME, rows, CONFIG, started, out_dir=OUT)
     EXP.finish()
 
 

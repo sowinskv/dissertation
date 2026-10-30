@@ -44,8 +44,8 @@
  "figures": [
   "fig_exp04_h2_noise.png"
  ],
- "status": "done",
+ "status": "running",
  "started_at": "2026-10-30T00:26:25",
- "finished_at": "2026-10-30T00:35:30",
+ "finished_at": null,
  "n_runs": null
 }
