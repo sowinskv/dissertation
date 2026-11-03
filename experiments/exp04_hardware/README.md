@@ -37,3 +37,7 @@ uv run python -c "from qiskit_ibm_runtime import QiskitRuntimeService as S; S.sa
 ## Result (noisy simulator)
 
 Raw error is 7–37 mHa. Readout mitigation alone helps little. Readout + ZNE brings the mean error to 0.04–3.8 mHa, with a shot-noise spread of 1–4 mHa. HEA (2 two-qubit gates) beats UCCSD (4) on noisy hardware, although both are exact without noise.
+
+## Result (IBM hardware, ibm_marrakesh, 2026-11-03, one run, 176 s QPU)
+
+Raw error is 11–34 mHa. Readout mitigation helps more than on the simulator (4–22 mHa). ZNE helps little or not at all: the error does not grow in proportion to the folded CZ gates, so the extrapolation keeps most of it (readout + ZNE: 4–15 mHa). No point reaches chemical accuracy. HEA beats UCCSD after readout mitigation at every bond length.

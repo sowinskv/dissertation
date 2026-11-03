@@ -78,46 +78,64 @@ def fig_noise(rows):
     shots = int(sim[0]["shots"])
     ps.footer(fig, f"H₂, STO-3G, 2 qubits. Noisy simulator of IBM {backend.replace('fake_', '').title()} "
                    f"(calibration noise model), {shots} shots per circuit, lines: mean of 5 shot seeds, bars: all 5. "
-                   "ZNE: two-qubit gates folded ×1, ×3, ×5, linear fit to zero noise. Dotted: chemical accuracy, ±1.6 mHa.")
+                   "ZNE: two-qubit gates folded ×1, ×3, ×5, linear fit to zero noise. Dotted: chemical accuracy, ±1.6 mHa."
+                   + (f" Hollow circles: one run on {hw[0]['backend']} ({hw[0]['date']}, qubits {hw[0]['qubits']}, "
+                      f"same shots), one circle per variant." if hw else ""))
     ps.save(fig, OUT / "fig_exp04_h2_noise")
 
 
-def fig_zne(rows, d=0.735):
+def _zne_panel(ax, rows, d, title):
     t = ps.theme()
-    sim = [r for r in rows if r["kind"] == "simulator" and abs(r["d_A"] - d) < 1e-9]
     factors = [1, 3, 5]
-    fig, ax = ps.figure(nrows=1, panel_height=2.8)
     ax.axhline(0, color=t["ink"], lw=0.8, zorder=1)
-    ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", above=True, x=0.55)
+    ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", above=True, x=0.4)
     ends = []
-    for k, (method, style_key, title) in enumerate(METHODS):
+    for k, (method, style_key, _) in enumerate(METHODS):
         c = ps.color(style_key)
-        e = np.array([[1e3 * (r[f"E_readout_x{f}_Ha"] - r["E_FCI_Ha"]) for f in factors]
-                      for r in sim if r["method"] == method])
-        zne = np.array([r["dE_readout_zne_mHa"] for r in sim if r["method"] == method])
+        sel = [r for r in rows if r["method"] == method and abs(r["d_A"] - d) < 1e-9]
+        e = np.array([[1e3 * (r[f"E_readout_x{f}_Ha"] - r["E_FCI_Ha"]) for f in factors] for r in sel])
+        zne = np.array([r["dE_readout_zne_mHa"] for r in sel])
         off = (k - 0.5) * 0.08
         mean = e.mean(axis=0)
-        ax.vlines(np.array(factors) + off, e.min(axis=0), e.max(axis=0), color=c, lw=1.2, alpha=0.6)
+        if len(sel) > 1:
+            ax.vlines(np.array(factors) + off, e.min(axis=0), e.max(axis=0), color=c, lw=1.2, alpha=0.6)
+            ax.vlines(off, zne.min(), zne.max(), color=c, lw=1.2, alpha=0.6)
         ax.plot(np.array(factors) + off, mean, ls="none", marker=ps.style(style_key)["marker"], markersize=6,
                 color=c, markeredgecolor=t["surface"])
         slope, icpt = np.polyfit(factors, mean, 1)
         xs = np.linspace(0, 5, 20)
         ax.plot(xs, icpt + slope * xs, color=c, lw=1.1, ls=(0, (4, 2)))
-        ax.vlines(off, zne.min(), zne.max(), color=c, lw=1.2, alpha=0.6)
         ax.plot([off], [zne.mean()], ls="none", marker=ps.style(style_key)["marker"], markersize=7,
                 markerfacecolor=t["surface"], markeredgecolor=c, markeredgewidth=1.4)
         ends.append((mean[-1], style_key))
     ax.set_xticks([0, 1, 3, 5])
     ax.set_xlim(-0.4, 5.4)
-    ax.set_xlabel("Noise factor (two-qubit gates folded)")
-    ps.panel_title(ax, f"Readout-mitigated energy at R = {d} Å", "error vs FCI, mHa")
+    ax.set_xlabel("Noise factor")
+    ps.panel_title(ax, title, "error vs FCI, mHa")
     ps.end_labels(ax, 5.1, ends)
+
+
+def fig_zne(rows, d=0.735):
+    t = ps.theme()
+    sim = [r for r in rows if r["kind"] == "simulator"]
+    hw = [r for r in rows if r["kind"] == "hardware" and any(abs(r["d_A"] - d) < 1e-9 for _ in [0])]
+    panels = [(sim, "Noisy simulator of IBM Fez")] + ([(hw, f"IBM hardware ({hw[0]['backend']})")] if hw else [])
+    fig, axes = ps.figure(nrows=1, ncols=len(panels), panel_height=2.8)
+    axes = np.atleast_1d(axes)
+    for ax, (sel, title) in zip(axes, panels):
+        _zne_panel(ax, sel, d, title)
+    lo = min(a.get_ylim()[0] for a in axes)
+    hi = max(a.get_ylim()[1] for a in axes)
+    for a in axes:
+        a.set_ylim(lo, hi)
+    if len(axes) > 1:
+        fig.subplots_adjust(wspace=0.55)
     key = [Line2D([], [], color=ps.color(s), marker=ps.style(s)["marker"], ls=(0, (4, 2)), lw=1.1, markersize=5,
                   markeredgecolor=t["surface"], label=lab) for _, s, lab in METHODS]
-    ps.header(fig, "Zero-noise extrapolation for H₂ at equilibrium on a noisy IBM processor", key=key)
-    ps.footer(fig, "H₂, STO-3G, noisy simulator of IBM Fez, readout mitigation applied. Filled: measured at noise "
-                   "factor 1, 3, 5 (mean of 5 shot seeds, bars: all 5); dashed: linear fit; hollow: extrapolated "
-                   "value at zero noise.")
+    ps.header(fig, f"Zero-noise extrapolation for H₂ at R = {d} Å, readout-mitigated energies", key=key)
+    note = (f" Hardware: one run on {hw[0]['backend']}, {hw[0]['date']}, qubits {hw[0]['qubits']}." if hw else "")
+    ps.footer(fig, "H₂, STO-3G. Filled: energy measured with two-qubit gates folded ×1, ×3, ×5 (simulator: mean of "
+                   "5 shot seeds, bars: all 5); dashed: linear fit; hollow: extrapolated value at zero noise." + note)
     ps.save(fig, OUT / "fig_exp04_h2_zne")
 
 
