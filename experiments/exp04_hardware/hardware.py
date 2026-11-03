@@ -24,9 +24,13 @@ run (from repo root):
   python experiments/exp04_hardware/hardware.py --backend ibm_fez      # a named one
 options: --shots N, --bond-lengths 0.735 1.5, --dry-run (build and estimate QPU time, submit nothing)
 
-IBM account (once, on your own machine, never in the repo):
-  python -c "from qiskit_ibm_runtime import QiskitRuntimeService as S; S.save_account(channel='ibm_quantum_platform', token='<API key>', set_as_default=True)"
-the key is stored in ~/.qiskit/qiskit-ibm.json, outside the repository.
+IBM account, either way (never commit the key):
+  a) a .env file in the repository root (ignored by git; template: .env.example):
+       QISKIT_IBM_TOKEN=<API key>
+       QISKIT_IBM_INSTANCE=<instance CRN or name>   (optional)
+     read by this script into the environment; qiskit-ibm-runtime prefers it over a saved account
+  b) saved once in ~/.qiskit/qiskit-ibm.json:
+       python -c "from qiskit_ibm_runtime import QiskitRuntimeService as S; S.save_account(channel='ibm_quantum_platform', token='<API key>', set_as_default=True)"
 
 output: results/exp04_h2_params.json (trained angles, reused by every backend),
         results/exp04_h2_results.csv (one row per backend run x method x bond length), _meta.json
@@ -197,6 +201,20 @@ def qubit_properties(backend, layout):
         return {"physical_qubits": layout, "error": repr(e)}
 
 
+def load_env(path):
+    """QISKIT_IBM_* variables from a .env file into the environment (already set ones win).
+    nothing is printed: the file holds the API key."""
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = (x.strip() for x in line.split("=", 1))
+        if key.startswith("QISKIT_IBM_") and value:
+            os.environ.setdefault(key, value.strip("'\""))
+
+
 # ---------------- 3. run and evaluate ----------------
 def run_sampler(backend, circuits, shots, seed=None, hardware=False):
     if hardware:
@@ -274,6 +292,7 @@ def main():
         backend, kind, seeds = getattr(fake_provider, CONFIG["fake_backend"])(), "simulator", CONFIG["simulator_seeds"]
     else:
         from qiskit_ibm_runtime import QiskitRuntimeService
+        load_env(Path(__file__).resolve().parents[2] / ".env")
         service = QiskitRuntimeService()
         backend = (service.least_busy(operational=True, simulator=False, min_num_qubits=2)
                    if args.backend == "ibm" else service.backend(args.backend))

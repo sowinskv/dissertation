@@ -38,7 +38,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 ## Environment
 
 - Python 3.12, qiskit 2.5.2, qiskit-nature 0.8.0, pyscf 2.14.0, scikit-learn 1.9.1 (RQ3 baselines), qiskit-ibm-runtime 0.51.0 + qiskit-aer 0.18.2 (RQ4) (see requirements.txt).
-- IBM Quantum is not reachable from the cloud container (network allowlist): hardware runs happen on Joanna's machine (`experiments/exp04_hardware/hardware.py --backend ibm`), account saved once with `QiskitRuntimeService.save_account(...)` in ~/.qiskit, never in the repo.
+- IBM Quantum is not reachable from the cloud container (network allowlist): hardware runs happen on Joanna's machine (`experiments/exp04_hardware/hardware.py --backend ibm`), key in a git-ignored `.env` in the repo root (`QISKIT_IBM_TOKEN`, optional `QISKIT_IBM_INSTANCE`; template `.env.example`, loaded by the script, env vars take precedence in qiskit-ibm-runtime) or saved with `QiskitRuntimeService.save_account(...)` in ~/.qiskit; never committed.
 - Noisy simulation: use Aer's SamplerV2 with `AerSimulator.from_backend(fake)`; the local mode of qiskit-ibm-runtime's SamplerV2 ignores `seed_simulator` (runs not reproducible).
 - PySCF does not run natively on Windows: use WSL, macOS/Linux or Colab.
 - Experiments that use several worker processes must set OMP_NUM_THREADS=1 (done at the top of the script); multithreaded BLAS on tiny matrices otherwise makes training ~30x slower.

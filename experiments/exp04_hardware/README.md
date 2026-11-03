@@ -13,7 +13,14 @@ uv run python experiments/exp04_hardware/plot.py
 
 ### IBM account
 
-This is done once, on your own machine. The key is saved in `~/.qiskit/qiskit-ibm.json`, outside the repository:
+Easiest: copy `.env.example` (repository root) to `.env` and put the API key in it. `.env` is ignored by git, and the script loads it.
+
+```
+QISKIT_IBM_TOKEN=<API key>
+QISKIT_IBM_INSTANCE=          # optional
+```
+
+Alternative: save the account once in `~/.qiskit/qiskit-ibm.json`, outside the repository:
 
 ```
 uv run python -c "from qiskit_ibm_runtime import QiskitRuntimeService as S; S.save_account(channel='ibm_quantum_platform', token='<API key>', set_as_default=True)"
