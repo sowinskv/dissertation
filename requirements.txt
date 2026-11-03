@@ -5,3 +5,5 @@ matplotlib
 scipy
 numpy
 scikit-learn==1.9.1
+qiskit-ibm-runtime==0.51.0
+qiskit-aer==0.18.2

@@ -1,0 +1,43 @@
+{
+ "run_id": "fake_fez_s1_d1.500_UCCSD",
+ "params": {
+  "d_A": 1.5,
+  "method": "UCCSD",
+  "backend": "fake_fez",
+  "stage": "evaluation",
+  "seed": 1
+ },
+ "reference": -0.9981493534714097,
+ "status": "done",
+ "started_at": "2026-10-30T00:34:59",
+ "metrics": {
+  "E_ideal_Ha": -0.9981493534714092,
+  "two_qubit_gates": 4,
+  "depth": 24,
+  "E_raw_Ha": -0.9808172094823,
+  "E_readout_Ha": -0.9833097823012733,
+  "E_zne_Ha": -0.9871397331948882,
+  "E_readout_zne_Ha": -0.9896843497808131,
+  "E_readout_zne13_Ha": -0.9886242126783524,
+  "E_readout_richardson_Ha": -0.9876700892861373,
+  "E_raw_x1_Ha": -0.9808172094823,
+  "E_raw_x3_Ha": -0.9702600418965523,
+  "E_raw_x5_Ha": -0.9571974185034906,
+  "E_readout_x1_Ha": -0.9833097823012733,
+  "E_readout_x3_Ha": -0.9726809215471155,
+  "E_readout_x5_Ha": -0.959507731747052,
+  "shots": 16384,
+  "qubits": "96-103",
+  "E_FCI_Ha": -0.9981493534714097,
+  "job_id": "",
+  "dE_ideal_mHa": 4.440892098500626e-13,
+  "dE_raw_mHa": 17.33214398910965,
+  "dE_readout_mHa": 14.839571170136345,
+  "dE_zne_mHa": 11.009620276521414,
+  "dE_readout_zne_mHa": 8.46500369059655,
+  "dE_readout_zne13_mHa": 9.525140793057219,
+  "dE_readout_richardson_mHa": 10.479264185272342
+ },
+ "finished_at": "2026-10-30T00:34:59",
+ "duration_s": 0.0
+}

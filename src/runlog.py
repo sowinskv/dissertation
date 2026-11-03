@@ -1,8 +1,10 @@
 """
 runlog: save results together with everything needed to reproduce them.
 
-every experiment writes  results/<name>_results.csv  (one row per run)
-and                      results/<name>_meta.json    (config, library versions, timing).
+every experiment writes  <out_dir>/<name>_results.csv  (one row per run)
+and                      <out_dir>/<name>_meta.json    (config, library versions, timing),
+where out_dir is the experiment's own results folder (experiments/expNN_<name>/results).
+load() reads such a CSV back for the plot scripts.
 """
 
 import csv
@@ -43,3 +45,22 @@ def save(name, rows, config, started_at, out_dir="results"):
     with open(out / f"{name}_meta.json", "w") as f:
         json.dump(meta, f, indent=2)
     print(f"saved: {out / f'{name}_results.csv'}, {out / f'{name}_meta.json'}")
+
+
+def load(path):
+    """rows of a results CSV as dicts: numbers as float, True/False as bool, empty as None,
+    text columns (method, spin names, ...) as str."""
+    with open(path) as f:
+        rows = list(csv.DictReader(f))
+    for r in rows:
+        for k, v in list(r.items()):
+            if v == "":
+                r[k] = None
+            elif v in ("True", "False"):
+                r[k] = v == "True"
+            else:
+                try:
+                    r[k] = float(v)
+                except ValueError:
+                    pass
+    return rows

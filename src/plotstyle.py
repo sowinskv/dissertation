@@ -29,7 +29,7 @@ usage:
     ...
     ps.header(fig, "title", "subtitle", key=["FCI", "HF", "UCCSD"])
     ps.footer(fig, "source: ...")
-    ps.save(fig, "results/exp01_h2_curve")
+    ps.save(fig, OUT / "fig_exp01_h2")   # OUT = the experiment's results folder
 """
 
 import math

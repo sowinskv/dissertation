@@ -1,5 +1,6 @@
 """
-lab notebook: a local web UI for the experiment logs in results/runs/ (see src/tracking.py).
+lab notebook: a local web UI for the experiment logs (see src/tracking.py). every experiment
+folder keeps its own logs: experiments/<folder>/results/runs/<experiment>/, found automatically.
 
 run (from repo root):  python tools/notebook.py [--port 8765] [--no-browser]
 then open http://localhost:8765. the page refreshes itself while an experiment is running.
@@ -10,7 +11,7 @@ api:
   GET /api/experiments                      all experiments with run counts
   GET /api/experiments/<name>               experiment metadata + all runs (no histories)
   GET /api/experiments/<name>/history?ids=a,b,c   training histories of the listed runs
-  GET /results/<file>                       figures and other files from results/
+  GET /files/<folder>/<file>                figures and CSV from experiments/<folder>/results/
   everything else is served from notebook/
 """
 
@@ -24,9 +25,16 @@ from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
 REPO = Path(__file__).resolve().parents[1]
-RUNS = REPO / "results" / "runs"
-RESULTS = REPO / "results"
+EXPERIMENTS = REPO / "experiments"
 STATIC = REPO / "notebook"
+
+
+def _folders():
+    """experiment name -> (its log folder, the experiment folder's name under experiments/)."""
+    out = {}
+    for meta in sorted(EXPERIMENTS.glob("*/results/runs/*/experiment.json")):
+        out[meta.parent.name] = (meta.parent, meta.parents[3].name)
+    return out
 
 
 def _read_json(path):
@@ -57,21 +65,22 @@ def _counts(runs):
     return c
 
 
-def _extras(name):
-    """links the page shows next to an experiment: its CSV in results/, if there is one."""
-    csv = RESULTS / f"{name}_results.csv"
-    return {"csv": csv.name if csv.exists() else None}
+def _extras(name, folder):
+    """where the page finds the experiment's files: figures and its results CSV, if there is one."""
+    csv = EXPERIMENTS / folder / "results" / f"{name}_results.csv"
+    return {"csv": csv.name if csv.exists() else None, "files": f"/files/{folder}/",
+            "folder": f"experiments/{folder}"}
 
 
 def _labels():
     """experiment numbers as shown on the pages: 01, 02, then 02b, 02c for follow-ups that share
     a number (ordered by start date)."""
     groups = {}
-    for folder in RUNS.glob("*"):
-        meta = _read_json(folder / "experiment.json") if folder.is_dir() else None
-        m = re.match(r"exp(\d+)", folder.name)
+    for name, (folder, _) in _folders().items():
+        meta = _read_json(folder / "experiment.json")
+        m = re.match(r"exp(\d+)", name)
         if meta and m:
-            groups.setdefault(m.group(1), []).append((meta.get("started_at") or "", folder.name))
+            groups.setdefault(m.group(1), []).append((meta.get("started_at") or "", name))
     out = {}
     for num, items in groups.items():
         for i, (_, name) in enumerate(sorted(items)):
@@ -81,13 +90,13 @@ def _labels():
 
 def list_experiments():
     items = []
-    for folder in sorted(p for p in RUNS.glob("*") if p.is_dir()):
+    for name, (folder, exp_folder) in _folders().items():
         meta = _read_json(folder / "experiment.json")
         if meta is None:
             continue
         runs = _runs(folder)
         meta.pop("config", None)
-        items.append({**meta, **_extras(meta["name"]), "counts": _counts(runs), "n_logged": len(runs)})
+        items.append({**meta, **_extras(name, exp_folder), "counts": _counts(runs), "n_logged": len(runs)})
     labels = _labels()
     for x in items:
         x["label"] = labels.get(x["name"], "")
@@ -95,19 +104,23 @@ def list_experiments():
 
 
 def get_experiment(name):
-    folder = RUNS / name
+    if name not in _folders():
+        return None
+    folder, exp_folder = _folders()[name]
     meta = _read_json(folder / "experiment.json")
     if meta is None:
         return None
     runs = _runs(folder)
     for r in runs:
         r.get("metrics", {}).pop("theta", None)   # parameters are large and not shown
-    return {**meta, **_extras(name), "label": _labels().get(name, ""), "runs": runs,
+    return {**meta, **_extras(name, exp_folder), "label": _labels().get(name, ""), "runs": runs,
             "counts": _counts(runs)}
 
 
 def get_history(name, ids):
-    folder = RUNS / name
+    if name not in _folders():
+        return {}
+    folder = _folders()[name][0]
     out = {}
     for rid in ids:
         f = folder / f"{Path(rid).name}.history.jsonl"
@@ -161,8 +174,9 @@ class Handler(BaseHTTPRequestHandler):
                 ids = [i for i in parse_qs(url.query).get("ids", [""])[0].split(",") if i]
                 return self._send(200, get_history(name, ids))
             return self._send(404, {"error": "not found"})
-        if parts[:1] == ["results"]:
-            return self._file(_safe(RESULTS, "/".join(parts[1:])))
+        if parts[:1] == ["files"] and len(parts) >= 3:
+            base = EXPERIMENTS / Path(unquote(parts[1])).name / "results"
+            return self._file(_safe(base, "/".join(parts[2:])))
         return self._file(_safe(STATIC, "/".join(parts) or "index.html"))
 
 

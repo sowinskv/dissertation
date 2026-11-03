@@ -1,0 +1,24 @@
+{
+ "run_id": "d2.500_UCCSD",
+ "params": {
+  "d_A": 2.5,
+  "method": "UCCSD",
+  "start": "hf",
+  "stage": "training"
+ },
+ "reference": -0.9360549199556059,
+ "status": "done",
+ "started_at": "2026-10-30T00:26:27",
+ "metrics": {
+  "E_Ha": -0.9360549199556052,
+  "dE_mHa": 6.661338147750939e-13,
+  "evaluations": 42,
+  "theta": [
+   0.0,
+   0.0,
+   -0.6904070330839245
+  ]
+ },
+ "finished_at": "2026-10-30T00:26:27",
+ "duration_s": 0.0
+}
