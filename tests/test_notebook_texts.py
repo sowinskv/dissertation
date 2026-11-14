@@ -6,6 +6,7 @@ run:  uv run pytest -q tests/test_notebook_texts.py
 """
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -51,3 +52,27 @@ def test_no_stale_entries():
             stale += [f"{name}: config.{k}" for k in texts.get("config", {}) if k not in logged[name].get("config", {})]
             stale += [f"{name}: figures.{f}" for f in texts.get("figures", {}) if f not in logged[name].get("figures", [])]
     assert not stale, "texts without a logged counterpart: " + ", ".join(stale)
+
+
+def _labels(block):
+    """keys of a label table (LABELS / LABELS_PL) in notebook/app.js."""
+    js = (EXPERIMENTS.parent / "notebook" / "app.js").read_text()
+    body = js.split(f"const {block} = {{")[1].split("};")[0]
+    return set(re.findall(r'(?:^|[\s,{])"?([A-Za-z_][\w-]*)"?\s*:', body))
+
+
+def test_run_columns_have_labels():
+    """every run parameter and metric shown in the notebook tables has a name in both languages
+    (LABELS and LABELS_PL in notebook/app.js; a Polish entry is needed only where it differs,
+    so the check is: English name exists, and Polish exists or equals the English one)."""
+    en, pl = _labels("LABELS"), _labels("LABELS_PL")
+    missing = set()
+    for m in EXPERIMENTS.glob("*/results/runs/*/*.json"):
+        if m.name == "experiment.json":
+            continue
+        rec = json.loads(m.read_text())
+        for k in [*rec.get("params", {}), *rec.get("metrics", {})]:
+            if k != "theta" and k not in en:
+                missing.add(f"{k} (en)")
+    assert not missing, "columns without a label: " + ", ".join(sorted(missing))
+    assert pl <= en, "Polish labels without an English one: " + ", ".join(sorted(pl - en))
