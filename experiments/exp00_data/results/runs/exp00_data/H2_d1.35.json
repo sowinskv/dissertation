@@ -1,0 +1,35 @@
+{
+ "run_id": "H2_d1.35",
+ "params": {
+  "molecule": "H2",
+  "d_A": 1.35
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-11-14T13:59:35",
+ "metrics": {
+  "n_atoms": 2,
+  "n_electrons": 2,
+  "spatial_orbitals": 2,
+  "qubits_before": 4,
+  "qubits": 2,
+  "pauli_terms": 4,
+  "coeff_1norm_Ha": 0.5470660331368505,
+  "measurement_groups": 2,
+  "E_nuc_Ha": 0.39198311919999995,
+  "E_HF_Ha": -0.9572031750747304,
+  "E_CCSD_Ha": -1.0250543625247388,
+  "E_FCI_Ha": -1.0250543624687891,
+  "E_corr_mHa": -67.85118739405871,
+  "dE_CCSD_mHa": -5.5949689325984764e-08,
+  "hf_weight": 0.912945218627717,
+  "ccsd_converged": true,
+  "fci_check_Ha": 4.440892098500626e-16,
+  "other_sector_below_mHa": 0.0,
+  "rebuild_diff": 0.0,
+  "build_s": 0.12,
+  "used_in": "exp01"
+ },
+ "finished_at": "2026-11-14T13:59:36",
+ "duration_s": 0.12
+}

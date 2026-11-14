@@ -1,0 +1,28 @@
+{
+  "experiment": "exp00_data",
+  "config": {
+    "basis": "sto3g",
+    "mapping": "ParityMapper with two-qubit Z2 reduction (qiskit-nature)",
+    "orbital_signs": "largest coefficient of every MO made positive (hamiltonians.fix_orbital_signs)",
+    "references": "RHF, CCSD, FCI from PySCF",
+    "measurement_groups": "qubit-wise commuting (src/hardware.measurement_groups)",
+    "fci_check_tolerance_Ha": 1e-08,
+    "pauli_coefficient_cutoff": 1e-10,
+    "exp03_train_range_A": [
+      0.5,
+      2.5
+    ],
+    "splits": "geometries of every experiment and their role: exp00_data_splits.csv"
+  },
+  "python": "3.12.0",
+  "packages": {
+    "qiskit": "2.5.2",
+    "qiskit-nature": "0.8.0",
+    "pyscf": "2.14.0",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "git_commit": "b9e9434",
+  "runtime_s": 49.6,
+  "rows": 86
+}

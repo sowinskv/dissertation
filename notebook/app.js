@@ -13,10 +13,17 @@ const LABELS = {
   dE_mHa: "error (mHa)", converged: "converged", iterations: "iterations",
   evaluations: "evaluations", duration_s: "time (s)", fidelity: "fidelity", N: "⟨N⟩",
   params: "parameters", cnot: "CNOT", depth: "depth", hf_weight: "HF weight",
-  E_Ha: "energy (Ha)", d_A: "d (Å)", R_A: "R (Å)", method: "method", layers: "layers",
-  seed: "seed",
+  E_Ha: "energy (Ha)", d_A: "d (Å)", molecule: "molecule", R_A: "R (Å)", method: "method", layers: "layers",
+  seed: "seed", E_HF_Ha: "E HF (Ha)", E_CCSD_Ha: "E CCSD (Ha)", E_FCI_Ha: "E FCI (Ha)",
+  E_corr_mHa: "E corr (mHa)", dE_CCSD_mHa: "CCSD − FCI (mHa)", E_nuc_Ha: "E nuc (Ha)",
+  qubits: "qubits", qubits_before: "qubits before Z₂", pauli_terms: "Pauli terms",
+  coeff_1norm_Ha: "1-norm (Ha)", measurement_groups: "measurement groups",
+  fci_check_Ha: "|λ − FCI| (Ha)", rebuild_diff: "rebuild diff", ccsd_converged: "CCSD converged",
+  other_sector_below_mHa: "wrong-N below (mHa)", build_s: "build (s)", used_in: "used in",
+  n_atoms: "atoms", n_electrons: "electrons", spatial_orbitals: "orbitals",
 };
-const METRIC_ORDER = ["dE_mHa", "converged", "iterations", "evaluations", "duration_s",
+const METRIC_ORDER = ["used_in", "qubits_before", "qubits", "pauli_terms", "measurement_groups",
+  "E_FCI_Ha", "E_corr_mHa", "fci_check_Ha", "dE_mHa", "converged", "iterations", "evaluations", "duration_s",
   "fidelity", "N", "params", "cnot", "depth", "hf_weight", "E_Ha"];
 
 const app = document.getElementById("app");
@@ -171,7 +178,7 @@ async function showExperiment(name, section) {
   syncFilters(exp);
   renderMeta(exp);
   renderTable();
-  await renderChart();
+  if (hasCurves(exp)) await renderChart();
   countPixels();
 
   if (exp.status === "running") poll(() => showExperiment(name, section));
@@ -187,7 +194,7 @@ function renderShell(exp) {
     </figure>`).join("");
   const links = [
     figures && `[<a href="#figures" data-jump>figures</a>]`,
-    `[<a href="#curves" data-jump>training curves</a>]`,
+    hasCurves(exp) && `[<a href="#curves" data-jump>training curves</a>]`,
     `[<a href="#runs-title" data-jump>runs</a>]`,
     exp.csv && `[<a href="${exp.files}${encodeURIComponent(exp.csv)}" download>download CSV</a>]`,
   ].filter(Boolean).join(" ");
@@ -202,11 +209,11 @@ function renderShell(exp) {
       <p class="desc">${chem(exp.description)}</p>
       ${setup ? `<p class="setup">${setup}</p>` : ""}
       ${figures ? `<h2 id="figures">Figures</h2>${figures}` : ""}
-      <h2 id="curves">Training curves</h2>
-      <p class="hint">Error against the exact (FCI) energy at every optimizer iteration. Tick what to show.</p>
+      ${hasCurves(exp) ? `<h2 id="curves">Training curves</h2>
+      <p class="hint">Error against the exact (FCI) energy at every optimizer iteration. Tick what to show.</p>` : ""}
       <div class="filters" id="filters"></div>
-      <div class="chart-box"><canvas id="chart" aria-label="Training curves"></canvas></div>
-      <p class="hint" id="chart-note"></p>
+      ${hasCurves(exp) ? `<div class="chart-box"><canvas id="chart" aria-label="Training curves"></canvas></div>
+      <p class="hint" id="chart-note"></p>` : ""}
       <h2 id="runs-title">Runs</h2>
       <p class="hint" id="runs-note"></p>
       <div class="table-wrap"><table id="runs"></table></div>
@@ -264,7 +271,7 @@ function syncFilters(exp) {
       next[key] = { values, selected: sel };
     } else {
       const numeric = values.every((v) => typeof v === "number");
-      const one = numeric && values.length > 6 && key !== "seed";   // geometry scans: start with one point
+      const one = numeric && values.length > 6 && key !== "seed" && hasCurves(exp);   // geometry scans: start with one point
       next[key] = { values, selected: new Set(one ? [values[values.length - 1]] : values) };
       changed = true;
     }
@@ -304,6 +311,8 @@ function columns(runs) {
   [...metricKeys].sort().forEach((k) => { if (!metrics.includes(k) && k !== "theta") metrics.push(k); });
   return [...paramKeys(runs).map((k) => ({ key: k, param: true })), ...metrics.map((k) => ({ key: k, param: false }))];
 }
+// experiments without training (e.g. exp00 data preparation) have no curves to show
+const hasCurves = (exp) => exp.runs.some((r) => r.has_history || r.status === "running");
 const cell = (r, c) => (c.param ? r.params?.[c.key] : r.metrics?.[c.key]);
 
 function renderTable() {
@@ -321,7 +330,7 @@ function renderTable() {
     });
   }
   document.getElementById("runs-note").textContent =
-    `${rows.length} of ${exp.runs.length} runs match the ticks above. Click a row to highlight its curve; click a column name to sort.`;
+    `${rows.length} of ${exp.runs.length} runs match the ticks above. ${hasCurves(exp) ? "Click a row to highlight its curve; c" : "C"}lick a column name to sort.`;
   const head = cols.map((c) => {
     const sort = state.sort?.key === c.key ? (state.sort.dir > 0 ? "ascending" : "descending") : "none";
     return `<th scope="col" aria-sort="${sort}"><button type="button" data-key="${esc(c.key)}">${esc(LABELS[c.key] || c.key)}</button></th>`;

@@ -1,0 +1,35 @@
+{
+ "run_id": "H4_d0.90",
+ "params": {
+  "molecule": "H4",
+  "d_A": 0.9
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-11-14T13:59:41",
+ "metrics": {
+  "n_atoms": 4,
+  "n_electrons": 4,
+  "spatial_orbitals": 4,
+  "qubits_before": 8,
+  "qubits": 6,
+  "pauli_terms": 164,
+  "coeff_1norm_Ha": 7.472417229230359,
+  "measurement_groups": 34,
+  "E_nuc_Ha": 2.5478902748000007,
+  "E_HF_Ha": -2.124259738972779,
+  "E_CCSD_Ha": -2.1803094120436235,
+  "E_FCI_Ha": -2.1803166143238593,
+  "E_corr_mHa": -56.05687535108039,
+  "dE_CCSD_mHa": 0.00720228023576297,
+  "hf_weight": 0.9542768908890636,
+  "ccsd_converged": true,
+  "fci_check_Ha": 5.329070518200751e-15,
+  "other_sector_below_mHa": 0.0,
+  "rebuild_diff": 0.0,
+  "build_s": 0.4,
+  "used_in": "exp03"
+ },
+ "finished_at": "2026-11-14T13:59:42",
+ "duration_s": 0.4
+}

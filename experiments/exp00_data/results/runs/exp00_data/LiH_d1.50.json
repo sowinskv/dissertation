@@ -1,0 +1,35 @@
+{
+ "run_id": "LiH_d1.50",
+ "params": {
+  "molecule": "LiH",
+  "d_A": 1.5
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-11-14T14:00:06",
+ "metrics": {
+  "n_atoms": 2,
+  "n_electrons": 4,
+  "spatial_orbitals": 6,
+  "qubits_before": 12,
+  "qubits": 10,
+  "pauli_terms": 630,
+  "coeff_1norm_Ha": 12.357776320300069,
+  "measurement_groups": 165,
+  "E_nuc_Ha": 1.05835442184,
+  "E_HF_Ha": -7.863357621535113,
+  "E_CCSD_Ha": -7.882352909152674,
+  "E_FCI_Ha": -7.882362286798725,
+  "E_corr_mHa": -19.004665263611997,
+  "dE_CCSD_mHa": 0.009377646050801047,
+  "hf_weight": 0.9773411201534632,
+  "ccsd_converged": true,
+  "fci_check_Ha": 1.9539925233402755e-14,
+  "other_sector_below_mHa": 0.0,
+  "rebuild_diff": 0.0,
+  "build_s": 2.29,
+  "used_in": "next"
+ },
+ "finished_at": "2026-11-14T14:00:08",
+ "duration_s": 2.29
+}

@@ -56,6 +56,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 ## Repo layout
 
 - `experiments/expNN_<name>/` one folder per experiment: its scripts (`run.py` or several, e.g. `ansatze.py`, `penalty.py`), `plot.py`, a `README.md` (what, how to run, files, result) and `results/` (CSV, meta JSON, figures `fig_expNN_*.pdf/.png`, notebook logs `runs/<experiment>/`). Run scripts from the repo root (`uv run python experiments/exp02_h4/penalty.py`). In every script `OUT = Path(__file__).resolve().parent / "results"`; pass `root=OUT / "runs"` to `tracking.Experiment` and `out_dir=OUT` to `runlog.save`. Result and figure file names keep their `expNN_` prefix.
+  - `exp00_data/` (prepare, plot): data preparation, no training,
   - `exp01_h2_curve/` (run, plot), `exp02_h4/` (ansatze, spin_check, penalty, plot), `exp03_conditional/` (conditional, baselines, plot), `exp04_hardware/` (hardware, plot; raw counts in `results/counts/`)
 - `src/` shared modules:
   - `hamiltonians.py` geometries, qubit hamiltonian (ParityMapper), exact ground state in the right electron-number sector
@@ -74,6 +75,7 @@ The thesis text is written in Polish. Code comments, docstrings and console outp
 
 ## Status
 
+- exp00 (`experiments/exp00_data/prepare.py`, data preparation, no training): every geometry of exp01-exp04 + LiH (86) through the pipeline once; per geometry qubits before/after Z2 reduction, Pauli terms, 1-norm, qubit-wise measurement groups, HF/CCSD/FCI, HF weight; checks lambda_min = FCI (< 1e-8 Ha, worst 3.6e-14) and identical rebuilds. Splits CSV (which geometries each experiment uses, exp03 train/test/extrapolation); `tests/test_data.py` keeps them in sync with the scripts' CONFIG. H2 2 qubits / 4 terms / 2 groups, H4 6 / 164 / 34, LiH 10 / 630 / 165 (needs an active space on hardware). Figures: `fig_exp00_references`, `_hamiltonian`, `_splits`, `_checks`. Notebook hides the training-curves section for experiments without histories.
 - exp01: H2 curve, HF / FCI / VQE-UCCSD / VQE-HEA (L=2) on statevector. Both VQE models reach FCI to numerical precision (< 1e-9 mHa); UCCSD 3 params, 4 CNOT, ~45 circuit evaluations; HEA 12 params, 2 CNOT, ~1100 evaluations (evaluations counted as 2p+1 per gradient).
 - exp02: H4 chain (d = 0.5-2.5 A, 9 points), UCCSD vs HEA 1-6 layers x 5 seeds, CCSD reference.
   - HF weight in FCI state drops 99% -> 33%; HF error 25 -> 462 mHa; CCSD goes BELOW FCI from d = 1.25 (down to -31 mHa).
