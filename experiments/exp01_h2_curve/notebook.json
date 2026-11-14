@@ -1,0 +1,37 @@
+{
+ "exp01_h2": {
+  "title": {
+   "en": "Potential energy curve of H₂",
+   "pl": "Krzywa energii potencjalnej H₂"
+  },
+  "description": {
+   "en": "Validation of the pipeline: HF, FCI, VQE-UCCSD and VQE-HEA (2 layers) on H₂ in STO-3G, bond length 0.3-3.0 Å.",
+   "pl": "Walidacja całego potoku: HF, FCI, VQE-UCCSD i VQE-HEA (2 warstwy) dla H₂ w bazie STO-3G, długość wiązania 0,3–3,0 Å."
+  },
+  "config": {
+   "molecule": {"label": {"en": "molecule", "pl": "cząsteczka"}},
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "bond_lengths_A": {"label": {"en": "bond lengths (Å)", "pl": "długości wiązania (Å)"}},
+   "hea_layers": {"label": {"en": "HEA layers", "pl": "warstwy HEA"}},
+   "seed": {"label": {"en": "seed", "pl": "ziarno"}},
+   "hea_init": {
+    "label": {"en": "HEA initial angles", "pl": "kąty początkowe HEA"},
+    "value": {"en": "uniform(−0.1, 0.1)", "pl": "jednostajnie z (−0,1; 0,1)"}
+   },
+   "optimizer": {
+    "label": {"en": "optimizer", "pl": "optymalizator"},
+    "value": {"en": "L-BFGS-B, central finite-difference gradient (batched)", "pl": "L-BFGS-B, gradient z centralnych różnic skończonych (wsadowo)"}
+   },
+   "circuit_resources": {
+    "label": {"en": "circuit resources", "pl": "zasoby obwodów"},
+    "value": {"en": "UCCSD: 3 parameters, 4 CNOT, depth 17; HEA: 12 parameters, 2 CNOT, depth 19", "pl": "UCCSD: 3 parametry, 4 CNOT, głębokość 17; HEA: 12 parametrów, 2 CNOT, głębokość 19"}
+   }
+  },
+  "figures": {
+   "fig_exp01_h2.png": {
+    "en": "Both VQE models reproduce the exact (FCI) curve of H₂ at every bond length, to below 10⁻⁹ mHa, while Hartree–Fock misses the dissociation limit by more than 200 mHa. This validates the whole pipeline; the cost differs: UCCSD needs about 45 circuit evaluations, HEA about 1100.",
+    "pl": "Oba modele VQE odtwarzają dokładną krzywą (FCI) H₂ dla każdej długości wiązania z błędem poniżej 10⁻⁹ mHa, podczas gdy Hartree–Fock myli się na granicy dysocjacji o ponad 200 mHa. To potwierdza poprawność całego potoku; różni się koszt: UCCSD potrzebuje ok. 45 ewaluacji obwodu, HEA ok. 1100."
+   }
+  }
+ }
+}

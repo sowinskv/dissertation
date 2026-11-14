@@ -1,0 +1,96 @@
+{
+ "exp02_h4": {
+  "title": {
+   "en": "UCCSD vs hardware-efficient ansatz on the H₄ chain",
+   "pl": "UCCSD a ansatz sprzętowo wydajny (HEA) dla łańcucha H₄"
+  },
+  "description": {
+   "en": "VQE with UCCSD and HEA (1-6 layers, 5 random starts) on a linear H₄ chain, spacing 0.5-2.5 Å, against HF, CCSD and FCI. Research question 1.",
+   "pl": "VQE z ansatzem UCCSD i HEA (1–6 warstw, 5 losowych punktów startowych) dla liniowego łańcucha H₄, odległość między atomami 0,5–2,5 Å, w porównaniu z HF, CCSD i FCI. Pytanie badawcze 1."
+  },
+  "config": {
+   "molecule": {
+    "label": {"en": "molecule", "pl": "cząsteczka"},
+    "value": {"en": "H₄ linear chain", "pl": "liniowy łańcuch H₄"}
+   },
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "spacings_A": {"label": {"en": "atom spacings (Å)", "pl": "odległości między atomami (Å)"}},
+   "hea_layers": {"label": {"en": "HEA layers", "pl": "warstwy HEA"}},
+   "seeds": {"label": {"en": "seeds", "pl": "ziarna"}},
+   "hea_init": {
+    "label": {"en": "HEA initial angles", "pl": "kąty początkowe HEA"},
+    "value": {"en": "uniform(−0.1, 0.1)", "pl": "jednostajnie z (−0,1; 0,1)"}
+   },
+   "optimizer": {
+    "label": {"en": "optimizer", "pl": "optymalizator"},
+    "value": {"en": "L-BFGS-B, central finite-difference gradient (batched)", "pl": "L-BFGS-B, gradient z centralnych różnic skończonych (wsadowo)"}
+   },
+   "maxiter": {"label": {"en": "max. iterations", "pl": "maks. liczba iteracji"}},
+   "gtol": {"label": {"en": "gradient tolerance", "pl": "tolerancja gradientu"}}
+  },
+  "figures": {
+   "fig_exp02_h4.png": {
+    "en": "As the chain stretches the Hartree–Fock determinant loses weight (99 % → 33 %) and every approximate method gets worse. UCCSD stays within chemical accuracy up to 1.5 Å (worst 5.3 mHa); CCSD drops below the exact energy from 1.25 Å (hollow diamonds), by up to 31 mHa. HEA with 6 layers is often better than UCCSD, but its spread over random starts is wide.",
+    "pl": "Przy rozciąganiu łańcucha wyznacznik Hartree–Focka traci wagę (99 % → 33 %) i każda metoda przybliżona traci dokładność. UCCSD mieści się w dokładności chemicznej do 1,5 Å (najgorzej 5,3 mHa); CCSD od 1,25 Å schodzi poniżej energii dokładnej (puste romby), nawet o 31 mHa. HEA z 6 warstwami bywa lepszy od UCCSD, ale rozrzut między losowymi startami jest duży."
+   },
+   "fig_exp02_h4_cost.png": {
+    "en": "What accuracy costs. The worst HEA error on the curve falls with depth, but not monotonically; 6 layers (30 CNOT) reach 5.4 mHa, close to UCCSD with 1072 CNOT. In training cost the order flips: HEA needs about 800k circuit evaluations, roughly 690 times more than UCCSD.",
+    "pl": "Ile kosztuje dokładność. Najgorszy błąd HEA na krzywej maleje z głębokością, choć niemonotonicznie; 6 warstw (30 CNOT) osiąga 5,4 mHa, blisko UCCSD z 1072 CNOT. W koszcie uczenia kolejność się odwraca: HEA potrzebuje ok. 800 tys. ewaluacji obwodu, ok. 690 razy więcej niż UCCSD."
+   },
+   "fig_exp02_h4_spin.png": {
+    "en": "Why HEA fails: the total spin of its final states. 21 of 270 runs end exactly in the quintet (S² = 6, all four spins aligned), an exact eigenstate with zero gradient from which the optimizer cannot escape; most other failures are singlet–triplet mixtures. All runs within chemical accuracy have ⟨S²⟩ ≤ 0.41.",
+    "pl": "Dlaczego HEA zawodzi: całkowity spin stanów końcowych. 21 z 270 przebiegów kończy się dokładnie w kwintecie (S² = 6, wszystkie cztery spiny równoległe), czyli w stanie własnym o zerowym gradiencie, z którego optymalizator nie wychodzi; większość pozostałych porażek to mieszaniny singletu i trypletu. Wszystkie przebiegi w granicy dokładności chemicznej mają ⟨S²⟩ ≤ 0,41."
+   }
+  }
+ },
+ "exp02_h4_penalty": {
+  "title": {
+   "en": "Spin penalty for the hardware-efficient ansatz, H₄ chain",
+   "pl": "Kara spinowa dla ansatzu sprzętowo wydajnego, łańcuch H₄"
+  },
+  "description": {
+   "en": "Same HEA runs with and without a spin penalty μ⟨S²⟩ in the cost (μ = 0, 0.1, 1 Ha), identical random starts, spacing 1.5-2.5 Å. Does the penalty keep VQE out of the quintet traps found in exp02? Research question 1.",
+   "pl": "Te same przebiegi HEA z karą spinową μ⟨S²⟩ w funkcji kosztu i bez niej (μ = 0; 0,1; 1 Ha), identyczne losowe punkty startowe, odległość 1,5–2,5 Å. Czy kara chroni VQE przed pułapkami kwintetowymi z exp02? Pytanie badawcze 1."
+  },
+  "config": {
+   "molecule": {
+    "label": {"en": "molecule", "pl": "cząsteczka"},
+    "value": {"en": "H₄ linear chain", "pl": "liniowy łańcuch H₄"}
+   },
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "spacings_A": {"label": {"en": "atom spacings (Å)", "pl": "odległości między atomami (Å)"}},
+   "hea_layers": {"label": {"en": "HEA layers", "pl": "warstwy HEA"}},
+   "seeds": {"label": {"en": "seeds", "pl": "ziarna"}},
+   "mu_Ha": {"label": {"en": "penalty weight μ (Ha)", "pl": "waga kary μ (Ha)"}},
+   "cost": {
+    "label": {"en": "cost", "pl": "funkcja kosztu"},
+    "value": {"en": "⟨H⟩ + μ⟨S²⟩", "pl": "⟨H⟩ + μ⟨S²⟩"}
+   },
+   "hea_init": {
+    "label": {"en": "HEA initial angles", "pl": "kąty początkowe HEA"},
+    "value": {"en": "uniform(−0.1, 0.1), same seed in both arms", "pl": "jednostajnie z (−0,1; 0,1), to samo ziarno w obu wariantach"}
+   },
+   "optimizer": {
+    "label": {"en": "optimizer", "pl": "optymalizator"},
+    "value": {"en": "L-BFGS-B, central finite-difference gradient (batched)", "pl": "L-BFGS-B, gradient z centralnych różnic skończonych (wsadowo)"}
+   },
+   "maxiter": {"label": {"en": "max. iterations", "pl": "maks. liczba iteracji"}},
+   "gtol": {"label": {"en": "gradient tolerance", "pl": "tolerancja gradientu"}},
+   "eigenstate_variance_tol_Ha2": {"label": {"en": "eigenstate variance tolerance (Ha²)", "pl": "tolerancja wariancji stanu własnego (Ha²)"}},
+   "extra": {
+    "label": {"en": "extra runs", "pl": "dodatkowe przebiegi"},
+    "value": {"en": "d = 0.5, 0.75, 1.0, 1.25 Å, 6 layers, μ = 0.1 Ha", "pl": "d = 0,5; 0,75; 1,0; 1,25 Å, 6 warstw, μ = 0,1 Ha"}
+   }
+  },
+  "figures": {
+   "fig_exp02_h4_penalty.png": {
+    "en": "Each point is one random start, run with and without the penalty from the same parameters; below the diagonal the penalty helped. With 6 layers and μ = 0.1 Ha every quintet trap disappears: 16 instead of 10 of 25 runs reach chemical accuracy and the median error falls from 2.77 to 0.92 mHa. μ = 1 Ha is too strong, and with 2 layers the penalty cannot help, because that circuit cannot represent a good singlet.",
+    "pl": "Każdy punkt to jeden losowy start, uruchomiony z karą i bez niej z tych samych parametrów; poniżej przekątnej kara pomogła. Przy 6 warstwach i μ = 0,1 Ha znikają wszystkie pułapki kwintetowe: dokładność chemiczną osiąga 16 zamiast 10 z 25 przebiegów, a mediana błędu spada z 2,77 do 0,92 mHa. μ = 1 Ha to za dużo, a przy 2 warstwach kara nie pomaga, bo taki obwód nie potrafi przedstawić dobrego singletu."
+   },
+   "fig_exp02_h4_summary.png": {
+    "en": "Closing comparison along the whole chain. HEA with 6 layers and the spin penalty, best of 5 starts, is within chemical accuracy at all 9 spacings (worst 0.082 mHa), while UCCSD leaves it from 1.75 Å (up to 5.3 mHa) and CCSD falls below the exact energy. The price: about 680 times more circuit evaluations per start than UCCSD, and single starts can still fail (bars).",
+    "pl": "Podsumowanie wzdłuż całego łańcucha. HEA z 6 warstwami i karą spinową, najlepszy z 5 startów, mieści się w dokładności chemicznej przy wszystkich 9 odległościach (najgorzej 0,082 mHa), podczas gdy UCCSD wychodzi poza nią od 1,75 Å (do 5,3 mHa), a CCSD schodzi poniżej energii dokładnej. Cena: ok. 680 razy więcej ewaluacji obwodu na start niż UCCSD, a pojedyncze starty nadal mogą zawieść (słupki)."
+   }
+  }
+ }
+}

@@ -1,0 +1,45 @@
+{
+ "exp04_h2_hardware": {
+  "title": {
+   "en": "H₂ on a noisy IBM processor: readout mitigation and zero-noise extrapolation",
+   "pl": "H₂ na zaszumionym procesorze IBM: mitygacja błędów odczytu i ekstrapolacja do zerowego szumu"
+  },
+  "description": {
+   "en": "Trained UCCSD and HEA circuits for H₂ evaluated from shots on a noisy simulator of IBM Fez and on real IBM hardware, raw and with readout mitigation and zero-noise extrapolation. Research question 4.",
+   "pl": "Wytrenowane obwody UCCSD i HEA dla H₂ ewaluowane z pomiarów na zaszumionym symulatorze procesora IBM Fez oraz na prawdziwym sprzęcie IBM, bez korekcji, z mitygacją błędów odczytu i z ekstrapolacją do zerowego szumu (ZNE). Pytanie badawcze 4."
+  },
+  "config": {
+   "molecule": {"label": {"en": "molecule", "pl": "cząsteczka"}},
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "qubits": {"label": {"en": "qubits", "pl": "kubity"}},
+   "bond_lengths_A": {"label": {"en": "bond lengths (Å)", "pl": "długości wiązania (Å)"}},
+   "methods": {
+    "label": {"en": "circuits", "pl": "obwody"},
+    "value": {"en": "UCCSD from HF (θ = 0); HEA_L2: 2 layers, best of 5 random starts uniform(−0.1, 0.1)", "pl": "UCCSD startujący z HF (θ = 0); HEA_L2: 2 warstwy, najlepszy z 5 losowych startów z (−0,1; 0,1)"}
+   },
+   "hardware_bond_lengths_A": {"label": {"en": "bond lengths on hardware (Å)", "pl": "długości wiązania na sprzęcie (Å)"}},
+   "fake_backend": {"label": {"en": "simulated processor", "pl": "symulowany procesor"}},
+   "simulator_seeds": {"label": {"en": "simulator seeds", "pl": "ziarna symulatora"}},
+   "shots": {"label": {"en": "shots per circuit", "pl": "pomiary (shots) na obwód"}},
+   "fold_factors": {"label": {"en": "ZNE fold factors", "pl": "krotności zwielokrotnienia szumu (ZNE)"}},
+   "zne_fit": {
+    "label": {"en": "ZNE fit", "pl": "dopasowanie ZNE"},
+    "value": {"en": "linear least squares over all fold factors, value at 0", "pl": "liniowa metoda najmniejszych kwadratów po wszystkich krotnościach, wartość w zerze"}
+   },
+   "transpile": {
+    "label": {"en": "transpilation", "pl": "transpilacja"},
+    "value": {"en": "optimization_level 1 (keeps the circuit as designed), one fixed pair of physical qubits for every circuit", "pl": "optimization_level 1 (obwód pozostaje taki, jak zaprojektowany), jedna stała para fizycznych kubitów dla wszystkich obwodów"}
+   },
+   "readout_calibration": {
+    "label": {"en": "readout calibration", "pl": "kalibracja odczytu"},
+    "value": {"en": "all 4 basis states, same qubits and shots, full 4 × 4 assignment matrix inverted", "pl": "wszystkie 4 stany bazowe, te same kubity i liczba pomiarów, odwrócona pełna macierz przypisań 4 × 4"}
+   }
+  },
+  "figures": {
+   "fig_exp04_h2_noise.png": {
+    "en": "Both circuits are exact on a noiseless simulator; here only noise is measured. On the simulated IBM Fez the raw error is 7–37 mHa, readout mitigation helps a little, and readout mitigation + ZNE brings it to a few mHa, at the price of a larger spread between shot seeds. HEA (2 two-qubit gates) beats UCCSD (4) because fewer gates mean less noise. On the real ibm_marrakesh (hollow circles) readout mitigation helps more than on the simulator, but with ZNE the error stays at 4–15 mHa and no point reaches chemical accuracy: the error there does not grow in proportion to the gate folding, so most of it does not come from the two-qubit gates.",
+    "pl": "Oba obwody są dokładne na bezszumowym symulatorze, więc tutaj mierzony jest wyłącznie wpływ szumu. Na symulowanym IBM Fez błąd bez korekcji wynosi 7–37 mHa, mitygacja odczytu pomaga nieznacznie, a mitygacja odczytu razem z ZNE sprowadza go do kilku mHa, kosztem większego rozrzutu między ziarnami pomiarów. HEA (2 bramki dwukubitowe) wypada lepiej niż UCCSD (4), bo mniej bramek to mniej szumu. Na prawdziwym ibm_marrakesh (puste kółka) mitygacja odczytu pomaga bardziej niż na symulatorze, ale z ZNE błąd pozostaje na poziomie 4–15 mHa i żaden punkt nie osiąga dokładności chemicznej: błąd nie rośnie tam proporcjonalnie do zwielokrotnienia bramek, więc w większości nie pochodzi z bramek dwukubitowych."
+   }
+  }
+ }
+}
