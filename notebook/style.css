@@ -45,6 +45,10 @@ a[href^="#/"]:visited { color: var(--link); }
 code { font-size: 0.92em; }
 .error { max-width: 50ch; margin: 120px auto; text-align: center; }
 
+/* language switch, top right of every page: EN | PL, current one in bold */
+.lang { position: absolute; top: 14px; right: 24px; z-index: 1; font-size: 14px; }
+.lang b { font-weight: 700; }
+
 /* ================= landing page: list of experiments ================= */
 
 .masthead { margin: 28px auto 48px; text-align: center; }
@@ -122,6 +126,7 @@ tr.failed td { text-decoration: line-through; }
 @media (max-width: 760px) {
   .exp h1 { font-size: 26px; margin-top: 56px; }
   .stamp { top: 28px; }
+  .lang { right: 16px; }
   .chart-box { height: 320px; padding: 6px; }
   .table-wrap { width: calc(100vw - 32px); }
 }
