@@ -1,0 +1,29 @@
+{
+ "name": "exp00_data",
+ "title": "Data preparation: geometries, qubit hamiltonians and reference energies",
+ "description": "Every geometry used in the experiments (H\u2082, H\u2084 chain, and LiH for the next step) taken through the whole pipeline: PySCF integrals, parity-mapped qubit hamiltonian, HF / CCSD / FCI references. Logs the size of each encoding and checks that the qubit hamiltonian reproduces FCI and is identical between builds.",
+ "config": {
+  "basis": "sto3g",
+  "mapping": "ParityMapper with two-qubit Z2 reduction (qiskit-nature)",
+  "orbital_signs": "largest coefficient of every MO made positive (hamiltonians.fix_orbital_signs)",
+  "references": "RHF, CCSD, FCI from PySCF",
+  "measurement_groups": "qubit-wise commuting (src/hardware.measurement_groups)",
+  "fci_check_tolerance_Ha": 1e-08,
+  "pauli_coefficient_cutoff": 1e-10,
+  "exp03_train_range_A": [
+   0.5,
+   2.5
+  ],
+  "splits": "geometries of every experiment and their role: exp00_data_splits.csv"
+ },
+ "figures": [
+  "fig_exp00_references.png",
+  "fig_exp00_hamiltonian.png",
+  "fig_exp00_splits.png",
+  "fig_exp00_checks.png"
+ ],
+ "status": "done",
+ "started_at": "2026-11-14T13:56:14",
+ "finished_at": "2026-11-14T14:00:23",
+ "n_runs": 86
+}

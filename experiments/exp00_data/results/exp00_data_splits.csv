@@ -1,0 +1,117 @@
+split,molecule,role,d_A,region
+exp01 H2 curve,H2,evaluated,0.3,
+exp01 H2 curve,H2,evaluated,0.45,
+exp01 H2 curve,H2,evaluated,0.6,
+exp01 H2 curve,H2,evaluated,0.75,
+exp01 H2 curve,H2,evaluated,0.9,
+exp01 H2 curve,H2,evaluated,1.05,
+exp01 H2 curve,H2,evaluated,1.2,
+exp01 H2 curve,H2,evaluated,1.35,
+exp01 H2 curve,H2,evaluated,1.5,
+exp01 H2 curve,H2,evaluated,1.65,
+exp01 H2 curve,H2,evaluated,1.8,
+exp01 H2 curve,H2,evaluated,1.95,
+exp01 H2 curve,H2,evaluated,2.1,
+exp01 H2 curve,H2,evaluated,2.25,
+exp01 H2 curve,H2,evaluated,2.4,
+exp01 H2 curve,H2,evaluated,2.55,
+exp01 H2 curve,H2,evaluated,2.7,
+exp01 H2 curve,H2,evaluated,2.85,
+exp01 H2 curve,H2,evaluated,3.0,
+exp02 H4 spacings,H4,evaluated,0.5,
+exp02 H4 spacings,H4,evaluated,0.75,
+exp02 H4 spacings,H4,evaluated,1.0,
+exp02 H4 spacings,H4,evaluated,1.25,
+exp02 H4 spacings,H4,evaluated,1.5,
+exp02 H4 spacings,H4,evaluated,1.75,
+exp02 H4 spacings,H4,evaluated,2.0,
+exp02 H4 spacings,H4,evaluated,2.25,
+exp02 H4 spacings,H4,evaluated,2.5,
+exp03 train M=3,H4,train,0.5,interpolation
+exp03 train M=3,H4,train,1.5,interpolation
+exp03 train M=3,H4,train,2.5,interpolation
+exp03 train M=5,H4,train,0.5,interpolation
+exp03 train M=5,H4,train,1.0,interpolation
+exp03 train M=5,H4,train,1.5,interpolation
+exp03 train M=5,H4,train,2.0,interpolation
+exp03 train M=5,H4,train,2.5,interpolation
+exp03 train M=9,H4,train,0.5,interpolation
+exp03 train M=9,H4,train,0.75,interpolation
+exp03 train M=9,H4,train,1.0,interpolation
+exp03 train M=9,H4,train,1.25,interpolation
+exp03 train M=9,H4,train,1.5,interpolation
+exp03 train M=9,H4,train,1.75,interpolation
+exp03 train M=9,H4,train,2.0,interpolation
+exp03 train M=9,H4,train,2.25,interpolation
+exp03 train M=9,H4,train,2.5,interpolation
+exp03 test grid,H4,test,0.4,extrapolation
+exp03 test grid,H4,test,0.45,extrapolation
+exp03 test grid,H4,test,0.5,interpolation
+exp03 test grid,H4,test,0.55,interpolation
+exp03 test grid,H4,test,0.6,interpolation
+exp03 test grid,H4,test,0.65,interpolation
+exp03 test grid,H4,test,0.7,interpolation
+exp03 test grid,H4,test,0.75,interpolation
+exp03 test grid,H4,test,0.8,interpolation
+exp03 test grid,H4,test,0.85,interpolation
+exp03 test grid,H4,test,0.9,interpolation
+exp03 test grid,H4,test,0.95,interpolation
+exp03 test grid,H4,test,1.0,interpolation
+exp03 test grid,H4,test,1.05,interpolation
+exp03 test grid,H4,test,1.1,interpolation
+exp03 test grid,H4,test,1.15,interpolation
+exp03 test grid,H4,test,1.2,interpolation
+exp03 test grid,H4,test,1.25,interpolation
+exp03 test grid,H4,test,1.3,interpolation
+exp03 test grid,H4,test,1.35,interpolation
+exp03 test grid,H4,test,1.4,interpolation
+exp03 test grid,H4,test,1.45,interpolation
+exp03 test grid,H4,test,1.5,interpolation
+exp03 test grid,H4,test,1.55,interpolation
+exp03 test grid,H4,test,1.6,interpolation
+exp03 test grid,H4,test,1.65,interpolation
+exp03 test grid,H4,test,1.7,interpolation
+exp03 test grid,H4,test,1.75,interpolation
+exp03 test grid,H4,test,1.8,interpolation
+exp03 test grid,H4,test,1.85,interpolation
+exp03 test grid,H4,test,1.9,interpolation
+exp03 test grid,H4,test,1.95,interpolation
+exp03 test grid,H4,test,2.0,interpolation
+exp03 test grid,H4,test,2.05,interpolation
+exp03 test grid,H4,test,2.1,interpolation
+exp03 test grid,H4,test,2.15,interpolation
+exp03 test grid,H4,test,2.2,interpolation
+exp03 test grid,H4,test,2.25,interpolation
+exp03 test grid,H4,test,2.3,interpolation
+exp03 test grid,H4,test,2.35,interpolation
+exp03 test grid,H4,test,2.4,interpolation
+exp03 test grid,H4,test,2.45,interpolation
+exp03 test grid,H4,test,2.5,interpolation
+exp03 test grid,H4,test,2.55,extrapolation
+exp03 test grid,H4,test,2.6,extrapolation
+exp03 test grid,H4,test,2.65,extrapolation
+exp03 test grid,H4,test,2.7,extrapolation
+exp03 test grid,H4,test,2.75,extrapolation
+exp03 test grid,H4,test,2.8,extrapolation
+exp03 test grid,H4,test,2.85,extrapolation
+exp03 test grid,H4,test,2.9,extrapolation
+exp03 test grid,H4,test,2.95,extrapolation
+exp03 test grid,H4,test,3.0,extrapolation
+exp04 simulator,H2,evaluated,0.5,
+exp04 simulator,H2,evaluated,0.735,
+exp04 simulator,H2,evaluated,1.0,
+exp04 simulator,H2,evaluated,1.5,
+exp04 simulator,H2,evaluated,2.0,
+exp04 simulator,H2,evaluated,2.5,
+exp04 hardware,H2,evaluated,0.735,
+exp04 hardware,H2,evaluated,1.5,
+exp04 hardware,H2,evaluated,2.5,
+next: LiH,LiH,prepared,1.0,
+next: LiH,LiH,prepared,1.25,
+next: LiH,LiH,prepared,1.5,
+next: LiH,LiH,prepared,1.75,
+next: LiH,LiH,prepared,2.0,
+next: LiH,LiH,prepared,2.25,
+next: LiH,LiH,prepared,2.5,
+next: LiH,LiH,prepared,2.75,
+next: LiH,LiH,prepared,3.0,

@@ -1,0 +1,35 @@
+{
+ "run_id": "LiH_d3.00",
+ "params": {
+  "molecule": "LiH",
+  "d_A": 3.0
+ },
+ "reference": null,
+ "status": "done",
+ "started_at": "2026-11-14T14:00:20",
+ "metrics": {
+  "n_atoms": 2,
+  "n_electrons": 4,
+  "spatial_orbitals": 6,
+  "qubits_before": 12,
+  "qubits": 10,
+  "pauli_terms": 630,
+  "coeff_1norm_Ha": 12.286494353328631,
+  "measurement_groups": 165,
+  "E_nuc_Ha": 0.52917721092,
+  "E_HF_Ha": -7.710829900217222,
+  "E_CCSD_Ha": -7.798761959121778,
+  "E_FCI_Ha": -7.7988431595024,
+  "E_corr_mHa": -88.01325928517834,
+  "dE_CCSD_mHa": 0.0812003806220929,
+  "hf_weight": 0.7196803871166756,
+  "ccsd_converged": true,
+  "fci_check_Ha": 1.7763568394002505e-15,
+  "other_sector_below_mHa": 0.0,
+  "rebuild_diff": 0.0,
+  "build_s": 2.84,
+  "used_in": "next"
+ },
+ "finished_at": "2026-11-14T14:00:23",
+ "duration_s": 2.84
+}
