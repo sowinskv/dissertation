@@ -35,8 +35,8 @@ const LABELS_PL = {
 };
 
 /* ---------- language: interface strings in English and Polish ---------- */
-// experiment titles and descriptions come from the logs: experiment.json may carry
-// title_pl / description_pl next to title / description; English is the fallback.
+// experiment texts (title, description, config, figure captions) come from
+// experiments/<folder>/notebook.json, served as exp.i18n; the logged English text is the fallback.
 const LANGS = ["en", "pl"];
 let lang = (() => {
   try { const s = localStorage.getItem("notebook-lang"); if (LANGS.includes(s)) return s; } catch (e) { /* no storage */ }
@@ -115,8 +115,16 @@ const t = (key, ...args) => {
   return typeof s === "function" ? s(...args) : s;
 };
 const label = (key) => (lang === "pl" && LABELS_PL[key]) || LABELS[key] || key;
-// a text field from the logs in the current language (title_pl, ...), English if missing
-const local = (obj, field) => (lang !== "en" && obj?.[`${field}_${lang}`]) || obj?.[field] || "";
+// a text of an experiment in the current language: notebook.json, else the logged (English) text
+const pick = (texts) => texts?.[lang] ?? texts?.en;
+const local = (obj, field) => pick(obj?.i18n?.[field]) || obj?.[field] || "";
+const configLabel = (exp, k) => pick(exp.i18n?.config?.[k]?.label) || k.replaceAll("_", " ");
+function configValue(exp, k, v) {
+  const text = pick(exp.i18n?.config?.[k]?.value);
+  if (text !== undefined) return text;
+  return Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : String(v);
+}
+const caption = (exp, f) => pick(exp.i18n?.figures?.[f]);
 
 function renderLangSwitch() {
   const el = document.getElementById("lang");
@@ -309,11 +317,12 @@ async function showExperiment(name, section) {
 
 function renderShell(exp) {
   const setup = Object.entries(exp.config || {}).map(([k, v]) =>
-    `<b>${esc(k.replaceAll("_", " "))}:</b> ${esc(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v)}`).join("<br>");
+    `<b>${chem(configLabel(exp, k))}:</b> ${chem(configValue(exp, k, v))}`).join("<br>");
   const figures = (exp.figures || []).map((f) => `
     <figure>
       <a href="${exp.files}${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="${exp.files}${encodeURIComponent(f)}" alt="${t("figureFrom")} ${esc(exp.folder)}/results/${esc(f)}" loading="lazy"></a>
-      <figcaption>${esc(exp.folder)}/results/${esc(f)} [<a href="${exp.files}${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</figcaption>
+      <figcaption>${caption(exp, f) ? `<span class="caption">${chem(caption(exp, f))}</span>` : ""}
+        <span class="path">${esc(exp.folder)}/results/${esc(f)} [<a href="${exp.files}${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</span></figcaption>
     </figure>`).join("");
   const links = [
     figures && `[<a href="#figures" data-jump>${t("figures")}</a>]`,
