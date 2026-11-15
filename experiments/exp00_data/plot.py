@@ -5,6 +5,8 @@ run (from repo root):  uv run python experiments/exp00_data/plot.py
 input:   results/exp00_data_results.csv, results/exp00_data_splits.csv
 output:  results/fig_exp00_references, fig_exp00_hamiltonian, fig_exp00_splits, fig_exp00_checks
          (.pdf / .png)
+--pl:    polish labels and decimal comma for the thesis text, saved with a _pl suffix
+         (references, splits, checks)
 """
 
 import sys
@@ -22,6 +24,20 @@ NAMES = {"H2": "H₂", "H4": "H₄ chain", "LiH": "LiH"}
 # the systems are not methods: all drawn in FCI ink, told apart by marker and direct labels
 MARKERS = {"H2": "o", "H4": "s", "LiH": "^"}
 FLOOR_HA = 1e-17   # checks that come out exactly 0 are drawn on the floor
+PL = "--pl" in sys.argv   # polish version for the thesis text
+SUFFIX = "_pl" if PL else ""
+if PL:
+    NAMES = {"H2": "H₂", "H4": "łańcuch H₄", "LiH": "LiH"}
+SPLITS_PL = {"exp01 H2 curve": "exp01 krzywa H2", "exp02 H4 spacings": "exp02 odległości H4",
+             "exp03 train M=3": "exp03 trening M=3", "exp03 train M=5": "exp03 trening M=5",
+             "exp03 train M=9": "exp03 trening M=9", "exp03 test grid": "exp03 siatka testowa",
+             "exp04 simulator": "exp04 symulator", "exp04 hardware": "exp04 sprzęt IBM",
+             "next: LiH": "następnie: LiH"}
+XLABEL = "Odległość między atomami d (Å)" if PL else "Bond length / atom spacing d (Å)"
+
+
+def tr(en, pl):
+    return pl if PL else en
 
 
 def by_system(rows):
@@ -52,18 +68,21 @@ def fig_references(S):
     for m in SYSTEMS:
         ink_line(ax1, S[m]["d_A"], -S[m]["E_corr_mHa"], m)
         ink_line(ax2, S[m]["d_A"], S[m]["hf_weight"], m)
-    ps.panel_title(ax1, "Correlation energy", "HF minus FCI energy, mHa")
-    ps.panel_title(ax2, "Weight of the HF determinant in the FCI state", "squared overlap")
+    ps.panel_title(ax1, tr("Correlation energy", "Energia korelacji"), tr("HF minus FCI energy, mHa", "energia HF minus FCI, mHa"))
+    ps.panel_title(ax2, tr("Weight of the HF determinant in the FCI state", "Udział wyznacznika HF w stanie FCI"),
+                   tr("squared overlap", "kwadrat modułu iloczynu skalarnego"))
     ax2.set_ylim(0, 1.05)
     ps.number_axis(ax2, "y", decimals=1)
-    ax2.set_xlabel("Bond length / atom spacing d (Å)")
+    ax2.set_xlabel(XLABEL)
     ps.number_axis(ax2, "x", decimals=1)
     ax2.set_xlim(0.25, 3.05)
     ps.end_labels(ax1, 3.0, [(-S[m]["E_corr_mHa"][-1], NAMES[m]) for m in SYSTEMS])
     ps.end_labels(ax2, 3.0, [(S[m]["hf_weight"][-1], NAMES[m]) for m in SYSTEMS])
-    ps.header(fig, "Correlation energy and HF weight along each curve", key=key())
-    ps.footer(fig, "STO-3G, PySCF. Low HF weight = strong correlation: H₄ falls to 0.27 at 3 Å.")
-    ps.save(fig, OUT / "fig_exp00_references")
+    ps.header(fig, tr("Correlation energy and HF weight along each curve",
+                      "Energia korelacji i udział HF w funkcji odległości"), key=key())
+    ps.footer(fig, tr("STO-3G, PySCF. Low HF weight = strong correlation: H₄ falls to 0.27 at 3 Å.",
+                      "STO-3G, PySCF. Mały udział HF = silna korelacja: dla H₄ spada do 0,27 przy 3 Å."))
+    ps.save(fig, OUT / f"fig_exp00_references{SUFFIX}")
 
 
 def fig_hamiltonian(S):
@@ -116,26 +135,29 @@ def fig_splits(splits):
             ax.plot(d, np.full_like(d, i), "o", ms=5.5, color=ps.color("QNN-cond"), mec=t["surface"], mew=0.6)
         else:
             ax.plot(d, np.full_like(d, i), "o", ms=3.6, color=t["ink"], mec=t["surface"], mew=0.5)
-    ax.set_yticks(range(len(names)), [ps.tex(n.replace("H2", "H₂").replace("H4", "H₄")) for n in names])
+    ax.set_yticks(range(len(names)), [ps.tex((SPLITS_PL.get(n, n) if PL else n).replace("H2", "H₂").replace("H4", "H₄"))
+                                       for n in names])
     ax.grid(False)
     ax.tick_params(axis="y", length=0)
     ax.spines["left"].set_visible(False)
     ax.set_xlim(0.25, 3.05)
     ax.set_ylim(-0.7, len(names) - 0.3)
-    ax.set_xlabel("Bond length / atom spacing d (Å)")
+    ax.set_xlabel(XLABEL)
     ps.number_axis(ax, "x", decimals=1)
-    ax.annotate("extrapolation", (2.775, len(names) - 0.3), xytext=(0, 2), textcoords="offset points",
+    ax.annotate(tr("extrapolation", "ekstrapolacja"), (2.775, len(names) - 0.3), xytext=(0, 2), textcoords="offset points",
                 ha="center", va="bottom", fontsize=7, color=t["muted"], annotation_clip=False)
     handles = [Line2D([], [], ls="none", marker="o", ms=5.5, color=ps.color("QNN-cond"), mec=t["surface"],
-                      label="training (energy only)"),
-               Line2D([], [], ls="none", marker="o", ms=2.6, color=t["ink"], mfc=t["surface"], label="test"),
+                      label=tr("training (energy only)", "trening (tylko energia)")),
+               Line2D([], [], ls="none", marker="o", ms=2.6, color=t["ink"], mfc=t["surface"], label=tr("test", "test")),
                Line2D([], [], ls="none", marker="o", ms=3.6, color=t["ink"], mec=t["surface"],
-                      label="evaluated per point")]
-    ps.header(fig, "Geometries used by each experiment", key=handles)
-    ps.footer(fig, "exp03: conditional QNN trained on M spacings in 0.5–2.5 Å, tested on the full "
-                   "grid; shaded = outside the training range. LiH is prepared, not used yet.")
+                      label=tr("evaluated per point", "liczone punkt po punkcie"))]
+    ps.header(fig, tr("Geometries used by each experiment", "Geometrie użyte w poszczególnych eksperymentach"), key=handles)
+    ps.footer(fig, tr("exp03: conditional QNN trained on M spacings in 0.5–2.5 Å, tested on the full "
+                      "grid; shaded = outside the training range. LiH is prepared, not used yet.",
+                      "exp03: warunkowa QNN trenowana na M odległościach z zakresu 0,5–2,5 Å, testowana na pełnej "
+                      "siatce; tło = poza zakresem treningu. LiH jest przygotowany, jeszcze nieużywany."))
     fig.subplots_adjust(left=0.2)
-    ps.save(fig, OUT / "fig_exp00_splits")
+    ps.save(fig, OUT / f"fig_exp00_splits{SUFFIX}")
 
 
 def fig_checks(S):
@@ -144,22 +166,27 @@ def fig_checks(S):
         ink_line(ax, S[m]["d_A"], np.maximum(S[m]["fci_check_Ha"], FLOOR_HA), m, ls="none", markevery=None)
     ps.log_axis(ax, "y", every=2)
     ax.set_ylim(FLOOR_HA * 0.3, 1e-6)
-    ps.threshold(ax, 1e-8, "tolerance 10⁻⁸ Ha", above=True)
-    ps.panel_title(ax, "Difference from PySCF FCI", "absolute value, Ha, log scale")
-    ax.set_xlabel("Bond length / atom spacing d (Å)")
+    ps.threshold(ax, 1e-8, tr("tolerance 10⁻⁸ Ha", "tolerancja 10⁻⁸ Ha"), above=True)
+    ps.panel_title(ax, tr("Difference from PySCF FCI", "Różnica względem FCI z PySCF"),
+                   tr("absolute value, Ha, log scale", "wartość bezwzględna, Ha, skala logarytmiczna"))
+    ax.set_xlabel(XLABEL)
     ps.number_axis(ax, "x", decimals=1)
     ax.set_xlim(0.25, 3.05)
-    ps.header(fig, "Lowest eigenvalue of the qubit hamiltonian vs FCI", key=key(lines=False))
-    ps.footer(fig, "Lowest eigenvalue taken in the right electron-number sector. Exact zeros drawn at 10⁻¹⁷. "
-                   "Two independent builds gave identical hamiltonians at every geometry.")
-    ps.save(fig, OUT / "fig_exp00_checks")
+    ps.header(fig, tr("Lowest eigenvalue of the qubit hamiltonian vs FCI",
+                      "Najniższa wartość własna hamiltonianu a energia FCI"), key=key(lines=False))
+    ps.footer(fig, tr("Lowest eigenvalue taken in the right electron-number sector. Exact zeros drawn at 10⁻¹⁷. "
+                      "Two independent builds gave identical hamiltonians at every geometry.",
+                      "Wartość własna w sektorze o właściwej liczbie elektronów; różnice równe zeru narysowano "
+                      "na poziomie 10⁻¹⁷. Dwa niezależne przygotowania dały identyczne hamiltoniany."))
+    ps.save(fig, OUT / f"fig_exp00_checks{SUFFIX}")
 
 
 def main():
-    ps.use()
+    ps.use(decimal_comma=PL)
     S = by_system(runlog.load(OUT / "exp00_data_results.csv"))
     fig_references(S)
-    fig_hamiltonian(S)
+    if not PL:   # the thesis text has this as a table
+        fig_hamiltonian(S)
     fig_splits(runlog.load(OUT / "exp00_data_splits.csv"))
     fig_checks(S)
 

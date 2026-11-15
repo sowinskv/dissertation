@@ -133,8 +133,9 @@ def fig_cost(rows, layers):
     ps.save(fig, OUT / "fig_exp02_h4_cost")
 
 
-def fig_spin(spin_rows, layers):
-    """energy error of every final HEA state against its total spin <S^2>."""
+def fig_spin(spin_rows, layers, pl=False):
+    """energy error of every final HEA state against its total spin <S^2>; pl=True: polish labels, _pl suffix."""
+    tr = lambda en, p: p if pl else en
     t = ps.theme()
     floor = 1e-4
     hea = [r for r in spin_rows if r["method"] == "HEA"]
@@ -146,28 +147,33 @@ def fig_spin(spin_rows, layers):
     ax.set_xlim(-0.3, 6.6)
     ax.set_xticks([0, 1, 2, 3, 4, 5, 6])
     ax.grid(axis="x", visible=False)
-    for s2, name in ((0, "singlet"), (2, "triplet"), (6, "quintet")):
+    for s2, name in ((0, "singlet"), (2, "triplet"), (6, tr("quintet", "kwintet"))):
         ax.axvline(s2, color=t["muted"], lw=0.7, ls=(0, (1, 2)), zorder=0)
         ax.annotate(name, (s2, 1), xycoords=ax.get_xaxis_transform(), xytext=(4, -3),
                     textcoords="offset points", ha="left", va="top", fontsize=7, color=t["ink_2"])
-    ps.threshold(ax, ps.CHEM_ACC_MHA, "chemical accuracy", x=0.42)
+    ps.threshold(ax, ps.CHEM_ACC_MHA, tr("chemical accuracy", "dokładność chemiczna"), x=0.42)
     for L, c in zip(layers, ramp):
         sel = [r for r in hea if r["layers"] == L]
         ax.plot([r["S2"] for r in sel], [max(r["dE_mHa"], floor) for r in sel], ls="none",
                 marker="o", markersize=4.2, markerfacecolor=c, markeredgecolor=ps.color("HEA"),
                 markeredgewidth=0.5, alpha=0.9, zorder=3 + L)
-    ax.set_xlabel("Total spin ⟨S²⟩ of the final state")
-    ps.panel_title(ax, "Error vs FCI", "mHa, log scale")
+    ax.set_xlabel(tr("Total spin ⟨S²⟩ of the final state", "Całkowity spin ⟨S²⟩ stanu końcowego"))
+    ps.panel_title(ax, tr("Error vs FCI", "Błąd względem FCI"), tr("mHa, log scale", "mHa, skala logarytmiczna"))
 
     key = [Line2D([], [], ls="none", marker="o", markersize=4.5, markerfacecolor=c,
-                  markeredgecolor=ps.color("HEA"), markeredgewidth=0.5, label=f"{L} layer{'s' if L > 1 else ''}")
+                  markeredgecolor=ps.color("HEA"), markeredgewidth=0.5, label=tr(f"{L} layer{'s' if L > 1 else ''}",
+                                                            f"{L} warstw{'a' if L == 1 else ('y' if L < 5 else '')}"))
            for L, c in zip(layers, ramp)]
-    ps.header(fig, "Energy error vs total spin of the final HEA states, H₄\u00a0chain", key=key)
+    ps.header(fig, tr("Energy error vs total spin of the final HEA states, H₄\u00a0chain",
+                      "Błąd energii a całkowity spin stanów końcowych HEA, łańcuch\u00a0H₄"), key=key)
     n_q = sum(1 for r in hea if r["is_eigenstate"] and r["spin"] == "quintet")
-    ps.footer(fig, f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
-                   f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
-                   f"Errors below 10⁻⁴ mHa are drawn at the floor.")
-    ps.save(fig, OUT / "fig_exp02_h4_spin")
+    ps.footer(fig, tr(f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
+                      f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
+                      f"Errors below 10⁻⁴ mHa are drawn at the floor.",
+                      f"Łańcuch H₄, STO-3G, symulator bez szumu. 9 odległości, 5 losowych startów na głębokość; "
+                      f"stany odtworzone z zapisanych parametrów. {n_q} treningów przy S² = 6 to dokładne stany "
+                      f"kwintetowe (wiele się pokrywa). Błędy poniżej 10⁻⁴ mHa narysowano na dolnej granicy."))
+    ps.save(fig, OUT / f"fig_exp02_h4_spin{'_pl' if pl else ''}")
 
 
 def fig_penalty(rows):
@@ -271,8 +277,13 @@ def fig_summary(rows, pen_rows, layers=6, mu=0.1):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", default=OUT / "exp02_h4_results.csv")
+    parser.add_argument("--pl", action="store_true", help="only the spin figure, polish labels, for the thesis text")
     args = parser.parse_args()
-    ps.use()
+    ps.use(decimal_comma=args.pl)
+    if args.pl:
+        layers = sorted({int(r["layers"]) for r in load(args.csv) if r["method"] == "HEA"})
+        fig_spin(load(OUT / "exp02_h4_spin_results.csv"), layers, pl=True)
+        return
     rows = load(args.csv)
     layers = sorted({int(r["layers"]) for r in rows if r["method"] == "HEA"})
     fig_error_vs_spacing(rows, max(layers))
