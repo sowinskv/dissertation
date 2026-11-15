@@ -134,7 +134,7 @@ def fig_cost(rows, layers):
 
 
 def fig_spin(spin_rows, layers, pl=False):
-    """energy error of every final HEA state against its total spin <S^2>; pl=True: polish labels, _pl suffix."""
+    """energy error of every final HEA state against its total spin <S^2>; pl=True: polish labels, no footer, _pl suffix."""
     tr = lambda en, p: p if pl else en
     t = ps.theme()
     floor = 1e-4
@@ -167,12 +167,10 @@ def fig_spin(spin_rows, layers, pl=False):
     ps.header(fig, tr("Energy error vs total spin of the final HEA states, H₄\u00a0chain",
                       "Błąd energii a całkowity spin stanów końcowych HEA, łańcuch\u00a0H₄"), key=key)
     n_q = sum(1 for r in hea if r["is_eigenstate"] and r["spin"] == "quintet")
-    ps.footer(fig, tr(f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
-                      f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
-                      f"Errors below 10⁻⁴ mHa are drawn at the floor.",
-                      f"Łańcuch H₄, STO-3G, symulator bez szumu. 9 odległości, 5 losowych startów na głębokość; "
-                      f"stany odtworzone z zapisanych parametrów. {n_q} treningów przy S² = 6 to dokładne stany "
-                      f"kwintetowe (wiele się pokrywa). Błędy poniżej 10⁻⁴ mHa narysowano na dolnej granicy."))
+    if not pl:   # the thesis version carries no footer: the caption in the text says it
+        ps.footer(fig, f"{BASE_NOTE} All 9 spacings, 5 random starts per depth; states rebuilt from the saved "
+                       f"parameters. The {n_q} runs at S² = 6 are exact quintet eigenstates (many overlap). "
+                       f"Errors below 10⁻⁴ mHa are drawn at the floor.")
     ps.save(fig, OUT / f"fig_exp02_h4_spin{'_pl' if pl else ''}")
 
 

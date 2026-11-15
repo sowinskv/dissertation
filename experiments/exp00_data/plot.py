@@ -5,7 +5,7 @@ run (from repo root):  uv run python experiments/exp00_data/plot.py
 input:   results/exp00_data_results.csv, results/exp00_data_splits.csv
 output:  results/fig_exp00_references, fig_exp00_hamiltonian, fig_exp00_splits, fig_exp00_checks
          (.pdf / .png)
---pl:    polish labels and decimal comma for the thesis text, saved with a _pl suffix
+--pl:    polish labels, decimal comma and no footer for the thesis text, saved with a _pl suffix
          (references, splits, checks)
 """
 
@@ -38,6 +38,12 @@ XLABEL = "Odległość między atomami d (Å)" if PL else "Bond length / atom sp
 
 def tr(en, pl):
     return pl if PL else en
+
+
+def footer(fig, text):
+    """the thesis versions carry no footer: the caption in the text says it."""
+    if not PL:
+        ps.footer(fig, text)
 
 
 def by_system(rows):
@@ -80,8 +86,7 @@ def fig_references(S):
     ps.end_labels(ax2, 3.0, [(S[m]["hf_weight"][-1], NAMES[m]) for m in SYSTEMS])
     ps.header(fig, tr("Correlation energy and HF weight along each curve",
                       "Energia korelacji i udział HF w funkcji odległości"), key=key())
-    ps.footer(fig, tr("STO-3G, PySCF. Low HF weight = strong correlation: H₄ falls to 0.27 at 3 Å.",
-                      "STO-3G, PySCF. Mały udział HF = silna korelacja: dla H₄ spada do 0,27 przy 3 Å."))
+    footer(fig, "STO-3G, PySCF. Low HF weight = strong correlation: H₄ falls to 0.27 at 3 Å.")
     ps.save(fig, OUT / f"fig_exp00_references{SUFFIX}")
 
 
@@ -152,10 +157,8 @@ def fig_splits(splits):
                Line2D([], [], ls="none", marker="o", ms=3.6, color=t["ink"], mec=t["surface"],
                       label=tr("evaluated per point", "liczone punkt po punkcie"))]
     ps.header(fig, tr("Geometries used by each experiment", "Geometrie użyte w poszczególnych eksperymentach"), key=handles)
-    ps.footer(fig, tr("exp03: conditional QNN trained on M spacings in 0.5–2.5 Å, tested on the full "
-                      "grid; shaded = outside the training range. LiH is prepared, not used yet.",
-                      "exp03: warunkowa QNN trenowana na M odległościach z zakresu 0,5–2,5 Å, testowana na pełnej "
-                      "siatce; tło = poza zakresem treningu. LiH jest przygotowany, jeszcze nieużywany."))
+    footer(fig, "exp03: conditional QNN trained on M spacings in 0.5–2.5 Å, tested on the full "
+                "grid; shaded = outside the training range. LiH is prepared, not used yet.")
     fig.subplots_adjust(left=0.2)
     ps.save(fig, OUT / f"fig_exp00_splits{SUFFIX}")
 
@@ -174,10 +177,8 @@ def fig_checks(S):
     ax.set_xlim(0.25, 3.05)
     ps.header(fig, tr("Lowest eigenvalue of the qubit hamiltonian vs FCI",
                       "Najniższa wartość własna hamiltonianu a energia FCI"), key=key(lines=False))
-    ps.footer(fig, tr("Lowest eigenvalue taken in the right electron-number sector. Exact zeros drawn at 10⁻¹⁷. "
-                      "Two independent builds gave identical hamiltonians at every geometry.",
-                      "Wartość własna w sektorze o właściwej liczbie elektronów; różnice równe zeru narysowano "
-                      "na poziomie 10⁻¹⁷. Dwa niezależne przygotowania dały identyczne hamiltoniany."))
+    footer(fig, "Lowest eigenvalue taken in the right electron-number sector. Exact zeros drawn at 10⁻¹⁷. "
+                "Two independent builds gave identical hamiltonians at every geometry.")
     ps.save(fig, OUT / f"fig_exp00_checks{SUFFIX}")
 
 
