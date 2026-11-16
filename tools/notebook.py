@@ -12,6 +12,10 @@ api:
   GET /api/experiments/<name>               experiment metadata + all runs (no histories)
   GET /api/experiments/<name>/history?ids=a,b,c   training histories of the listed runs
   GET /files/<folder>/<file>                figures and CSV from experiments/<folder>/results/
+
+texts for the page in English and Polish (title, description, config names and values, figure
+captions) live in experiments/<folder>/notebook.json, keyed by experiment name; they are added
+to the experiment as "i18n". the logs stay as they are; editing a text needs no rerun.
   everything else is served from notebook/
 """
 
@@ -65,11 +69,16 @@ def _counts(runs):
     return c
 
 
+def notes(folder):
+    """experiments/<folder>/notebook.json: per experiment, texts in English and Polish."""
+    return _read_json(EXPERIMENTS / folder / "notebook.json") or {}
+
+
 def _extras(name, folder):
-    """where the page finds the experiment's files: figures and its results CSV, if there is one."""
+    """where the page finds the experiment's files (figures, results CSV) and its translated texts."""
     csv = EXPERIMENTS / folder / "results" / f"{name}_results.csv"
     return {"csv": csv.name if csv.exists() else None, "files": f"/files/{folder}/",
-            "folder": f"experiments/{folder}"}
+            "folder": f"experiments/{folder}", "i18n": notes(folder).get(name, {})}
 
 
 def _labels():

@@ -1,0 +1,56 @@
+{
+ "exp00_data": {
+  "title": {
+   "en": "Data preparation: geometries, qubit hamiltonians and reference energies",
+   "pl": "Przygotowanie danych: geometrie, hamiltoniany kubitowe i energie referencyjne"
+  },
+  "description": {
+   "en": "Every geometry used in the experiments (H₂, H₄ chain, and LiH for the next step) taken through the whole pipeline: PySCF integrals, parity-mapped qubit hamiltonian, HF / CCSD / FCI references. Logs the size of each encoding and checks that the qubit hamiltonian reproduces FCI and is identical between builds.",
+   "pl": "Każda geometria używana w eksperymentach (H₂, łańcuch H₄ oraz LiH na kolejny etap) przechodzi przez cały potok: całki z PySCF, hamiltonian kubitowy po odwzorowaniu parzystości, energie referencyjne HF / CCSD / FCI. Zapisywany jest rozmiar każdego kodowania i sprawdzane, czy hamiltonian kubitowy odtwarza FCI oraz czy jest identyczny przy każdym budowaniu."
+  },
+  "config": {
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "mapping": {
+    "label": {"en": "mapping", "pl": "odwzorowanie"},
+    "value": {"en": "ParityMapper with two-qubit Z₂ reduction (qiskit-nature)", "pl": "ParityMapper z redukcją symetrii Z₂ o dwa kubity (qiskit-nature)"}
+   },
+   "orbital_signs": {
+    "label": {"en": "orbital signs", "pl": "znaki orbitali"},
+    "value": {"en": "largest coefficient of every MO made positive (hamiltonians.fix_orbital_signs)", "pl": "największy współczynnik każdego orbitalu molekularnego dodatni (hamiltonians.fix_orbital_signs)"}
+   },
+   "references": {
+    "label": {"en": "references", "pl": "referencje"},
+    "value": {"en": "RHF, CCSD, FCI from PySCF", "pl": "RHF, CCSD, FCI z PySCF"}
+   },
+   "measurement_groups": {
+    "label": {"en": "measurement groups", "pl": "grupy pomiarowe"},
+    "value": {"en": "qubit-wise commuting (src/hardware.measurement_groups)", "pl": "przemienne kubit po kubicie (src/hardware.measurement_groups)"}
+   },
+   "fci_check_tolerance_Ha": {"label": {"en": "FCI check tolerance (Ha)", "pl": "tolerancja zgodności z FCI (Ha)"}},
+   "pauli_coefficient_cutoff": {"label": {"en": "Pauli coefficient cutoff (Ha)", "pl": "próg współczynników Pauliego (Ha)"}},
+   "exp03_train_range_A": {"label": {"en": "exp03 training range (Å)", "pl": "zakres uczenia w exp03 (Å)"}},
+   "splits": {
+    "label": {"en": "splits", "pl": "podziały"},
+    "value": {"en": "geometries of every experiment and their role: exp00_data_splits.csv", "pl": "geometrie każdego eksperymentu i ich rola: exp00_data_splits.csv"}
+   }
+  },
+  "figures": {
+   "fig_exp00_references.png": {
+    "en": "In Hartree–Fock each electron moves in the averaged field of the others instead of avoiding them from moment to moment; the energy this misses is the correlation energy, the gap between HF and the exact (FCI) energy. Near equilibrium a single electron configuration describes the molecule well. As the bonds stretch, the exact state becomes a mixture of several configurations: the weight of the HF determinant falls and the correlation energy rises. This happens fastest in the H₄ chain, where several bonds break at once, while LiH stays close to the Hartree–Fock picture over this range.",
+    "pl": "W metodzie Hartree–Focka każdy elektron porusza się w uśrednionym polu pozostałych, zamiast omijać je na bieżąco; energia, której to przybliżenie nie uwzględnia, to energia korelacji, czyli różnica między energią HF a energią dokładną (FCI). W pobliżu położenia równowagi cząsteczkę dobrze opisuje jedna konfiguracja elektronowa. Przy rozciąganiu wiązań stan dokładny staje się mieszaniną kilku konfiguracji: waga wyznacznika HF maleje, a energia korelacji rośnie. Najszybciej zachodzi to w łańcuchu H₄, w którym jednocześnie rozrywa się kilka wiązań, natomiast LiH w tym zakresie pozostaje bliski obrazowi Hartree–Focka."
+   },
+   "fig_exp00_hamiltonian.png": {
+    "en": "Size of the problem after encoding. The parity mapping removes two qubits; the number of Pauli terms grows from 4 (H₂) to 164 (H₄) and 630 (LiH). On hardware the measurement groups set how many circuits one energy costs: 2 for H₂ but 165 for LiH, which is why LiH needs an active space.",
+    "pl": "Rozmiar problemu po zakodowaniu. Odwzorowanie parzystości usuwa dwa kubity; liczba członów Pauliego rośnie z 4 (H₂) do 164 (H₄) i 630 (LiH). Na sprzęcie liczba grup pomiarowych wyznacza, ile obwodów kosztuje jedna energia: 2 dla H₂, ale 165 dla LiH, dlatego LiH wymaga przestrzeni aktywnej."
+   },
+   "fig_exp00_splits.png": {
+    "en": "Which geometries each experiment uses. The conditional QNN (exp03) is trained on 3, 5 or 9 spacings with energies only and tested on a 0.05 Å grid; the shaded bands lie outside the training range, where it has to extrapolate.",
+    "pl": "Które geometrie wykorzystuje każdy eksperyment. Warunkowa QNN (exp03) uczy się na 3, 5 lub 9 odległościach, wyłącznie z energii, i jest testowana na siatce co 0,05 Å; zacienione pasy leżą poza zakresem uczenia, gdzie model musi ekstrapolować."
+   },
+   "fig_exp00_checks.png": {
+    "en": "Control check of the data. At every geometry the lowest eigenvalue of the qubit hamiltonian (in the right electron-number sector) matches the PySCF FCI energy to at most 4·10⁻¹⁴ Ha, six orders of magnitude below the tolerance.",
+    "pl": "Kontrola poprawności danych. Dla każdej geometrii najniższa wartość własna hamiltonianu kubitowego (w sektorze o właściwej liczbie elektronów) zgadza się z energią FCI z PySCF z dokładnością do 4·10⁻¹⁴ Ha, sześć rzędów wielkości poniżej tolerancji."
+   }
+  }
+ }
+}

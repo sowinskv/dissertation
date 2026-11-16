@@ -21,7 +21,189 @@ const LABELS = {
   fci_check_Ha: "|λ − FCI| (Ha)", rebuild_diff: "rebuild diff", ccsd_converged: "CCSD converged",
   other_sector_below_mHa: "wrong-N below (mHa)", build_s: "build (s)", used_in: "used in",
   n_atoms: "atoms", n_electrons: "electrons", spatial_orbitals: "orbitals",
+  // exp02b spin penalty
+  mu_Ha: "μ (Ha)", S2: "⟨S²⟩", Sz: "⟨S_z⟩", cost_Ha: "cost (Ha)",
+  energy_variance_Ha2: "energy variance (Ha²)", quintet_trap: "quintet trap",
+  // exp03 conditional QNN and baselines
+  degree: "encoder degree K", n_train: "training spacings M", start: "start", target: "target",
+  kernel: "kernel", fci_labels: "FCI labels", weights: "weights", encoder_params: "encoder parameters",
+  loss_Ha: "loss (Ha)", train_seconds: "training time (s)", train_mean_dE_mHa: "mean training error (mHa)",
+  d_eq_A: "d_eq (Å)", d_eq_error_A: "d_eq error (Å)",
+  interp_max_dE_mHa: "max error 0.5–2.5 Å (mHa)", interp_median_dE_mHa: "median error 0.5–2.5 Å (mHa)",
+  interp_max_abs_dE_mHa: "max error 0.5–2.5 Å (mHa)", interp_median_abs_dE_mHa: "median error 0.5–2.5 Å (mHa)",
+  interp_frac_chem_acc: "share within 1.6 mHa", interp_max_gap_mHa: "max gap to UCCSD (mHa)",
+  unseen_max_gap_mHa: "max gap to UCCSD, unseen d (mHa)",
+  extrap_short_max_dE_mHa: "max error d < 0.5 Å (mHa)", extrap_long_max_dE_mHa: "max error d > 2.5 Å (mHa)",
+  extrap_short_max_abs_dE_mHa: "max error d < 0.5 Å (mHa)", extrap_long_max_abs_dE_mHa: "max error d > 2.5 Å (mHa)",
+  // exp04 hardware
+  backend: "backend", stage: "stage", job_id: "job id", shots: "shots", usage_s: "QPU time (s)",
+  two_qubit_gates: "two-qubit gates",
+  E_ideal_Ha: "E ideal (Ha)", E_raw_Ha: "E raw (Ha)", E_readout_Ha: "E readout (Ha)", E_zne_Ha: "E ZNE (Ha)",
+  E_readout_zne_Ha: "E readout + ZNE (Ha)", E_readout_zne13_Ha: "E readout + ZNE ×1,×3 (Ha)",
+  E_readout_richardson_Ha: "E readout + Richardson (Ha)",
+  E_raw_x1_Ha: "E raw ×1 (Ha)", E_raw_x3_Ha: "E raw ×3 (Ha)", E_raw_x5_Ha: "E raw ×5 (Ha)",
+  E_readout_x1_Ha: "E readout ×1 (Ha)", E_readout_x3_Ha: "E readout ×3 (Ha)", E_readout_x5_Ha: "E readout ×5 (Ha)",
+  dE_ideal_mHa: "error ideal (mHa)", dE_raw_mHa: "error raw (mHa)", dE_readout_mHa: "error readout (mHa)",
+  dE_zne_mHa: "error ZNE (mHa)", dE_readout_zne_mHa: "error readout + ZNE (mHa)",
+  dE_readout_zne13_mHa: "error readout + ZNE ×1,×3 (mHa)", dE_readout_richardson_mHa: "error readout + Richardson (mHa)",
 };
+const LABELS_PL = {
+  dE_mHa: "błąd (mHa)", converged: "zbieżny", iterations: "iteracje", evaluations: "ewaluacje",
+  duration_s: "czas (s)", fidelity: "wierność", params: "parametry", depth: "głębokość",
+  hf_weight: "waga HF", E_Ha: "energia (Ha)", molecule: "cząsteczka", method: "metoda",
+  layers: "warstwy", seed: "ziarno", E_corr_mHa: "E korel. (mHa)", E_nuc_Ha: "E jąder (Ha)",
+  qubits: "kubity", qubits_before: "kubity przed Z₂", pauli_terms: "człony Pauliego",
+  measurement_groups: "grupy pomiarowe", rebuild_diff: "różnica przebudowy",
+  ccsd_converged: "CCSD zbieżny", other_sector_below_mHa: "inne N niżej (mHa)",
+  build_s: "budowa (s)", used_in: "użyte w", n_atoms: "atomy", n_electrons: "elektrony",
+  spatial_orbitals: "orbitale", R_A: "R (Å)",
+  E_HF_Ha: "E HF (Ha)", E_CCSD_Ha: "E CCSD (Ha)", E_FCI_Ha: "E FCI (Ha)", dE_CCSD_mHa: "CCSD − FCI (mHa)",
+  coeff_1norm_Ha: "norma 1 (Ha)", fci_check_Ha: "|λ − FCI| (Ha)", cnot: "CNOT", N: "⟨N⟩",
+  // exp02b
+  mu_Ha: "μ (Ha)", cost_Ha: "koszt (Ha)", energy_variance_Ha2: "wariancja energii (Ha²)",
+  quintet_trap: "pułapka kwintetowa",
+  // exp03
+  degree: "stopień kodera K", n_train: "odległości uczące M", start: "start", target: "cel",
+  kernel: "jądro", fci_labels: "etykiety FCI", weights: "wagi", encoder_params: "parametry kodera",
+  loss_Ha: "strata (Ha)", train_seconds: "czas uczenia (s)", train_mean_dE_mHa: "średni błąd uczenia (mHa)",
+  d_eq_A: "d_rów (Å)", d_eq_error_A: "błąd d_rów (Å)",
+  interp_max_dE_mHa: "maks. błąd 0,5–2,5 Å (mHa)", interp_median_dE_mHa: "mediana błędu 0,5–2,5 Å (mHa)",
+  interp_max_abs_dE_mHa: "maks. błąd 0,5–2,5 Å (mHa)", interp_median_abs_dE_mHa: "mediana błędu 0,5–2,5 Å (mHa)",
+  interp_frac_chem_acc: "odsetek w granicy 1,6 mHa", interp_max_gap_mHa: "maks. różnica do UCCSD (mHa)",
+  unseen_max_gap_mHa: "maks. różnica do UCCSD, nowe d (mHa)",
+  extrap_short_max_dE_mHa: "maks. błąd d < 0,5 Å (mHa)", extrap_long_max_dE_mHa: "maks. błąd d > 2,5 Å (mHa)",
+  extrap_short_max_abs_dE_mHa: "maks. błąd d < 0,5 Å (mHa)", extrap_long_max_abs_dE_mHa: "maks. błąd d > 2,5 Å (mHa)",
+  // exp04
+  backend: "procesor", stage: "etap", job_id: "id zadania", shots: "pomiary (shots)", usage_s: "czas QPU (s)",
+  two_qubit_gates: "bramki dwukubitowe",
+  E_ideal_Ha: "E idealna (Ha)", E_raw_Ha: "E bez korekcji (Ha)", E_readout_Ha: "E mit. odczytu (Ha)",
+  E_zne_Ha: "E ZNE (Ha)", E_readout_zne_Ha: "E mit. odczytu + ZNE (Ha)",
+  E_readout_zne13_Ha: "E mit. odczytu + ZNE ×1,×3 (Ha)", E_readout_richardson_Ha: "E mit. odczytu + Richardson (Ha)",
+  E_raw_x1_Ha: "E bez korekcji ×1 (Ha)", E_raw_x3_Ha: "E bez korekcji ×3 (Ha)", E_raw_x5_Ha: "E bez korekcji ×5 (Ha)",
+  E_readout_x1_Ha: "E mit. odczytu ×1 (Ha)", E_readout_x3_Ha: "E mit. odczytu ×3 (Ha)",
+  E_readout_x5_Ha: "E mit. odczytu ×5 (Ha)",
+  dE_ideal_mHa: "błąd idealny (mHa)", dE_raw_mHa: "błąd bez korekcji (mHa)", dE_readout_mHa: "błąd mit. odczytu (mHa)",
+  dE_zne_mHa: "błąd ZNE (mHa)", dE_readout_zne_mHa: "błąd mit. odczytu + ZNE (mHa)",
+  dE_readout_zne13_mHa: "błąd mit. odczytu + ZNE ×1,×3 (mHa)",
+  dE_readout_richardson_mHa: "błąd mit. odczytu + Richardson (mHa)",
+};
+
+/* ---------- language: interface strings in English and Polish ---------- */
+// experiment texts (title, description, config, figure captions) come from
+// experiments/<folder>/notebook.json, served as exp.i18n; the logged English text is the fallback.
+const LANGS = ["en", "pl"];
+let lang = (() => {
+  try { const s = localStorage.getItem("notebook-lang"); if (LANGS.includes(s)) return s; } catch (e) { /* no storage */ }
+  return (navigator.language || "").toLowerCase().startsWith("pl") ? "pl" : "en";
+})();
+
+// polish plural: 1 przebieg, 2-4 przebiegi, 5+ przebiegów (12-14 too)
+const plPlural = (n, one, few, many) => (n === 1 ? one
+  : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? few : many);
+
+const STR = {
+  en: {
+    notebook: "Lab notebook",
+    subtitle: "Quantum neural networks for molecular simulation",
+    exp: "Exp.",
+    open: "open", figures: "figures", csv: "CSV", downloadCsv: "download CSV",
+    trainingCurves: "training curves", runs: "runs",
+    hFigures: "Figures", hCurves: "Training curves", hRuns: "Runs",
+    back: "back to the notebook",
+    nRuns: (n) => `${n} runs`,
+    runningOf: (d, t) => `running, ${d} of ${t} runs done`,
+    finished: (time) => `finished ${time}`,
+    failed: (n) => `${n} failed`,
+    stamp: (d, t) => `Still running<br>${d} of ${t}`,
+    scrolled: (px) => `You just scrolled through <span id="px">${px}</span> pixels.`,
+    empty: `Nothing logged yet. Run an experiment script from the repo root, for example
+           <code>uv run python experiments/exp01_h2_curve/run.py</code>, and it will appear here.`,
+    serverDown: (m) => `The notebook server is not answering (${m}).
+      Start it from the repo root with <code>uv run python tools/notebook.py</code> and reload this page.`,
+    curvesHint: "Error against the exact (FCI) energy at every optimizer iteration. Tick what to show.",
+    runsNote: (shown, all, curves) => `${shown} of ${all} runs match the ticks above. `
+      + (curves ? "Click a row to highlight its curve; click a column name to sort." : "Click a column name to sort."),
+    noHistory: "No training history for the ticked runs (classical methods are not trained).",
+    showingOf: (s, t) => `Showing ${s} of ${t} matching runs; untick some values to see the rest.`,
+    shownN: (n) => `${n} run${n > 1 ? "s" : ""} shown.`,
+    figureFrom: "Figure from", running: "running…", yes: "yes", no: "no",
+    xAxis: "optimizer iteration + 1", yAxis: "error (mHa)", chemAcc: "chemical accuracy",
+    iteration: (i, v) => `iteration ${i}: ${v} mHa`,
+    months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    switchTo: "Polski", switchLabel: "Language",
+  },
+  pl: {
+    notebook: "Notatnik laboratoryjny",
+    subtitle: "Kwantowe sieci neuronowe w symulacji układów molekularnych",
+    exp: "Eksp.",
+    open: "otwórz", figures: "wykresy", csv: "CSV", downloadCsv: "pobierz CSV",
+    trainingCurves: "krzywe uczenia", runs: "przebiegi",
+    hFigures: "Wykresy", hCurves: "Krzywe uczenia", hRuns: "Przebiegi",
+    back: "wróć do notatnika",
+    nRuns: (n) => `${n} ${plPlural(n, "przebieg", "przebiegi", "przebiegów")}`,
+    runningOf: (d, t) => `w toku, ukończono ${d} z ${t}`,
+    finished: (time) => `zakończono ${time}`,
+    failed: (n) => `nieudane: ${n}`,
+    stamp: (d, t) => `Wciąż trwa<br>${d} z ${t}`,
+    scrolled: (px) => `Przewinięto właśnie <span id="px">${px}</span> pikseli.`,
+    empty: `Nic jeszcze nie zapisano. Uruchom skrypt eksperymentu z katalogu głównego repozytorium,
+           np. <code>uv run python experiments/exp01_h2_curve/run.py</code>, a pojawi się tutaj.`,
+    serverDown: (m) => `Serwer notatnika nie odpowiada (${m}).
+      Uruchom go z katalogu głównego repozytorium: <code>uv run python tools/notebook.py</code> i odśwież stronę.`,
+    curvesHint: "Błąd względem dokładnej energii (FCI) w każdej iteracji optymalizatora. Zaznacz, co pokazać.",
+    runsNote: (shown, all, curves) => `Zaznaczeniom powyżej odpowiada ${shown} z ${all} przebiegów. `
+      + (curves ? "Kliknij wiersz, aby wyróżnić jego krzywą; kliknij nazwę kolumny, aby sortować."
+        : "Kliknij nazwę kolumny, aby sortować."),
+    noHistory: "Brak historii uczenia dla zaznaczonych przebiegów (metod klasycznych się nie trenuje).",
+    showingOf: (s, t) => `Pokazano ${s} z ${t} pasujących przebiegów; odznacz część wartości, aby zobaczyć resztę.`,
+    shownN: (n) => `Pokazano ${n} ${plPlural(n, "przebieg", "przebiegi", "przebiegów")}.`,
+    figureFrom: "Wykres z", running: "w toku…", yes: "tak", no: "nie",
+    xAxis: "iteracja optymalizatora + 1", yAxis: "błąd (mHa)", chemAcc: "dokładność chemiczna",
+    iteration: (i, v) => `iteracja ${i}: ${v} mHa`,
+    months: ["sty", "lut", "mar", "kwi", "maj", "cze", "lip", "sie", "wrz", "paź", "lis", "gru"],
+    switchTo: "English", switchLabel: "Język",
+  },
+};
+const t = (key, ...args) => {
+  const s = STR[lang][key] ?? STR.en[key];
+  return typeof s === "function" ? s(...args) : s;
+};
+const label = (key) => (lang === "pl" && LABELS_PL[key]) || LABELS[key] || key;
+// a text of an experiment in the current language: notebook.json, else the logged (English) text
+const pick = (texts) => texts?.[lang] ?? texts?.en;
+const local = (obj, field) => pick(obj?.i18n?.[field]) || obj?.[field] || "";
+const configLabel = (exp, k) => pick(exp.i18n?.config?.[k]?.label) || k.replaceAll("_", " ");
+function configValue(exp, k, v) {
+  const text = pick(exp.i18n?.config?.[k]?.value);
+  if (text !== undefined) return text;
+  return Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : String(v);
+}
+const caption = (exp, f) => pick(exp.i18n?.figures?.[f]);
+
+function renderLangSwitch() {
+  const el = document.getElementById("lang");
+  el.setAttribute("aria-label", t("switchLabel"));
+  el.innerHTML = LANGS.map((l) => (l === lang
+    ? `<b aria-current="true">${l.toUpperCase()}</b>`
+    : `<a href="#" data-lang="${l}" lang="${l}" title="${esc(STR[l].switchTo)}">${l.toUpperCase()}</a>`)).join(" | ");
+  el.querySelectorAll("[data-lang]").forEach((a) => a.addEventListener("click", (e) => {
+    e.preventDefault();
+    setLang(a.dataset.lang);
+  }));
+}
+
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem("notebook-lang", l); } catch (e) { /* no storage */ }
+  document.documentElement.lang = l;
+  renderLangSwitch();
+  // redraw the current page in the new language, keeping ticks, pins and sorting
+  if (state.chart) { state.chart.destroy(); state.chart = null; }
+  app.innerHTML = "";
+  shownIndex = "";
+  route();
+}
+
 const METRIC_ORDER = ["used_in", "qubits_before", "qubits", "pauli_terms", "measurement_groups",
   "E_FCI_Ha", "E_corr_mHa", "fci_check_Ha", "dE_mHa", "converged", "iterations", "evaluations", "duration_s",
   "fidelity", "N", "params", "cnot", "depth", "hf_weight", "E_Ha"];
@@ -42,11 +224,10 @@ async function getJSON(url) {
   return r.json();
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 function fmtDate(iso) {
   if (!iso) return "";
   const [y, m, d] = iso.split("T")[0].split("-");
-  return `${Number(d)} ${MONTHS[Number(m) - 1]} ${y}`;
+  return `${Number(d)} ${t("months")[Number(m) - 1]} ${y}`;
 }
 const fmtTime = (iso) => (iso ? iso.split("T")[1].slice(0, 5) : "");
 
@@ -55,7 +236,7 @@ const pow10 = (e) => (e === 0 ? "1" : e === 1 ? "10" : "10" + String(e).split(""
 
 function fmtNum(v) {
   if (v === null || v === undefined || v === "") return "–";
-  if (typeof v === "boolean") return v ? "yes" : "no";
+  if (typeof v === "boolean") return v ? t("yes") : t("no");
   if (typeof v !== "number") return String(v);
   if (v === 0) return "0";
   const a = Math.abs(v);
@@ -82,7 +263,11 @@ function poll(fn) { stopPolling(); state.timer = setTimeout(fn, POLL_MS); }
 
 /* ---------- routing ---------- */
 window.addEventListener("hashchange", route);
-document.addEventListener("DOMContentLoaded", route);
+document.addEventListener("DOMContentLoaded", () => {
+  document.documentElement.lang = lang;
+  renderLangSwitch();
+  route();
+});
 
 function route() {
   stopPolling();
@@ -95,22 +280,22 @@ function route() {
 function runsLine(x) {
   const done = x.counts.done || 0, total = x.n_runs || x.n_logged;
   const runs = x.status === "running"
-    ? `<span class="bad">running, ${done} of ${total} runs done</span>` : `${done} runs`;
+    ? `<span class="bad">${t("runningOf", done, total)}</span>` : t("nRuns", done);
   return `${fmtDate(x.started_at)}, ${runs}`;
 }
 
 function entryHTML(x) {
   const href = `#/exp/${encodeURIComponent(x.name)}`, fig = x.figures?.[0];
-  const links = [`[<a href="${href}">open</a>]`,
-    fig && `[<a href="${href}/figures">figures</a>]`,
-    x.csv && `[<a href="${x.files}${encodeURIComponent(x.csv)}" download>CSV</a>]`].filter(Boolean).join(" ");
+  const links = [`[<a href="${href}">${t("open")}</a>]`,
+    fig && `[<a href="${href}/figures">${t("figures")}</a>]`,
+    x.csv && `[<a href="${x.files}${encodeURIComponent(x.csv)}" download>${t("csv")}</a>]`].filter(Boolean).join(" ");
   return `<article class="entry" data-name="${esc(x.name)}">
       ${fig ? `<a class="thumb" href="${href}/figures" tabindex="-1" aria-hidden="true">
         <img src="${x.files}${encodeURIComponent(fig)}" alt="" loading="lazy"></a>` : `<span class="thumb"></span>`}
       <div class="entry-text">
-        <h2><a href="${href}"><b>Exp. ${esc(x.label)}:</b> ${chem(x.title)}</a></h2>
+        <h2><a href="${href}"><b>${t("exp")} ${esc(x.label)}:</b> ${chem(local(x, "title"))}</a></h2>
         <p class="meta" data-live>${runsLine(x)}</p>
-        <p class="desc">${chem(x.description)}</p>
+        <p class="desc">${chem(local(x, "description"))}</p>
         <p class="links">${links}</p>
       </div>
     </article>`;
@@ -121,7 +306,7 @@ async function showIndex(isPoll = false) {
   let list;
   try { list = await getJSON("/api/experiments"); }
   catch (e) { return renderError(e); }
-  document.title = "Lab notebook";
+  document.title = t("notebook");
   const signature = list.map((x) => `${x.name}:${x.status}`).join("|");
   if (isPoll && signature === shownIndex) {
     // only the run counts change while training: update those lines, keep the page still
@@ -134,14 +319,13 @@ async function showIndex(isPoll = false) {
     if (!isPoll) window.scrollTo(0, 0);
     app.innerHTML = `
       <header class="masthead">
-        <h1>Lab notebook</h1>
-        <p>Quantum neural networks for molecular simulation</p>
+        <h1>${t("notebook")}</h1>
+        <p>${t("subtitle")}</p>
         <p class="by">J. Sowińska</p>
       </header>
       ${list.length ? `<div class="entries">${list.map(entryHTML).join("")}</div>`
-        : `<p class="error">Nothing logged yet. Run an experiment script from the repo root, for example
-           <code>uv run python experiments/exp01_h2_curve.py</code>, and it will appear here.</p>`}
-      <footer class="foot"><p>You just scrolled through <span id="px">0</span> pixels.</p></footer>`;
+        : `<p class="error">${t("empty")}</p>`}
+      <footer class="foot"><p>${t("scrolled", 0)}</p></footer>`;
     // a figure not drawn yet (experiment still running): leave the slot empty
     app.querySelectorAll(".thumb img").forEach((img) => img.addEventListener("error", () => img.remove()));
     shownIndex = signature;
@@ -151,8 +335,7 @@ async function showIndex(isPoll = false) {
 }
 
 function renderError(e) {
-  app.innerHTML = `<p class="error">The notebook server is not answering (${esc(e.message)}).
-    Start it from the repo root with <code>uv run python tools/notebook.py</code> and reload this page.</p>`;
+  app.innerHTML = `<p class="error">${t("serverDown", esc(e.message))}</p>`;
 }
 
 /* ---------- experiment page ---------- */
@@ -168,14 +351,16 @@ async function showExperiment(name, section) {
     if (state.chart) { state.chart.destroy(); state.chart = null; }
   }
   state.exp = exp;
-  document.title = `${exp.title} – Lab notebook`;
+  document.title = `${local(exp, "title")} – ${t("notebook")}`;
 
-  if (fresh || !document.getElementById("runs")) {
+  const rebuilt = fresh || !document.getElementById("runs");
+  if (rebuilt) {
     renderShell(exp);
     window.scrollTo(0, 0);
     if (section) requestAnimationFrame(() => document.getElementById(section)?.scrollIntoView());
   }
   syncFilters(exp);
+  if (rebuilt) renderFilters();   // the page was redrawn (e.g. new language): keep the ticks
   renderMeta(exp);
   renderTable();
   if (hasCurves(exp)) await renderChart();
@@ -186,41 +371,42 @@ async function showExperiment(name, section) {
 
 function renderShell(exp) {
   const setup = Object.entries(exp.config || {}).map(([k, v]) =>
-    `<b>${esc(k.replaceAll("_", " "))}:</b> ${esc(Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v)}`).join("<br>");
+    `<b>${chem(configLabel(exp, k))}:</b> ${chem(configValue(exp, k, v))}`).join("<br>");
   const figures = (exp.figures || []).map((f) => `
     <figure>
-      <a href="${exp.files}${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="${exp.files}${encodeURIComponent(f)}" alt="Figure from ${esc(exp.folder)}/results/${esc(f)}" loading="lazy"></a>
-      <figcaption>${esc(exp.folder)}/results/${esc(f)} [<a href="${exp.files}${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</figcaption>
+      <a href="${exp.files}${encodeURIComponent(f)}" target="_blank" rel="noopener"><img src="${exp.files}${encodeURIComponent(f)}" alt="${t("figureFrom")} ${esc(exp.folder)}/results/${esc(f)}" loading="lazy"></a>
+      <figcaption>${caption(exp, f) ? `<span class="caption">${chem(caption(exp, f))}</span>` : ""}
+        <span class="path">${esc(exp.folder)}/results/${esc(f)} [<a href="${exp.files}${encodeURIComponent(f.replace(/\.png$/, ".pdf"))}" target="_blank" rel="noopener">pdf</a>]</span></figcaption>
     </figure>`).join("");
   const links = [
-    figures && `[<a href="#figures" data-jump>figures</a>]`,
-    hasCurves(exp) && `[<a href="#curves" data-jump>training curves</a>]`,
-    `[<a href="#runs-title" data-jump>runs</a>]`,
-    exp.csv && `[<a href="${exp.files}${encodeURIComponent(exp.csv)}" download>download CSV</a>]`,
+    figures && `[<a href="#figures" data-jump>${t("figures")}</a>]`,
+    hasCurves(exp) && `[<a href="#curves" data-jump>${t("trainingCurves")}</a>]`,
+    `[<a href="#runs-title" data-jump>${t("runs")}</a>]`,
+    exp.csv && `[<a href="${exp.files}${encodeURIComponent(exp.csv)}" download>${t("downloadCsv")}</a>]`,
   ].filter(Boolean).join(" ");
 
   app.innerHTML = `
-    <nav class="top">[<a href="#/">back to the notebook</a>]</nav>
+    <nav class="top">[<a href="#/">${t("back")}</a>]</nav>
     <article class="exp">
       <p class="stamp" id="stamp" hidden></p>
-      <h1><b>Exp. ${esc(exp.label)}:</b> ${chem(exp.title)}</h1>
+      <h1><b>${t("exp")} ${esc(exp.label)}:</b> ${chem(local(exp, "title"))}</h1>
       <p class="meta" id="meta"></p>
       <p class="links">${links}</p>
-      <p class="desc">${chem(exp.description)}</p>
+      <p class="desc">${chem(local(exp, "description"))}</p>
       ${setup ? `<p class="setup">${setup}</p>` : ""}
-      ${figures ? `<h2 id="figures">Figures</h2>${figures}` : ""}
-      ${hasCurves(exp) ? `<h2 id="curves">Training curves</h2>
-      <p class="hint">Error against the exact (FCI) energy at every optimizer iteration. Tick what to show.</p>` : ""}
+      ${figures ? `<h2 id="figures">${t("hFigures")}</h2>${figures}` : ""}
+      ${hasCurves(exp) ? `<h2 id="curves">${t("hCurves")}</h2>
+      <p class="hint">${t("curvesHint")}</p>` : ""}
       <div class="filters" id="filters"></div>
-      ${hasCurves(exp) ? `<div class="chart-box"><canvas id="chart" aria-label="Training curves"></canvas></div>
+      ${hasCurves(exp) ? `<div class="chart-box"><canvas id="chart" aria-label="${t("hCurves")}"></canvas></div>
       <p class="hint" id="chart-note"></p>` : ""}
-      <h2 id="runs-title">Runs</h2>
+      <h2 id="runs-title">${t("hRuns")}</h2>
       <p class="hint" id="runs-note"></p>
       <div class="table-wrap"><table id="runs"></table></div>
     </article>
     <footer class="foot">
-      <p>You just scrolled through <span id="px">0</span> pixels.</p>
-      <p>[<a href="#/">back to the notebook</a>]</p>
+      <p>${t("scrolled", 0)}</p>
+      <p>[<a href="#/">${t("back")}</a>]</p>
     </footer>`;
   // in-page links must not touch the router's hash
   app.querySelectorAll("[data-jump]").forEach((a) => a.addEventListener("click", (e) => {
@@ -232,18 +418,18 @@ function renderShell(exp) {
 function renderMeta(exp) {
   const c = exp.counts, total = exp.n_runs || exp.runs.length;
   const parts = [fmtDate(exp.started_at)];
-  if (exp.status === "running") parts.push(`running, ${c.done || 0} of ${total} runs done`);
-  else parts.push(`${c.done || 0} runs${exp.finished_at ? `, finished ${fmtTime(exp.finished_at)}` : ""}`);
-  if (c.failed) parts.push(`<span class="bad">${c.failed} failed</span>`);
+  if (exp.status === "running") parts.push(t("runningOf", c.done || 0, total));
+  else parts.push(t("nRuns", c.done || 0) + (exp.finished_at ? `, ${t("finished", fmtTime(exp.finished_at))}` : ""));
+  if (c.failed) parts.push(`<span class="bad">${t("failed", c.failed)}</span>`);
   document.getElementById("meta").innerHTML = parts.join(", ");
   const stamp = document.getElementById("stamp");
   stamp.hidden = exp.status !== "running";
-  stamp.innerHTML = `Still running<br>${c.done || 0} of ${total}`;
+  stamp.innerHTML = t("stamp", c.done || 0, total);
 }
 
 function countPixels() {
   const px = document.getElementById("px");
-  if (px) px.textContent = document.documentElement.scrollHeight.toLocaleString("en-US");
+  if (px) px.textContent = document.documentElement.scrollHeight.toLocaleString(lang === "pl" ? "pl-PL" : "en-US");
 }
 
 /* ---------- filters ---------- */
@@ -283,8 +469,8 @@ function syncFilters(exp) {
 function renderFilters() {
   const el = document.getElementById("filters");
   el.innerHTML = Object.entries(state.filters).filter(([, f]) => f.values.length > 1).map(([key, f]) => `
-    <div class="filter" role="group" aria-label="${esc(LABELS[key] || key)}">
-      <b>${esc(LABELS[key] || key)}:</b>
+    <div class="filter" role="group" aria-label="${esc(label(key))}">
+      <b>${esc(label(key))}:</b>
       ${f.values.map((v) => `<label><input type="checkbox" data-key="${esc(key)}"
         data-value="${esc(JSON.stringify(v))}" ${f.selected.has(v) ? "checked" : ""}>${key === "method"
         ? `<span class="swatch" style="background:${colorFor(v)}"></span>` : ""}${esc(fmtNum(v))}</label>`).join("")}
@@ -330,16 +516,16 @@ function renderTable() {
     });
   }
   document.getElementById("runs-note").textContent =
-    `${rows.length} of ${exp.runs.length} runs match the ticks above. ${hasCurves(exp) ? "Click a row to highlight its curve; c" : "C"}lick a column name to sort.`;
+    t("runsNote", rows.length, exp.runs.length, hasCurves(exp));
   const head = cols.map((c) => {
     const sort = state.sort?.key === c.key ? (state.sort.dir > 0 ? "ascending" : "descending") : "none";
-    return `<th scope="col" aria-sort="${sort}"><button type="button" data-key="${esc(c.key)}">${esc(LABELS[c.key] || c.key)}</button></th>`;
+    return `<th scope="col" aria-sort="${sort}"><button type="button" data-key="${esc(c.key)}">${esc(label(c.key))}</button></th>`;
   }).join("");
   const body = rows.map((r) => {
     const tds = cols.map((c) => {
       const v = cell(r, c);
       if (c.key === "method") return `<td class="method"><span class="swatch" style="background:${colorFor(v)}"></span>${esc(v)}</td>`;
-      if (c.key === "dE_mHa" && r.status === "running") return `<td class="running">running…</td>`;
+      if (c.key === "dE_mHa" && r.status === "running") return `<td class="running">${t("running")}</td>`;
       const bad = (c.key === "converged" && v === false) || (c.key === "dE_mHa" && typeof v === "number" && Math.abs(v) > CHEM_ACC_MHA);
       return `<td class="${bad ? "bad" : ""}">${esc(fmtNum(v))}</td>`;
     }).join("");
@@ -376,7 +562,7 @@ const threshold = {
     ctx.strokeStyle = "#000"; ctx.lineWidth = 1; ctx.setLineDash([2, 4]);
     ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
     ctx.setLineDash([]); ctx.fillStyle = "#000"; ctx.font = '12px "Helvetica Neue", Helvetica, Arimo, Arial, sans-serif';
-    ctx.fillText("chemical accuracy", a.left + 8, py - 6);
+    ctx.fillText(t("chemAcc"), a.left + 8, py - 6);
     ctx.restore();
   },
 };
@@ -425,9 +611,8 @@ async function renderChart() {
     };
   });
   const note = document.getElementById("chart-note");
-  note.textContent = !shown.length ? "No training history for the ticked runs (classical methods are not trained)."
-    : total > shown.length ? `Showing ${shown.length} of ${total} matching runs; untick some values to see the rest.`
-    : `${shown.length} run${shown.length > 1 ? "s" : ""} shown.`;
+  note.textContent = !shown.length ? t("noHistory")
+    : total > shown.length ? t("showingOf", shown.length, total) : t("shownN", shown.length);
 
   if (state.chart) {
     state.chart.data.datasets = datasets;
@@ -446,9 +631,9 @@ async function renderChart() {
       animation: false, maintainAspectRatio: false, normalized: true,
       interaction: { mode: "nearest", intersect: false },
       scales: {
-        x: { type: "logarithmic", title: { display: true, text: "optimizer iteration + 1" },
+        x: { type: "logarithmic", title: { display: true, text: t("xAxis") },
              ticks: { callback: logTicks, autoSkip: false, maxRotation: 0 }, grid: { color: decadeGrid }, border: { color: "#000" } },
-        y: { type: "logarithmic", title: { display: true, text: "error (mHa)" },
+        y: { type: "logarithmic", title: { display: true, text: t("yAxis") },
              ticks: { callback: logTicks, autoSkip: false }, grid: { color: decadeGrid }, border: { color: "#000" } },
       },
       plugins: {
@@ -459,7 +644,7 @@ async function renderChart() {
           titleFont: { weight: "700" },
           callbacks: {
             title: (items) => items[0]?.dataset.label ?? "",
-            label: (it) => `iteration ${it.parsed.x - 1}: ${fmtNum(it.parsed.y)} mHa`,
+            label: (it) => t("iteration", it.parsed.x - 1, fmtNum(it.parsed.y)),
           },
         },
       },

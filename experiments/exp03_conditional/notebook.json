@@ -1,0 +1,112 @@
+{
+ "exp03_h4_conditional": {
+  "title": {
+   "en": "One conditional QNN for the whole H₄ curve",
+   "pl": "Jedna warunkowa QNN dla całej krzywej H₄"
+  },
+  "description": {
+   "en": "UCCSD whose angles come from an encoder of the atom spacing (Meta-VQE style), trained on 3, 5 or 9 spacings with energy only, no FCI labels. Tested on 0.4-3.0 Å: interpolation inside 0.5-2.5 Å, extrapolation outside. Research question 2.",
+   "pl": "Obwód UCCSD, którego kąty wylicza koder odległości między atomami (w stylu Meta-VQE), uczony na 3, 5 lub 9 odległościach wyłącznie na podstawie energii, bez etykiet FCI. Testowany na 0,4–3,0 Å: interpolacja w zakresie 0,5–2,5 Å, ekstrapolacja poza nim. Pytanie badawcze 2."
+  },
+  "config": {
+   "molecule": {
+    "label": {"en": "molecule", "pl": "cząsteczka"},
+    "value": {"en": "H₄ linear chain", "pl": "liniowy łańcuch H₄"}
+   },
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "circuit": {
+    "label": {"en": "circuit", "pl": "obwód"},
+    "value": {"en": "UCCSD (26 angles)", "pl": "UCCSD (26 kątów)"}
+   },
+   "encoder": {
+    "label": {"en": "encoder", "pl": "koder"},
+    "value": {"en": "θ(d) = W · Chebyshev features T₀…T_K of d, scaled from the training range to [−1, 1]", "pl": "θ(d) = W · cechy Czebyszewa T₀…T_K odległości d, przeskalowanej z zakresu uczenia do [−1, 1]"}
+   },
+   "train_range_A": {"label": {"en": "training range (Å)", "pl": "zakres uczenia (Å)"}},
+   "degrees": {"label": {"en": "encoder degrees K", "pl": "stopnie kodera K"}},
+   "n_train": {"label": {"en": "training spacings M", "pl": "liczba odległości uczących M"}},
+   "seeds": {"label": {"en": "seeds", "pl": "ziarna"}},
+   "encoder_init": {
+    "label": {"en": "encoder initial weights", "pl": "wagi początkowe kodera"},
+    "value": {"en": "uniform(−0.05, 0.05)", "pl": "jednostajnie z (−0,05; 0,05)"}
+   },
+   "loss": {
+    "label": {"en": "loss", "pl": "funkcja straty"},
+    "value": {"en": "mean energy over the training spacings (no energy labels)", "pl": "średnia energia po odległościach uczących (bez etykiet energii)"}
+   },
+   "test_grid_A": {
+    "label": {"en": "test grid (Å)", "pl": "siatka testowa (Å)"},
+    "value": {"en": "0.40 to 3.00, step 0.05", "pl": "od 0,40 do 3,00, krok 0,05"}
+   },
+   "uccsd_per_point": {
+    "label": {"en": "UCCSD per point", "pl": "UCCSD w każdym punkcie"},
+    "value": {"en": "best of three starts: HF, warm start sweeping up, warm start sweeping down", "pl": "najlepszy z trzech startów: z HF, z poprzedniego punktu przy rosnącym d, z poprzedniego punktu przy malejącym d"}
+   },
+   "optimizer": {
+    "label": {"en": "optimizer", "pl": "optymalizator"},
+    "value": {"en": "L-BFGS-B, central finite-difference gradient (batched), chain rule for the encoder", "pl": "L-BFGS-B, gradient z centralnych różnic skończonych (wsadowo), reguła łańcuchowa dla kodera"}
+   },
+   "maxiter": {"label": {"en": "max. iterations", "pl": "maks. liczba iteracji"}},
+   "gtol": {"label": {"en": "gradient tolerance", "pl": "tolerancja gradientu"}},
+   "chemical_accuracy_mHa": {"label": {"en": "chemical accuracy (mHa)", "pl": "dokładność chemiczna (mHa)"}}
+  },
+  "figures": {
+   "fig_exp03_h4_curve.png": {
+    "en": "One circuit for the whole curve, trained on 5 spacings (crosses) without energy labels. With a degree-3 encoder the conditional QNN follows UCCSD trained separately at every spacing: worst error inside 0.5–2.5 Å 5.19 mHa against 5.28 mHa, and near 2.4 Å it even finds lower minima. The linear encoder of the original Meta-VQE is too weak. Outside the training range (gray) the error grows to tens of mHa.",
+    "pl": "Jeden obwód dla całej krzywej, uczony na 5 odległościach (krzyżyki) bez etykiet energii. Z koderem stopnia 3 warunkowa QNN podąża za UCCSD uczonym osobno w każdym punkcie: najgorszy błąd w zakresie 0,5–2,5 Å to 5,19 mHa wobec 5,28 mHa, a w okolicy 2,4 Å model znajduje nawet niższe minima. Liniowy koder z oryginalnego Meta-VQE jest za słaby. Poza zakresem uczenia (szare tło) błąd rośnie do dziesiątek mHa."
+   },
+   "fig_exp03_h4_grid.png": {
+    "en": "Worst error for every encoder degree K and number of training spacings M. Inside the training range the model works once the encoder has at most as many coefficients as there are training spacings (K + 1 ≤ M); otherwise it overfits by hundreds of mHa, although no labels are used. Beyond the training range every setting fails, and a higher degree makes it worse.",
+    "pl": "Najgorszy błąd dla każdego stopnia kodera K i liczby odległości uczących M. W zakresie uczenia model działa, gdy koder ma co najwyżej tyle współczynników, ile jest odległości uczących (K + 1 ≤ M); w przeciwnym razie przeucza się o setki mHa, mimo że nie używa żadnych etykiet. Poza zakresem uczenia zawodzi każde ustawienie, a wyższy stopień pogarsza wynik."
+   }
+  }
+ },
+ "exp03_h4_baselines": {
+  "title": {
+   "en": "Classical regression of the H₄ curve from the same spacings",
+   "pl": "Klasyczna regresja krzywej H₄ z tych samych odległości"
+  },
+  "description": {
+   "en": "Gaussian process and MLP fitted to exact FCI energies at the same 3, 5 or 9 spacings as the conditional QNN, tested on 0.4-3.0 Å. The QNN needs no labels; these models do. Research question 3.",
+   "pl": "Proces gaussowski i sieć MLP dopasowane do dokładnych energii FCI w tych samych 3, 5 lub 9 odległościach co warunkowa QNN, testowane na 0,4–3,0 Å. QNN nie potrzebuje etykiet, te modele tak. Pytanie badawcze 3."
+  },
+  "config": {
+   "molecule": {
+    "label": {"en": "molecule", "pl": "cząsteczka"},
+    "value": {"en": "H₄ linear chain", "pl": "liniowy łańcuch H₄"}
+   },
+   "basis": {"label": {"en": "basis", "pl": "baza"}},
+   "labels": {
+    "label": {"en": "labels", "pl": "etykiety"},
+    "value": {"en": "FCI energies at the training spacings", "pl": "energie FCI w odległościach uczących"}
+   },
+   "targets": {
+    "label": {"en": "targets", "pl": "wielkości przewidywane"},
+    "value": {"en": "E: total energy E_FCI(d); E−HF: correlation energy E_FCI(d) − E_HF(d) (delta learning), HF computed at every test spacing and added back", "pl": "E: energia całkowita E_FCI(d); E−HF: energia korelacji E_FCI(d) − E_HF(d) (uczenie różnicy), HF liczone w każdej odległości testowej i dodawane z powrotem"}
+   },
+   "train_range_A": {"label": {"en": "training range (Å)", "pl": "zakres uczenia (Å)"}},
+   "n_train": {"label": {"en": "training spacings M", "pl": "liczba odległości uczących M"}},
+   "seeds": {"label": {"en": "seeds", "pl": "ziarna"}},
+   "gp": {
+    "label": {"en": "Gaussian process", "pl": "proces gaussowski"},
+    "value": {"en": "ConstantKernel · RBF, length scale bounds 0.05–10 Å, normalize_y, 5 restarts, alpha 1e-10", "pl": "ConstantKernel · RBF, skala długości w granicach 0,05–10 Å, normalize_y, 5 restartów, alpha 1e-10"}
+   },
+   "mlp": {
+    "label": {"en": "MLP", "pl": "MLP"},
+    "value": {"en": "2 × 32 tanh, lbfgs, max_iter 5000, alpha 1e-4, inputs scaled to [−1, 1], targets standardised", "pl": "2 × 32 tanh, lbfgs, max_iter 5000, alpha 1e-4, wejścia przeskalowane do [−1, 1], wyjścia standaryzowane"}
+   },
+   "test_grid_A": {
+    "label": {"en": "test grid (Å)", "pl": "siatka testowa (Å)"},
+    "value": {"en": "0.40 to 3.00, step 0.05", "pl": "od 0,40 do 3,00, krok 0,05"}
+   },
+   "chemical_accuracy_mHa": {"label": {"en": "chemical accuracy (mHa)", "pl": "dokładność chemiczna (mHa)"}},
+   "scikit-learn": {"label": {"en": "scikit-learn", "pl": "scikit-learn"}}
+  },
+  "figures": {
+   "fig_exp03_h4_baselines.png": {
+    "en": "The honest comparison. Fitted to the total energy, GP and MLP fail (dotted, bottom panel: tens to hundreds of mHa). Fitted to the correlation energy, with HF added back at every spacing, they beat the conditional QNN: with 5 spacings the MLP reaches about 1 mHa, with 9 the GP 0.05 mHa. With exact labels classical regression wins; the QNN needs no labels and also returns a quantum state.",
+    "pl": "Uczciwe porównanie. Dopasowane do energii całkowitej, GP i MLP zawodzą (linie kropkowane w dolnym panelu: od dziesiątek do setek mHa). Dopasowane do energii korelacji, z HF dodawanym z powrotem w każdej odległości, wygrywają z warunkową QNN: przy 5 odległościach MLP osiąga ok. 1 mHa, przy 9 GP 0,05 mHa. Mając dokładne etykiety, klasyczna regresja wygrywa; QNN nie potrzebuje etykiet i dodatkowo zwraca stan kwantowy."
+   }
+  }
+ }
+}
