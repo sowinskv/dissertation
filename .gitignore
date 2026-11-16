@@ -10,3 +10,6 @@ qiskit-ibm.json
 CLAUDE.local.md
 # in-progress experiment checkpoints
 experiments/*/results/*_partial.jsonl
+# assistant context, kept local only
+CLAUDE.md
+.claude/
